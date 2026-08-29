@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel · Estudio</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+</head>
+<body data-pag="panel">
+
+<div class="hoja">
+  <h1 class="tit">Viernes 28 de agosto</h1>
+  <p class="bajada">Lo que hay que resolver hoy, y cómo está el plantel.</p>
+
+  <div class="rejilla c4" style="margin-bottom:20px">
+    <div class="dato"><div class="v" id="kTurnos">—</div><div class="l">Turnos hoy</div></div>
+    <div class="dato"><div class="v" id="kOk" style="color:var(--verde)">—</div><div class="l">Disponibles</div></div>
+    <div class="dato"><div class="v" id="kLim" style="color:var(--ambar)">—</div><div class="l">Limitados</div></div>
+    <div class="dato"><div class="v" id="kBaja" style="color:var(--rojo)">—</div><div class="l">De baja</div></div>
+  </div>
+
+  <div class="rejilla c2">
+    <div>
+      <div class="tarjeta">
+        <div class="tarjeta-cab"><h2 class="sub">Turnos de hoy</h2>
+          <a class="eti" href="agenda.html" style="text-decoration:none">Ver agenda →</a></div>
+        <div id="turnos"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="tarjeta">
+        <div class="tarjeta-cab"><h2 class="sub">En tratamiento</h2>
+          <a class="eti" href="lesiones.html" style="text-decoration:none">Todas →</a></div>
+        <div id="activas"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tarjeta">
+    <div class="tarjeta-cab"><h2 class="sub">Parte médico</h2>
+      <span class="eti">Lo único que ve el cuerpo técnico</span></div>
+    <div class="plantel" id="plantel"></div>
+  </div>
+</div>
+
+<script>
+/* ── contadores ── */
+var c = {ok:0, limitado:0, baja:0};
+BASE.plantel.forEach(function(j){ c[estadoDe(j.d).estado]++; });
+var turnos = BASE.agenda[HOY] || [];
+document.getElementById('kTurnos').textContent = turnos.filter(function(t){ return t.dorsal; }).length;
+document.getElementById('kOk').textContent   = c.ok;
+document.getElementById('kLim').textContent  = c.limitado;
+document.getElementById('kBaja').textContent = c.baja;
+
+/* ── turnos ── */
+document.getElementById('turnos').innerHTML = turnos.map(function(t){
+  if(!t.dorsal)
+    return '<div class="fila libre"><span class="hh">' + t.h + '</span>'
+         + '<span class="cu"><b>Libre</b></span></div>';
+  var L = lesionDe(t.dorsal);
+  return '<button class="fila" onclick="irA(\'lesiones.html?f=' + (L ? L.id : '') + '\')">'
+       + '<span class="hh">' + t.h + '</span>'
+       + '<span class="cu"><b>' + nombre(t.dorsal) + '</b>'
+       + '<small>#' + t.dorsal + ' · ' + t.tipo + (L ? ' · ' + L.zona.toLowerCase() : '') + '</small></span>'
+       + '<span class="pin ' + t.estado + '">' + t.estado + '</span></button>';
+}).join('');
+
+/* ── lesiones activas ── */
+document.getElementById('activas').innerHTML = BASE.lesiones.map(function(L){
+  var listos = criteriosListos(L), tot = L.criterios.length;
+  return '<button class="fila" style="align-items:flex-start" onclick="irA(\'lesiones.html?f=' + L.id + '\')">'
+    + '<span class="cu"><b>' + nombre(L.dorsal) + ' · ' + L.zona.toLowerCase() + '</b>'
+    + '<small>' + L.diagnostico + ' — día ' + dias(L.fecha) + '</small>'
+    + pista(L.fase, false)
+    + '<small class="mono" style="margin-top:6px">FASE ' + L.fase + ' · ' + FASES[L.fase-1].t.toUpperCase()
+    + ' · ' + listos + '/' + tot + ' CRITERIOS</small></span></button>';
+}).join('');
+
+/* ── semáforo ── */
+document.getElementById('plantel').innerHTML = BASE.plantel.map(function(j){
+  var e = estadoDe(j.d), L = lesionDe(j.d);
+  var txt = e.estado === 'ok' ? 'Disponible'
+          : e.motivo + ' · vuelve en ' + faltan(e.hasta) + ' d';
+  return '<button class="at ' + e.estado + '" onclick="' + (L ? 'irA(\'lesiones.html?f=' + L.id + '\')' : 'void 0') + '">'
+    + '<span class="d">' + j.d + '</span><div class="n">' + j.n + '</div>'
+    + '<div class="e">' + txt + '</div></button>';
+}).join('');
+</script>
+<script>
+/* Registra el sw para que el portal ande sin internet. Falla en silencio
+   si se abre con doble clic desde el disco: eso es normal. */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+</script>
+</body></html>

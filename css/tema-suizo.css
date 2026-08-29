@@ -1,0 +1,32 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TEMA: SUIZO — grafito, tipografía enorme, un verde ácido.
+
+   La referencia es la señalética suiza y el diseño editorial alemán
+   llevados a pantalla oscura: retícula estricta, títulos grandes y
+   apretados, cero efectos, cero brillos. Impacta por el tamaño y el
+   contraste, no por el neón.
+
+   Más sobrio que Telemetría y envejece mejor. Menos "pantalla de
+   ciencia ficción", más "estudio europeo caro".
+   ══════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+:root{
+  --fondo:#111316; --sup:#1A1D21; --sup2:#212529;
+  --linea:rgba(255,255,255,.09); --linea2:rgba(255,255,255,.2); --borde:1px;
+  --tinta:#F2F3F4; --tinta2:#A0A6AD; --tinta3:#6E767E;
+
+  --acc:#C6F04A; --acc2:#D6FA70; --acc-suave:rgba(198,240,74,.11);
+  --acc-borde:rgba(198,240,74,.4); --acc-texto:#C6F04A; --sobre-acc:#14180A;
+
+  --verde:#5BD98A; --verde-suave:rgba(91,217,138,.1); --verde-borde:rgba(91,217,138,.34);
+  --ambar:#FFC048; --ambar-suave:rgba(255,192,72,.1); --ambar-borde:rgba(255,192,72,.34);
+  --rojo:#FF6B62;  --rojo-suave:rgba(255,107,98,.1);  --rojo-borde:rgba(255,107,98,.34);
+
+  --tit:'Archivo',system-ui,sans-serif; --txt:'Inter',system-ui,sans-serif;
+  --dat:'Space Mono',ui-monospace,monospace;
+  --tit-tam:38px; --tit-peso:800; --tit-track:-1.4px; --sub-track:-.4px; --tit-caja:none;
+
+  --r:3px; --r2:4px; --r-chico:3px; --r-min:1px;
+  --sombra:none; --sombra-alta:0 30px 80px rgba(0,0,0,.7);
+  --fulgor:none; --trama:none; --velo-fondo:rgba(10,11,13,.85);
+}

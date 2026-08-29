@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ejercicios · Estudio</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<style>
+  .ejs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .ej{border:1px solid var(--linea);border-radius:var(--r);background:var(--hoja);overflow:hidden;
+      text-align:left;font-family:inherit;color:inherit;cursor:pointer;transition:.13s;padding:0}
+  .ej:hover{border-color:var(--linea2);box-shadow:var(--sombra);transform:translateY(-1px)}
+  .ej .mini{height:112px;background:#3F8F42;position:relative;display:flex;align-items:center;justify-content:center}
+  .ej .mini.gym{background:#2F3542}
+  .ej .mini span{font-family:var(--dat);font-size:10px;letter-spacing:1.4px;text-transform:uppercase;
+    color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.4);padding:4px 9px;border-radius:20px}
+  .ej .cu{padding:12px 13px}
+  .ej .cu b{display:block;font-size:14.5px;font-weight:600;line-height:1.25}
+  .ej .cu small{display:block;color:var(--tinta2);font-size:12.5px;margin-top:3px}
+</style>
+</head>
+<body data-pag="ejercicios">
+
+<div class="hoja">
+  <h1 class="tit">Biblioteca del estudio</h1>
+  <p class="bajada">Los circuitos que se dibujan en el pizarrón y los ejercicios sueltos con su
+  video. Se filma una vez y se reusa en cada programa.</p>
+
+  <div class="pestanias">
+    <button class="pest on" data-f="todos">Todos</button>
+    <button class="pest" data-f="Tobillo">Tobillo</button>
+    <button class="pest" data-f="Rodilla">Rodilla</button>
+    <button class="pest" data-f="Hombro">Hombro</button>
+    <button class="pest" data-f="Lumbar">Lumbar</button>
+  </div>
+
+  <div class="tarjeta">
+    <div class="tarjeta-cab"><h2 class="sub">Circuitos en cancha</h2>
+      <a class="eti" href="pizarron.html" style="text-decoration:none">Dibujar uno nuevo →</a></div>
+    <div class="ejs" id="circuitos"></div>
+  </div>
+
+  <div class="tarjeta">
+    <div class="tarjeta-cab"><h2 class="sub">Ejercicios sueltos</h2>
+      <span class="eti" id="cuenta"></span></div>
+    <div class="ejs" id="sueltos"></div>
+  </div>
+</div>
+
+<script>
+var SUELTOS = [
+  {n:'Movilidad de tobillo con banda', z:'Tobillo', f:2, lugar:'gym', video:true},
+  {n:'Eversión con banda',             z:'Tobillo', f:2, lugar:'gym', video:true},
+  {n:'Elevación de talones sentado',   z:'Tobillo', f:2, lugar:'gym', video:false},
+  {n:'Apoyo en un pie',                z:'Tobillo', f:2, lugar:'gym', video:true},
+  {n:'Saltos con aterrizaje',          z:'Rodilla', f:3, lugar:'cancha', video:true},
+  {n:'Sentadilla búlgara',             z:'Rodilla', f:3, lugar:'gym', video:true},
+  {n:'Nórdico de isquiotibiales',      z:'Rodilla', f:3, lugar:'gym', video:true},
+  {n:'Rotación externa con banda',     z:'Hombro',  f:3, lugar:'gym', video:true},
+  {n:'Remo con banda',                 z:'Hombro',  f:2, lugar:'gym', video:false},
+  {n:'Elevación en Y boca abajo',      z:'Hombro',  f:3, lugar:'gym', video:true},
+  {n:'Puente de glúteo',               z:'Lumbar',  f:2, lugar:'gym', video:true},
+  {n:'Plancha lateral',                z:'Lumbar',  f:3, lugar:'gym', video:false},
+  {n:'Bird dog',                       z:'Lumbar',  f:2, lugar:'gym', video:true}
+];
+var filtro = 'todos';
+
+document.querySelectorAll('.pest[data-f]').forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll('.pest[data-f]').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on'); filtro = b.dataset.f; pintar();
+  };
+});
+
+function tarjeta(e){
+  return '<button class="ej" onclick="alert(\'Acá se abre el ejercicio: video, dosis y a qué programa sumarlo.\')">'
+    + '<div class="mini ' + (e.lugar === 'gym' ? 'gym' : '') + '">'
+    + '<span>' + (e.video ? 'Con video' : 'Sin video') + '</span></div>'
+    + '<div class="cu"><b>' + e.n + '</b>'
+    + '<small class="mono">' + e.z.toUpperCase() + ' · DESDE FASE ' + e.f + '</small></div></button>';
+}
+
+function pintar(){
+  var c = BASE.ejercicios.filter(function(e){ return filtro === 'todos' || e.zona === filtro; });
+  document.getElementById('circuitos').innerHTML = c.length
+    ? c.map(function(e){
+        return '<button class="ej" onclick="irA(\'pizarron.html\')">'
+          + '<div class="mini"><span>4 postas</span></div>'
+          + '<div class="cu"><b>' + e.nombre + '</b>'
+          + '<small class="mono">' + e.zona.toUpperCase() + ' · FASE ' + e.fase + '</small></div></button>';
+      }).join('')
+    : '<div class="vacio" style="grid-column:1/-1"><b>Sin circuitos para esa zona</b>'
+      + 'Dibujá uno en el pizarrón y queda guardado acá.</div>';
+
+  var s = SUELTOS.filter(function(e){ return filtro === 'todos' || e.z === filtro; });
+  document.getElementById('sueltos').innerHTML = s.map(tarjeta).join('');
+  document.getElementById('cuenta').textContent = s.length + ' ejercicios · '
+    + s.filter(function(e){ return e.video; }).length + ' con video';
+}
+pintar();
+</script>
+<script>
+/* Registra el sw para que el portal ande sin internet. Falla en silencio
+   si se abre con doble clic desde el disco: eso es normal. */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+</script>
+</body></html>

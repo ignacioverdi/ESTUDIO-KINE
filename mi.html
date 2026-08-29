@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mi recuperación · Estudio</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+</head>
+<body data-pag="mi">
+
+<div class="hoja angosta" id="todo"></div>
+
+<script>
+var L = lesionDe(miDorsal());
+var hechos = {}, dolor = null, esfuerzo = null;
+
+if(!L){
+  document.getElementById('todo').innerHTML =
+    '<h1 class="tit">Estás al día</h1>'
+    + '<p class="bajada">No tenés ninguna lesión abierta. Si te empezó a molestar algo, '
+    + 'pedí un turno y lo vemos.</p>'
+    + '<a class="bt" href="agenda.html" style="text-decoration:none;display:inline-block">Pedir un turno</a>';
+}else{
+  pintar();
+}
+
+function pintar(){
+  var prog = programaDe(L);
+  var prox = null;
+  (BASE.agenda[HOY] || []).concat(BASE.agenda['2026-08-31'] || []).forEach(function(t){
+    if(!prox && t.dorsal === miDorsal() && t.estado === 'reservado') prox = t;
+  });
+
+  document.getElementById('todo').innerHTML =
+
+    '<h1 class="tit">' + L.zona + ' ' + (L.lado === '—' ? '' : L.lado) + '</h1>'
+    + '<p class="bajada">' + L.diagnostico + '. Llevás ' + dias(L.fecha)
+    + ' días y faltan ' + faltan(L.alta) + ' para el alta prevista.</p>'
+
+    /* dónde estás */
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Dónde estás</h2>'
+    + '<span class="eti">Día ' + dias(L.fecha) + '</span></div>'
+    + pista(L.fase)
+    + '<p style="margin-top:14px">' + FASES[L.fase-1].d + '</p>'
+    + '<div class="nota info" style="margin-top:14px">'
+    + 'Para pasar a <b>' + FASES[Math.min(L.fase,4)].t.toLowerCase() + '</b> te falta: '
+    + L.criterios.filter(function(c){ return !c.ok; }).map(function(c){ return c.t.toLowerCase(); }).join('; ')
+    + '.</div></div>'
+
+    /* turno */
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Tu próximo turno</h2>'
+    + '<a class="eti" href="agenda.html" style="text-decoration:none">Cambiar →</a></div>'
+    + (prox
+        ? '<div class="fila" style="cursor:default;border-color:var(--azul)">'
+          + '<span class="hh">' + prox.h + '</span>'
+          + '<span class="cu"><b>' + prox.tipo + ' con Vero</b>'
+          + '<small>En el estudio. Te avisamos una hora antes.</small></span>'
+          + '<span class="pin reservado">reservado</span></div>'
+        : '<div class="vacio"><b>No tenés turno reservado</b>Pedilo desde la agenda.</div>')
+    + '</div>'
+
+    /* programa */
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Tus ejercicios de hoy</h2>'
+    + '<span class="eti" id="cuenta">0 de ' + prog.length + '</span></div>'
+    + (prog.length
+        ? prog.map(function(e, i){
+            return '<div class="fila" style="align-items:flex-start;cursor:pointer" onclick="marcar(' + i + ')" id="ej' + i + '">'
+              + '<input type="checkbox" style="width:19px;height:19px;accent-color:var(--azul);margin-top:3px" '
+              + 'onclick="event.stopPropagation();marcar(' + i + ')">'
+              + '<span class="cu"><b>' + e.n + '</b>'
+              + '<small class="mono" style="color:var(--azul)">' + e.d + '</small>'
+              + '<small>' + e.nota + '</small></span>'
+              + '<span class="pin gris" onclick="event.stopPropagation();alert(\'Acá abre el video filmado en el estudio.\')">Ver video</span>'
+              + '</div>';
+          }).join('')
+        : '<div class="vacio"><b>Todavía no hay programa</b>Vero lo carga después de tu próximo turno.</div>')
+
+    + (prog.length
+        ? '<label class="campo" style="margin-top:18px"><span class="eti">Cuánto te dolió mientras los hacías</span>'
+          + '<div id="esDolor"></div></label>'
+          + '<label class="campo"><span class="eti">Qué tan exigente te resultó</span>'
+          + '<div id="esEsf"></div></label>'
+          + '<button class="bt ancho" onclick="enviar()">Enviar al kinesiólogo</button>'
+          + '<div class="nota bien" id="listo" style="display:none;margin-top:12px">'
+          + 'Enviado. Vero lo ve antes de tu próximo turno.</div>'
+        : '')
+    + '</div>'
+
+    /* historial */
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Lo que llevás hecho</h2>'
+    + '<span class="eti">' + L.sesiones.length + ' sesiones</span></div>'
+    + L.sesiones.map(function(s){
+        return '<div class="fila" style="cursor:default"><span class="hh">' + fechaCorta(s.f) + '</span>'
+          + '<span class="cu"><b>' + s.t + '</b></span>'
+          + '<span class="pin ' + (s.post < s.pre ? 'atendido' : 'gris') + '">dolor ' + s.pre + ' → ' + s.post + '</span></div>';
+      }).join('')
+    + '</div>';
+
+  if(prog.length){
+    escala(document.getElementById('esDolor'), function(v){ dolor = v; }, dolor);
+    escala(document.getElementById('esEsf'),  function(v){ esfuerzo = v; }, esfuerzo);
+  }
+  actualizarCuenta();
+}
+
+function marcar(i){
+  hechos[i] = !hechos[i];
+  var f = document.getElementById('ej' + i);
+  f.querySelector('input').checked = hechos[i];
+  f.style.background = hechos[i] ? 'var(--verde-suave)' : '';
+  f.style.borderColor = hechos[i] ? '#BCDCC9' : '';
+  actualizarCuenta();
+}
+function actualizarCuenta(){
+  var c = document.getElementById('cuenta');
+  if(!c) return;
+  var n = 0; for(var k in hechos) if(hechos[k]) n++;
+  c.textContent = n + ' de ' + programaDe(L).length;
+}
+function enviar(){
+  if(dolor === null || esfuerzo === null){
+    alert('Marcá cuánto te dolió y qué tan exigente te resultó.'); return;
+  }
+  guardar('kine/adherencia/' + miDorsal() + '/' + HOY,
+          {hechos:hechos, dolor:dolor, esfuerzo:esfuerzo});
+  document.getElementById('listo').style.display = 'block';
+}
+</script>
+<script>
+/* Registra el sw para que el portal ande sin internet. Falla en silencio
+   si se abre con doble clic desde el disco: eso es normal. */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+</script>
+</body></html>

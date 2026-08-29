@@ -1,0 +1,42 @@
+# ══════════════════════════════════════════════════════════════════
+# QUÉ NO SUBE A GITHUB
+#
+# Lo más importante de este archivo son las tres primeras reglas:
+# acá se manejan datos de salud. Un JSON exportado con diagnósticos
+# subido sin querer a un repo público no se puede "desubir".
+# ══════════════════════════════════════════════════════════════════
+
+# DATOS DE PACIENTES — nunca, por ninguna razón
+pacientes/
+export/
+*_pacientes.json
+*_lesiones.json
+*_fichas.json
+backup_*.json
+
+# Llaves y secretos
+.env
+.env.*
+llave.txt
+firebase_admin*.json
+serviceAccount*.json
+
+# Videos del estudio (pesan y van a un hosting aparte, no al repo)
+videos/*
+!videos/LEEME.txt
+
+# Basura del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*~
+
+# Herramientas
+node_modules/
+__pycache__/
+*.pyc
+.vercel/
+
+# Salidas que se regeneran solas
+*.zip

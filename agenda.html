@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agenda · Estudio</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+</head>
+<body data-pag="agenda">
+
+<div class="hoja">
+  <h1 class="tit" id="tit">Agenda</h1>
+  <p class="bajada" id="baj"></p>
+
+  <div class="pestanias">
+    <button class="pest on" data-d="2026-08-28">Viernes 28</button>
+    <button class="pest" data-d="2026-08-31">Lunes 31</button>
+  </div>
+
+  <div class="tarjeta">
+    <div class="tarjeta-cab"><h2 class="sub" id="subDia"></h2>
+      <span class="eti" id="cuenta"></span></div>
+    <div id="grilla"></div>
+  </div>
+
+  <div class="tarjeta" id="cajaCfg">
+    <div class="tarjeta-cab"><h2 class="sub">Horario del estudio</h2>
+      <span class="eti">Se aplica a toda la semana</span></div>
+    <div class="rejilla c3">
+      <label class="campo"><span class="eti">Abre</span><input type="text" value="08:30"></label>
+      <label class="campo"><span class="eti">Cierra</span><input type="text" value="12:30"></label>
+      <label class="campo"><span class="eti">Minutos por turno</span><input type="number" value="30"></label>
+    </div>
+    <button class="bt hueco" onclick="alert('Guardado. La grilla se rearma con estos horarios.')">Guardar horario</button>
+  </div>
+</div>
+
+<script>
+var dia = HOY, esKine = rol() === 'kine';
+
+if(!esKine){
+  document.getElementById('cajaCfg').style.display = 'none';
+  document.getElementById('tit').textContent = 'Mis turnos';
+}
+
+document.querySelectorAll('.pest[data-d]').forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll('.pest[data-d]').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on'); dia = b.dataset.d; pintar();
+  };
+});
+
+function pintar(){
+  var lista = BASE.agenda[dia] || [];
+  var tomados = lista.filter(function(t){ return t.dorsal; }).length;
+  var M = ['viernes 28 de agosto','lunes 31 de agosto'];
+  document.getElementById('subDia').textContent = dia === HOY ? M[0] : M[1];
+  document.getElementById('cuenta').textContent = tomados + ' de ' + lista.length + ' ocupados';
+  document.getElementById('baj').textContent = esKine
+    ? 'Tocá un turno ocupado para abrir la ficha, o uno libre para asignarlo.'
+    : 'Tocá un horario libre para reservarlo. Te llega un aviso una hora antes.';
+
+  document.getElementById('grilla').innerHTML = lista.map(function(t, i){
+    if(!t.dorsal){
+      return '<button class="fila libre" onclick="reservar(' + i + ')">'
+        + '<span class="hh">' + t.h + '</span>'
+        + '<span class="cu"><b>' + (esKine ? 'Libre — asignar' : 'Libre — reservar') + '</b></span></button>';
+    }
+    if(!esKine && t.dorsal !== miDorsal()){
+      return '<div class="fila libre" style="opacity:.5"><span class="hh">' + t.h + '</span>'
+        + '<span class="cu"><b>Ocupado</b></span></div>';
+    }
+    var L = lesionDe(t.dorsal);
+    var mio = t.dorsal === miDorsal();
+    return '<button class="fila" onclick="' + (esKine && L ? 'irA(\'lesiones.html?f=' + L.id + '\')' : 'void 0') + '">'
+      + '<span class="hh">' + t.h + '</span>'
+      + '<span class="cu"><b>' + (esKine ? nombre(t.dorsal) : 'Tu turno') + '</b>'
+      + '<small>' + t.tipo + (esKine && L ? ' · ' + L.zona.toLowerCase() : ' · con Vero') + '</small></span>'
+      + '<span class="pin ' + (mio && !esKine ? 'reservado' : t.estado) + '">'
+      + (mio && !esKine ? 'tuyo' : t.estado) + '</span></button>';
+  }).join('');
+}
+
+function reservar(i){
+  var t = (BASE.agenda[dia] || [])[i];
+  if(!t) return;
+  if(esKine){
+    var d = prompt('¿Qué dorsal asignás a las ' + t.h + '?');
+    if(!d) return;
+    t.dorsal = +d; t.tipo = 'Tratamiento'; t.estado = 'reservado';
+  }else{
+    t.dorsal = miDorsal(); t.tipo = 'Tratamiento'; t.estado = 'reservado';
+  }
+  guardar('kine/agenda/turnos/' + dia + '/' + t.h, {dorsal:t.dorsal, estado:'reservado'});
+  pintar();
+}
+pintar();
+</script>
+<script>
+/* Registra el sw para que el portal ande sin internet. Falla en silencio
+   si se abre con doble clic desde el disco: eso es normal. */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+</script>
+</body></html>

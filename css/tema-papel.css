@@ -1,0 +1,22 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TEMA: PAPEL — el original. Ficha clínica sobre papel.
+   Se queda como opción: es el que mejor imprime y el más legible al sol.
+   ══════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{
+  --fondo:#EBEEF2; --sup:#FFFFFF; --sup2:#F5F7F9;
+  --linea:#DBE1E8; --linea2:#C3CCD6; --borde:1px;
+  --tinta:#0F1922; --tinta2:#546372; --tinta3:#8B98A5;
+  --acc:#1D3E6E; --acc2:#2F5C9E; --acc-suave:#E7EDF6; --acc-borde:#BFD1E9;
+  --acc-texto:#1D3E6E; --sobre-acc:#FFFFFF;
+  --verde:#2E7D4F; --verde-suave:#E4F1E9; --verde-borde:#BCDCC9;
+  --ambar:#8A5A11; --ambar-suave:#FAEFDD; --ambar-borde:#E8CFA4;
+  --rojo:#AE3226;  --rojo-suave:#F9E6E3;  --rojo-borde:#EBBFB9;
+  --tit:'Space Grotesk',system-ui,sans-serif; --txt:'IBM Plex Sans',system-ui,sans-serif;
+  --dat:'IBM Plex Mono',ui-monospace,monospace;
+  --tit-tam:27px; --tit-peso:700; --tit-track:-.6px; --sub-track:-.2px; --tit-caja:none;
+  --r:12px; --r2:16px; --r-chico:8px; --r-min:2px;
+  --sombra:0 1px 2px rgba(15,25,34,.05), 0 4px 14px rgba(15,25,34,.05);
+  --sombra-alta:0 20px 60px rgba(15,25,34,.22);
+  --fulgor:none; --trama:none; --velo-fondo:rgba(15,25,34,.45);
+}

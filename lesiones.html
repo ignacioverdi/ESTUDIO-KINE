@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lesiones · Estudio</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+</head>
+<body data-pag="ficha">
+
+<div class="hoja">
+  <h1 class="tit" id="titulo">Lesiones</h1>
+  <p class="bajada" id="bajada">Cada ficha avanza por criterios, no por calendario.</p>
+
+  <div id="lista"></div>
+  <div id="ficha"></div>
+</div>
+
+<script>
+var abierta = new URLSearchParams(location.search).get('f');
+
+function pintar(){
+  var lista = document.getElementById('lista'), ficha = document.getElementById('ficha');
+
+  if(!abierta){
+    document.getElementById('titulo').textContent = 'Lesiones';
+    document.getElementById('bajada').textContent =
+      'Tres en tratamiento. Cada ficha avanza por criterios cumplidos, no por días transcurridos.';
+    ficha.innerHTML = '';
+    lista.innerHTML = '<div class="tarjeta">' + BASE.lesiones.map(function(L){
+      var listos = criteriosListos(L);
+      return '<button class="fila" style="align-items:flex-start" onclick="abrir(\'' + L.id + '\')">'
+        + '<span class="hh">#' + L.dorsal + '</span>'
+        + '<span class="cu"><b>' + nombre(L.dorsal) + ' — ' + L.zona + ' ' + L.lado + '</b>'
+        + '<small>' + L.diagnostico + '</small>' + pista(L.fase, false) + '</span>'
+        + '<span class="pin reservado">' + listos + '/' + L.criterios.length + '</span></button>';
+    }).join('') + '</div>';
+    return;
+  }
+
+  var L = lesionPorId(abierta);
+  if(!L){ abierta = null; return pintar(); }
+  lista.innerHTML = '<button class="bt neutro chico" style="margin-bottom:16px" onclick="abrir(null)">← Todas las lesiones</button>';
+
+  document.getElementById('titulo').textContent = nombre(L.dorsal) + ' · ' + L.zona.toLowerCase() + ' ' + L.lado;
+  document.getElementById('bajada').textContent = L.diagnostico + '. Lesionado el ' + fechaCorta(L.fecha) + '.';
+
+  var sigue  = Math.min(L.fase + 1, 5);
+  var faltanC = L.criterios.length - criteriosListos(L);
+
+  ficha.innerHTML =
+
+    /* estado */
+    '<div class="tarjeta">'
+    + '<div class="rejilla c4" style="margin-bottom:18px">'
+    + '<div class="dato"><div class="v">' + dias(L.fecha) + '</div><div class="l">Días de baja</div></div>'
+    + '<div class="dato"><div class="v" style="color:var(--azul)">' + L.fase + '</div><div class="l">Fase actual</div></div>'
+    + '<div class="dato"><div class="v">' + faltan(L.alta) + '</div><div class="l">Días para el alta</div></div>'
+    + '<div class="dato"><div class="v">' + L.sesiones.length + '</div><div class="l">Sesiones</div></div>'
+    + '</div>'
+    + pista(L.fase)
+    + '<p style="font-size:14px;color:var(--tinta2);margin-top:14px">' + FASES[L.fase-1].d + '</p>'
+    + '</div>'
+
+    /* criterios */
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Para pasar a fase ' + sigue + ' — ' + FASES[sigue-1].t + '</h2></div>'
+    + (faltanC
+        ? '<div class="nota aviso">Falta' + (faltanC > 1 ? 'n ' + faltanC + ' criterios' : ' un criterio') + '. Hasta que estén, no avanza.</div>'
+        : '<div class="nota bien">Todos los criterios cumplidos. Se puede avanzar.</div>')
+    + L.criterios.map(function(c, i){
+        return '<label class="crit ' + (c.ok ? '' : 'falta') + '">'
+          + '<input type="checkbox" ' + (c.ok ? 'checked' : '') + ' onchange="tildar(' + i + ',this.checked)">'
+          + '<span>' + c.t + '</span></label>';
+      }).join('')
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">'
+    + '<button class="bt" ' + (faltanC ? 'disabled' : '') + ' onclick="avanzar()">Pasar a fase ' + sigue + '</button>'
+    + '<button class="bt neutro" onclick="window.print()">Imprimir ficha</button>'
+    + '</div></div>'
+
+    /* mecanismo */
+    + '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">Cómo se lesionó</h2></div>'
+    + '<p style="color:var(--tinta2)">' + L.mecanismo + '</p></div>'
+
+    /* programa */
+    + '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">Programa de esta fase</h2>'
+    + '<a class="eti" href="ejercicios.html" style="text-decoration:none">Biblioteca →</a></div>'
+    + (programaDe(L).length
+        ? programaDe(L).map(function(e){
+            return '<div class="fila" style="cursor:default"><span class="cu"><b>' + e.n + '</b>'
+              + '<small>' + e.d + ' — ' + e.nota + '</small></span></div>';
+          }).join('')
+        : '<div class="vacio"><b>Sin programa cargado para la fase ' + L.fase + '</b>'
+          + 'Armalo desde la biblioteca o dibujá un circuito en el pizarrón.</div>')
+    + '</div>'
+
+    /* sesiones */
+    + '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">Sesiones</h2>'
+    + '<span class="eti">Dolor antes → después</span></div>'
+    + L.sesiones.map(function(s){
+        var baja = s.post < s.pre;
+        return '<div class="fila" style="cursor:default;align-items:flex-start">'
+          + '<span class="hh">' + fechaCorta(s.f) + '</span>'
+          + '<span class="cu"><b>' + s.t + '</b><small>' + s.nota + '</small></span>'
+          + '<span class="pin ' + (baja ? 'atendido' : 'gris') + '">' + s.pre + ' → ' + s.post + '</span></div>';
+      }).join('')
+    + '<button class="bt hueco ancho" style="margin-top:12px" onclick="abrirSesion()">Cargar sesión de hoy</button>'
+    + '</div>';
+}
+
+/* ── Cargar la sesión del día ──────────────────────────────────────
+   Es la pantalla que el kinesiólogo usa quince veces por día, así que
+   tiene que ser rápida: el tipo y las dos escalas de dolor se tocan,
+   no se escriben. Solo la nota se tipea, y es opcional.
+
+   El dolor antes y después es el dato que importa: la diferencia entre
+   los dos es lo que muestra si la sesión sirvió. Por eso los dos son
+   obligatorios y la nota no.                                          */
+var sesionNueva = null;
+
+function abrirSesion(){
+  var L = lesionPorId(abierta);
+  if(!L) return;
+  sesionNueva = {tipo:'Tratamiento', pre:null, post:null, nota:''};
+
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo';
+  caja.id = 'cajaSesion';
+  caja.innerHTML =
+    '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarSesion()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Sesión de hoy</span>'
+    + '<h2>' + nombre(L.dorsal) + ' · ' + L.zona.toLowerCase() + '</h2>'
+    + '<p>Día ' + dias(L.fecha) + ' · fase ' + L.fase + ', ' + FASES[L.fase-1].t.toLowerCase() + '</p>'
+
+    + '<label class="campo"><span class="eti">Qué tipo de sesión</span>'
+    + '<div class="pestanias" id="tipoSes" style="margin-bottom:0">'
+    + ['Evaluación','Tratamiento','Gimnasio','Campo'].map(function(t){
+        return '<button class="pest' + (t === 'Tratamiento' ? ' on' : '') + '" data-t="' + t + '">' + t + '</button>';
+      }).join('')
+    + '</div></label>'
+
+    + '<label class="campo"><span class="eti">Dolor al llegar</span><div id="esPre"></div></label>'
+    + '<label class="campo"><span class="eti">Dolor al terminar</span><div id="esPost"></div></label>'
+    + '<label class="campo"><span class="eti">Qué se hizo (opcional)</span>'
+    + '<textarea id="notaSes" placeholder="Movilidad articular, isométricos de eversión..."></textarea></label>'
+
+    + '<div id="avisoSes"></div>'
+    + '<button class="bt ancho" onclick="guardarSesion()">Guardar sesión</button>'
+    + '</div>';
+
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarSesion(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+
+  var tipos = document.getElementById('tipoSes');
+  tipos.querySelectorAll('.pest').forEach(function(b){
+    b.onclick = function(){
+      tipos.querySelectorAll('.pest').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on'); sesionNueva.tipo = b.dataset.t;
+    };
+  });
+  escala(document.getElementById('esPre'),  function(v){ sesionNueva.pre = v; });
+  escala(document.getElementById('esPost'), function(v){ sesionNueva.post = v; });
+}
+
+function cerrarSesion(){
+  var c = document.getElementById('cajaSesion');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
+function guardarSesion(){
+  var av = document.getElementById('avisoSes');
+  if(sesionNueva.pre === null || sesionNueva.post === null){
+    av.innerHTML = '<div class="nota aviso">Marcá el dolor al llegar y al terminar. '
+      + 'La diferencia entre los dos es el dato que sirve.</div>';
+    return;
+  }
+  var L = lesionPorId(abierta);
+  sesionNueva.nota = document.getElementById('notaSes').value.trim() || '—';
+
+  L.sesiones.unshift({f:HOY, t:sesionNueva.tipo, pre:sesionNueva.pre,
+                      post:sesionNueva.post, nota:sesionNueva.nota});
+  guardar('kine/sesiones/' + L.id + '/' + HOY, {
+    dorsal:L.dorsal, fecha:HOY, tipo:sesionNueva.tipo,
+    dolor_pre:sesionNueva.pre, dolor_post:sesionNueva.post,
+    notas:sesionNueva.nota, fase:L.fase
+  });
+  cerrarSesion();
+  pintar();
+}
+
+function abrir(id){
+  abierta = id;
+  history.replaceState(null, '', id ? '?f=' + id : location.pathname);
+  pintar(); scrollTo(0, 0);
+}
+function tildar(i, v){
+  var L = lesionPorId(abierta);
+  L.criterios[i].ok = v;
+  guardar('kine/lesiones/' + L.id + '/criterios/' + i + '/ok', v);
+  pintar();
+}
+function avanzar(){
+  var L = lesionPorId(abierta);
+  if(L.fase >= 5) return;
+  L.fase++;
+  L.criterios.forEach(function(c){ c.ok = false; });
+  guardar('kine/lesiones/' + L.id + '/fase', L.fase);
+  pintar();
+}
+pintar();
+</script>
+<script>
+/* Registra el sw para que el portal ande sin internet. Falla en silencio
+   si se abre con doble clic desde el disco: eso es normal. */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+</script>
+</body></html>

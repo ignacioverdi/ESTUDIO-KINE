@@ -1,0 +1,14 @@
+LOS VIDEOS NO VAN ACÁ
+=====================
+
+Esta carpeta está vacía a propósito.
+
+Un video de un ejercicio pesa entre 5 y 50 MB. Con treinta ejercicios el repo
+se vuelve inmanejable, cada clon tarda una eternidad y Vercel lo rechaza.
+
+Los videos van a un hosting de video, y en Firebase se guarda solo el enlace:
+
+    kine/ejercicios/<id>/video = "https://..."
+
+El .gitignore ya bloquea todo lo que se ponga en esta carpeta, menos este
+archivo. Si copiás un video acá para probar, no se va a subir. Está bien así.

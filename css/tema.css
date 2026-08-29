@@ -1,0 +1,39 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TEMA: TELEMETRÍA — consola de datos, casi negro, cian eléctrico.
+
+   La referencia es el muro de telemetría de un box de Fórmula 1 y la
+   pantalla de un ecógrafo: fondo profundo, retícula finísima, números
+   grandes en monoespaciada, un solo color vivo.
+
+   El cian se eligió porque el verde, el ámbar y el rojo ya significan
+   disponible, limitado y de baja. El acento tiene que quedar afuera de
+   esa terna o el semáforo deja de leerse.
+   ══════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --fondo:#05070B; --sup:#0C1016; --sup2:#12181F;
+  --linea:rgba(120,200,225,.13); --linea2:rgba(120,200,225,.26); --borde:1px;
+  --tinta:#E4F2F8; --tinta2:#8FA6B4; --tinta3:#5F7280;
+
+  --acc:#00D8E8; --acc2:#4CE9F5; --acc-suave:rgba(0,216,232,.12);
+  --acc-borde:rgba(0,216,232,.42); --acc-texto:#3FE3F0; --sobre-acc:#03161A;
+
+  --verde:#3BE08A; --verde-suave:rgba(59,224,138,.11); --verde-borde:rgba(59,224,138,.36);
+  --ambar:#FFB531; --ambar-suave:rgba(255,181,49,.11); --ambar-borde:rgba(255,181,49,.36);
+  --rojo:#FF5C57;  --rojo-suave:rgba(255,92,87,.11);   --rojo-borde:rgba(255,92,87,.36);
+
+  --tit:'Rajdhani',system-ui,sans-serif; --txt:'IBM Plex Sans',system-ui,sans-serif;
+  --dat:'JetBrains Mono',ui-monospace,monospace;
+  --tit-tam:34px; --tit-peso:700; --tit-track:1.5px; --sub-track:.8px; --tit-caja:uppercase;
+
+  --r:6px; --r2:8px; --r-chico:5px; --r-min:1px;
+  --sombra:0 1px 0 rgba(255,255,255,.03) inset, 0 8px 26px rgba(0,0,0,.5);
+  --sombra-alta:0 30px 80px rgba(0,0,0,.75);
+  --fulgor:0 0 14px rgba(0,216,232,.35);
+  --velo-fondo:rgba(3,6,10,.82);
+
+  /* la retícula del fondo: dos líneas de 1px cada 46px */
+  --trama:linear-gradient(rgba(120,200,225,.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(120,200,225,.045) 1px, transparent 1px);
+}
+body{background-size:46px 46px}

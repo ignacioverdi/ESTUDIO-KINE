@@ -1,0 +1,24 @@
+{
+  "_comentario": "La identidad del estudio. Es lo único que se toca para que el mismo código sirva a otro club.",
+
+  "estudio": "Estudio de kinesiología",
+  "club": "Club Atlético",
+  "deporte": "futbol",
+
+  "kinesiologos": [
+    { "id": "vero", "nombre": "Vero", "iniciales": "VR" }
+  ],
+
+  "horario": {
+    "dias": ["lun", "mar", "mie", "jue", "vie"],
+    "abre": "08:30",
+    "cierra": "12:30",
+    "minutos_por_turno": 30
+  },
+
+  "aviso_turno_minutos_antes": 60,
+
+  "_nota_colores": "Cambiar el acento acá NO alcanza: los colores viven en css/estudio.css. Esto es para el manifiesto y la barra del navegador.",
+  "color_acento": "#1D3E6E",
+  "color_fondo": "#EBEEF2"
+}

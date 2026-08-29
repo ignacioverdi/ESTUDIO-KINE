@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estudio · Kinesiología del club</title>
+<meta name="theme-color" content="#1D3E6E">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   TEMA: TELEMETRÍA — consola de datos, casi negro, cian eléctrico.
+
+   La referencia es el muro de telemetría de un box de Fórmula 1 y la
+   pantalla de un ecógrafo: fondo profundo, retícula finísima, números
+   grandes en monoespaciada, un solo color vivo.
+
+   El cian se eligió porque el verde, el ámbar y el rojo ya significan
+   disponible, limitado y de baja. El acento tiene que quedar afuera de
+   esa terna o el semáforo deja de leerse.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:root{
+  --fondo:#05070B; --sup:#0C1016; --sup2:#12181F;
+  --linea:rgba(120,200,225,.13); --linea2:rgba(120,200,225,.26); --borde:1px;
+  --tinta:#E4F2F8; --tinta2:#8FA6B4; --tinta3:#5F7280;
+
+  --acc:#00D8E8; --acc2:#4CE9F5; --acc-suave:rgba(0,216,232,.12);
+  --acc-borde:rgba(0,216,232,.42); --acc-texto:#3FE3F0; --sobre-acc:#03161A;
+
+  --verde:#3BE08A; --verde-suave:rgba(59,224,138,.11); --verde-borde:rgba(59,224,138,.36);
+  --ambar:#FFB531; --ambar-suave:rgba(255,181,49,.11); --ambar-borde:rgba(255,181,49,.36);
+  --rojo:#FF5C57;  --rojo-suave:rgba(255,92,87,.11);   --rojo-borde:rgba(255,92,87,.36);
+
+  --tit:'Rajdhani',system-ui,sans-serif; --txt:'IBM Plex Sans',system-ui,sans-serif;
+  --dat:'JetBrains Mono',ui-monospace,monospace;
+  --tit-tam:34px; --tit-peso:700; --tit-track:1.5px; --sub-track:.8px; --tit-caja:uppercase;
+
+  --r:6px; --r2:8px; --r-chico:5px; --r-min:1px;
+  --sombra:0 1px 0 rgba(255,255,255,.03) inset, 0 8px 26px rgba(0,0,0,.5);
+  --sombra-alta:0 30px 80px rgba(0,0,0,.75);
+  --fulgor:0 0 14px rgba(0,216,232,.35);
+  --velo-fondo:rgba(3,6,10,.82);
+
+  /* la retícula del fondo: dos líneas de 1px cada 46px */
+  --trama:linear-gradient(rgba(120,200,225,.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(120,200,225,.045) 1px, transparent 1px);
+}
+body{background-size:46px 46px}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ESTUDIO — LOS COMPONENTES
+
+   Acá viven las FORMAS: tamaños, espacios, estructura.
+   Acá NO vive ningún color ni ninguna tipografía.
+
+   Todo eso sale de los tokens que define css/tema.css. Por eso cambiar
+   el aspecto entero del portal es cambiar un archivo de 40 líneas y no
+   tocar estas 400.
+
+   Si alguna vez tenés que escribir un #hexadecimal en este archivo, es
+   señal de que falta un token. Agregalo al tema en vez de pegarlo acá.
+   ══════════════════════════════════════════════════════════════════════ */
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--fondo); color:var(--tinta);
+  font-family:var(--txt); font-size:15px; line-height:1.5;
+  min-height:100vh; padding-bottom:76px;
+  background-image:var(--trama); background-attachment:fixed;
+}
+
+/* ── ENCABEZADO ─────────────────────────────────────────────────── */
+.top{background:var(--sup);border-bottom:var(--borde) solid var(--linea);position:sticky;top:0;z-index:40}
+.top-in{max-width:1240px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px}
+.marca{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+.marca .sig{width:30px;height:30px;border-radius:var(--r-chico);background:var(--acc);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--fulgor)}
+.marca .sig::after{content:'';width:14px;height:14px;
+  background:linear-gradient(var(--sobre-acc),var(--sobre-acc)) center/14px 2.5px no-repeat,
+             linear-gradient(var(--sobre-acc),var(--sobre-acc)) center/2.5px 14px no-repeat}
+.marca b{font-family:var(--tit);font-size:16px;font-weight:var(--tit-peso);
+  letter-spacing:var(--tit-track);line-height:1.1;text-transform:var(--tit-caja)}
+.marca span{display:block;font-family:var(--dat);font-size:9.5px;letter-spacing:1.4px;
+  text-transform:uppercase;color:var(--tinta3);font-weight:500}
+.quien{margin-left:auto;display:flex;align-items:center;gap:9px;font-family:var(--dat);
+  font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--tinta2)}
+.quien .av{width:28px;height:28px;border-radius:50%;background:var(--acc-suave);color:var(--acc-texto);
+  display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11px}
+
+.ayuda-bt{width:29px;height:29px;border-radius:50%;border:var(--borde) solid var(--linea2);
+  background:transparent;color:var(--tinta2);font-family:var(--tit);font-size:15px;font-weight:600;
+  cursor:pointer;flex-shrink:0;line-height:1;display:flex;align-items:center;justify-content:center}
+.ayuda-bt:hover{border-color:var(--acc);color:var(--acc);box-shadow:var(--fulgor)}
+
+/* ── NAVEGACIÓN ─────────────────────────────────────────────────── */
+.nav{background:var(--sup);border-bottom:var(--borde) solid var(--linea);overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-in{max-width:1240px;margin:0 auto;padding:0 18px;display:flex;gap:2px}
+.nav a{font-family:var(--dat);font-size:11.5px;font-weight:500;letter-spacing:1.1px;text-transform:uppercase;
+  color:var(--tinta2);text-decoration:none;padding:13px 14px;border-bottom:2px solid transparent;white-space:nowrap}
+.nav a:hover{color:var(--tinta)}
+.nav a.on{color:var(--acc);border-bottom-color:var(--acc)}
+
+/* ── ESTRUCTURA ─────────────────────────────────────────────────── */
+.hoja{max-width:1240px;margin:0 auto;padding:22px 18px}
+.hoja.angosta{max-width:760px}
+h1.tit{font-family:var(--tit);font-size:var(--tit-tam);font-weight:var(--tit-peso);
+  letter-spacing:var(--tit-track);line-height:1.1;text-transform:var(--tit-caja)}
+.bajada{font-size:15px;color:var(--tinta2);margin-top:6px;margin-bottom:20px;max-width:62ch}
+h2.sub{font-family:var(--tit);font-size:17px;font-weight:var(--tit-peso);
+  letter-spacing:var(--sub-track);text-transform:var(--tit-caja)}
+.eti{font-family:var(--dat);font-size:10.5px;font-weight:500;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--tinta3)}
+
+.tarjeta{background:var(--sup);border:var(--borde) solid var(--linea);border-radius:var(--r2);
+  padding:20px;margin-bottom:16px;box-shadow:var(--sombra)}
+.tarjeta-cab{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.tarjeta-cab .eti{margin-left:auto}
+.rejilla{display:grid;gap:16px}
+.rejilla.c2{grid-template-columns:1fr 1fr}
+.rejilla.c3{grid-template-columns:repeat(3,1fr)}
+.rejilla.c4{grid-template-columns:repeat(4,1fr)}
+
+/* ── DATOS ──────────────────────────────────────────────────────── */
+.dato{background:var(--sup2);border:var(--borde) solid var(--linea);border-radius:var(--r);padding:15px 16px}
+.dato .v{font-family:var(--dat);font-size:29px;font-weight:600;line-height:1;letter-spacing:-1.5px;
+  font-variant-numeric:tabular-nums}
+.dato .l{font-family:var(--dat);font-size:10px;font-weight:500;letter-spacing:1.4px;
+  text-transform:uppercase;color:var(--tinta3);margin-top:7px}
+.mono{font-family:var(--dat);font-variant-numeric:tabular-nums}
+
+/* ── LA PISTA DE RECUPERACIÓN — el elemento firma ───────────────── */
+.pista{margin:6px 0 4px}
+.pista-vias{display:flex;gap:3px}
+.pista-vias i{flex:1;height:9px;border-radius:var(--r-min);background:var(--sup2);
+  border:var(--borde) solid var(--linea2);position:relative}
+.pista-vias i.hecho{background:var(--verde);border-color:var(--verde)}
+.pista-vias i.ahora{background:var(--acc);border-color:var(--acc);box-shadow:var(--fulgor)}
+.pista-vias i.ahora::after{content:'';position:absolute;left:50%;top:-7px;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:var(--acc)}
+.pista-nom{display:flex;gap:3px;margin-top:7px}
+.pista-nom span{flex:1;font-family:var(--dat);font-size:9px;font-weight:500;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--tinta3);text-align:center;line-height:1.25}
+.pista-nom span.ahora{color:var(--acc);font-weight:600}
+.pista-solo{display:none;font-family:var(--dat);font-size:10.5px;font-weight:500;letter-spacing:1.1px;
+  text-transform:uppercase;color:var(--acc);margin-top:8px}
+
+/* ── SEMÁFORO ───────────────────────────────────────────────────── */
+.plantel{display:grid;grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:9px}
+.at{background:var(--sup2);border:var(--borde) solid var(--linea);border-left:4px solid var(--linea2);
+  border-radius:var(--r);padding:11px 13px;cursor:pointer;transition:.13s;text-align:left;
+  font-family:inherit;font-size:inherit;color:inherit;width:100%;display:block}
+.at:hover{border-color:var(--linea2);box-shadow:var(--sombra);transform:translateY(-1px)}
+.at .d{font-family:var(--dat);font-size:19px;font-weight:600;letter-spacing:-1px;line-height:1}
+.at .n{font-weight:600;font-size:15px;margin-top:1px}
+.at .e{font-family:var(--dat);font-size:10px;font-weight:500;letter-spacing:1.1px;
+  text-transform:uppercase;margin-top:7px}
+.at.ok{border-left-color:var(--verde)}
+.at.ok .e{color:var(--verde)}
+.at.limitado{border-left-color:var(--ambar)}
+.at.limitado .e{color:var(--ambar)} .at.limitado .d{color:var(--ambar)}
+.at.baja{border-left-color:var(--rojo)}
+.at.baja .e{color:var(--rojo)} .at.baja .d{color:var(--rojo)}
+
+.pin{display:inline-block;font-family:var(--dat);font-size:10px;font-weight:500;letter-spacing:1.1px;
+  text-transform:uppercase;padding:4px 9px;border-radius:20px;border:var(--borde) solid}
+.pin.ok,.pin.atendido{background:var(--verde-suave);border-color:var(--verde-borde);color:var(--verde)}
+.pin.limitado,.pin.reservado{background:var(--acc-suave);border-color:var(--acc-borde);color:var(--acc-texto)}
+.pin.baja,.pin.ausente{background:var(--rojo-suave);border-color:var(--rojo-borde);color:var(--rojo)}
+.pin.gris{background:var(--sup2);border-color:var(--linea);color:var(--tinta3)}
+
+/* ── FILAS ──────────────────────────────────────────────────────── */
+.fila{display:flex;align-items:center;gap:13px;padding:12px 14px;border:var(--borde) solid var(--linea);
+  border-radius:var(--r);background:var(--sup2);margin-bottom:7px;text-align:left;width:100%;
+  font-family:inherit;font-size:inherit;color:inherit}
+button.fila{cursor:pointer;transition:.13s}
+button.fila:hover{border-color:var(--acc);box-shadow:var(--sombra)}
+.fila .hh{font-family:var(--dat);font-size:15px;font-weight:600;letter-spacing:-.4px;
+  color:var(--acc-texto);min-width:52px}
+.fila .cu{flex:1;min-width:0}
+.fila .cu b{font-weight:600;font-size:15px}
+.fila .cu small{display:block;color:var(--tinta2);font-size:13px}
+.fila.libre{background:transparent;border-style:dashed;color:var(--tinta3)}
+.fila.libre .cu b{font-weight:400;font-style:italic;color:var(--tinta3)}
+
+/* ── CONTROLES ──────────────────────────────────────────────────── */
+.bt{font-family:var(--dat);font-size:11.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;
+  padding:11px 18px;border-radius:var(--r);border:var(--borde) solid var(--acc);background:var(--acc);
+  color:var(--sobre-acc);cursor:pointer;transition:.13s}
+.bt:hover{background:var(--acc2);border-color:var(--acc2);box-shadow:var(--fulgor)}
+.bt:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
+.bt.hueco{background:transparent;color:var(--acc-texto)}
+.bt.hueco:hover{background:var(--acc-suave);color:var(--acc-texto)}
+.bt.neutro{background:transparent;border-color:var(--linea2);color:var(--tinta2)}
+.bt.neutro:hover{background:var(--sup2);color:var(--tinta);box-shadow:none}
+.bt.ancho{width:100%;display:block}
+.bt.chico{padding:8px 13px;font-size:10.5px}
+
+input[type=text],input[type=date],input[type=number],select,textarea{
+  width:100%;background:var(--sup2);border:var(--borde) solid var(--linea2);border-radius:var(--r);
+  padding:10px 12px;font-family:var(--txt);font-size:15px;color:var(--tinta)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-suave)}
+textarea{resize:vertical;min-height:66px}
+label.campo{display:block;margin-bottom:12px}
+label.campo>.eti{display:block;margin-bottom:5px}
+
+.pestanias{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.pest{font-family:var(--dat);font-size:11px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;
+  padding:9px 15px;border-radius:var(--r);border:var(--borde) solid var(--linea2);background:var(--sup2);
+  color:var(--tinta2);cursor:pointer}
+.pest:hover{color:var(--tinta)}
+.pest.on{background:var(--acc);border-color:var(--acc);color:var(--sobre-acc);box-shadow:var(--fulgor)}
+.pest.rojo.on{background:var(--rojo);border-color:var(--rojo);color:var(--sobre-acc)}
+.panel{display:none}.panel.on{display:block}
+
+.escala{display:flex;gap:5px;flex-wrap:wrap}
+.escala button{width:34px;height:34px;border-radius:var(--r);border:var(--borde) solid var(--linea2);
+  background:var(--sup2);font-family:var(--dat);font-size:13px;font-weight:600;color:var(--tinta2);cursor:pointer}
+.escala button:hover{border-color:var(--acc);color:var(--acc-texto)}
+.escala button.on{background:var(--acc);border-color:var(--acc);color:var(--sobre-acc);box-shadow:var(--fulgor)}
+
+.crit{display:flex;align-items:flex-start;gap:11px;padding:11px 0;
+  border-bottom:var(--borde) solid var(--linea);cursor:pointer}
+.crit:last-child{border-bottom:none}
+.crit input{width:19px;height:19px;accent-color:var(--acc);margin-top:2px;flex-shrink:0}
+.crit.falta{color:var(--tinta2)}
+
+.nota{border-radius:var(--r);padding:12px 15px;font-size:14px;margin-bottom:14px;border:var(--borde) solid}
+.nota.aviso{background:var(--ambar-suave);border-color:var(--ambar-borde);color:var(--ambar)}
+.nota.bien{background:var(--verde-suave);border-color:var(--verde-borde);color:var(--verde)}
+.nota.info{background:var(--acc-suave);border-color:var(--acc-borde);color:var(--acc-texto)}
+.nota.reserva{background:var(--rojo-suave);border-color:var(--rojo-borde);color:var(--rojo)}
+
+.vacio{text-align:center;padding:40px 20px;color:var(--tinta2)}
+.vacio b{display:block;font-family:var(--tit);font-size:17px;font-weight:var(--tit-peso);
+  color:var(--tinta);margin-bottom:6px}
+
+/* ── PANEL DE AYUDA ─────────────────────────────────────────────── */
+.ayuda-fondo{position:fixed;inset:0;background:var(--velo-fondo);z-index:90;
+  display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+.ayuda-caja{background:var(--sup);border:var(--borde) solid var(--linea2);border-radius:var(--r2);
+  max-width:620px;width:100%;padding:26px;box-shadow:var(--sombra-alta);margin:auto;position:relative}
+.ayuda-caja .cerrar{position:absolute;top:18px;right:18px;background:transparent;border:none;
+  color:var(--tinta3);font-size:24px;line-height:1;cursor:pointer;padding:4px}
+.ayuda-caja .cerrar:hover{color:var(--tinta)}
+.ayuda-caja h2{font-family:var(--tit);font-size:23px;font-weight:var(--tit-peso);
+  letter-spacing:var(--tit-track);text-transform:var(--tit-caja);margin:6px 0 10px}
+.ayuda-caja>p{color:var(--tinta2);margin-bottom:18px;padding-right:30px}
+.ayuda-paso{display:flex;gap:13px;padding:13px 0;border-top:var(--borde) solid var(--linea)}
+.ayuda-paso .nn{font-family:var(--dat);font-size:12px;font-weight:600;color:var(--acc-texto);
+  border:var(--borde) solid var(--acc-borde);background:var(--acc-suave);border-radius:50%;
+  width:25px;height:25px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ayuda-paso b{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
+.ayuda-paso span{color:var(--tinta2);font-size:14px}
+
+/* ── BARRA INFERIOR (celular) ───────────────────────────────────── */
+.barra-abajo{display:none}
+@media(max-width:860px){
+  .nav{display:none}
+  .barra-abajo{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--sup);
+    border-top:var(--borde) solid var(--linea);z-index:50;padding:6px 4px 8px}
+  .barra-abajo a{flex:1;text-align:center;text-decoration:none;color:var(--tinta3);
+    font-family:var(--dat);font-size:9px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;padding:5px 2px}
+  .barra-abajo a .ic{display:block;font-size:17px;line-height:1.3}
+  .barra-abajo a.on{color:var(--acc)}
+  .rejilla.c2,.rejilla.c3,.rejilla.c4{grid-template-columns:1fr 1fr}
+  h1.tit{font-size:calc(var(--tit-tam) * .82)}
+}
+@media(max-width:560px){
+  .rejilla.c3,.rejilla.c4{grid-template-columns:1fr 1fr}
+  .pista-nom{display:none}
+  .pista-solo{display:block}
+}
+@media print{
+  .top,.nav,.barra-abajo,.bt,.pestanias,.ayuda-fondo{display:none!important}
+  body{background:#fff;color:#000;padding:0;background-image:none}
+  .tarjeta{box-shadow:none;break-inside:avoid}
+  .panel{display:block!important}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* pizarron.html */
+
+  .taller{display:grid;grid-template-columns:210px 1fr 290px;gap:16px;align-items:start}
+  .grupo{margin-bottom:14px}
+  .grupo>.eti{display:block;margin-bottom:7px}
+  .paleta{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .pz{aspect-ratio:1;border:1px solid var(--linea);border-radius:9px;background:#4C8F4F;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;padding:5px;transition:.12s}
+  .pz:hover{border-color:var(--tinta2)}
+  .pz.gym{background:#39404E}
+  .pz.on{border-color:var(--azul);border-width:2px;box-shadow:0 0 0 3px var(--azul-suave)}
+  .pz svg{width:100%;height:100%;overflow:visible}
+  #campo{width:100%;border-radius:var(--r);display:block;background:#3F8F42;touch-action:none;
+    cursor:crosshair;border:1px solid var(--linea2)}
+  .pieza{cursor:move}
+  .pieza.sel .halo{stroke:#fff;stroke-width:3;fill:none;stroke-dasharray:5 4}
+  .posta{border:1px solid var(--linea);border-radius:var(--r);background:var(--hoja2);padding:11px;margin-bottom:8px}
+  .posta-h{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+  .posta-n{width:25px;height:25px;border-radius:50%;background:var(--azul);color:#fff;font-family:var(--dat);
+    font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .posta-h b{font-size:14px;flex:1}
+  .posta-h .x{color:var(--tinta3);cursor:pointer;font-size:18px;line-height:1}
+  .posta-h .x:hover{color:var(--rojo)}
+  .posta textarea{font-size:14px;min-height:78px;line-height:1.4}
+  @media(max-width:1100px){ .taller{grid-template-columns:1fr} .paleta{grid-template-columns:repeat(8,1fr)} }
+
+/* ejercicios.html */
+
+  .ejs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .ej{border:1px solid var(--linea);border-radius:var(--r);background:var(--hoja);overflow:hidden;
+      text-align:left;font-family:inherit;color:inherit;cursor:pointer;transition:.13s;padding:0}
+  .ej:hover{border-color:var(--linea2);box-shadow:var(--sombra);transform:translateY(-1px)}
+  .ej .mini{height:112px;background:#3F8F42;position:relative;display:flex;align-items:center;justify-content:center}
+  .ej .mini.gym{background:#2F3542}
+  .ej .mini span{font-family:var(--dat);font-size:10px;letter-spacing:1.4px;text-transform:uppercase;
+    color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.4);padding:4px 9px;border-radius:20px}
+  .ej .cu{padding:12px 13px}
+  .ej .cu b{display:block;font-size:14.5px;font-weight:600;line-height:1.25}
+  .ej .cu small{display:block;color:var(--tinta2);font-size:12.5px;margin-top:3px}
+
+</style>
+</head>
+<body data-pag="inicio">
+
+<div id="armazon"></div>
+<div id="vista"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   DATOS — la única puerta a la base
+
+   Ninguna pantalla habla con Firebase directo. Todas piden acá.
+   Hoy devuelve los datos de ejemplo de abajo; el día que se enchufe
+   Firebase se cambia el cuerpo de leer() y guardar() y no hay que
+   tocar ninguna pantalla.
+
+   Rutas reales (ver LEEME.md):
+     kine/disponibilidad/<dorsal>
+     kine/lesiones/<id>
+     kine/agenda/turnos/<fecha>/<hora>
+     kine/ejercicios/<id>
+     kine/adherencia/<dorsal>/<fecha>
+   ══════════════════════════════════════════════════════════════════════ */
+
+var HOY = '2026-08-28';
+
+var BASE = {
+
+  club: 'Club Atlético — Estudio de kinesiología',
+
+  plantel: [
+    {d:1,  n:'Ferrari',  p:'Arquero'},   {d:4,  n:'Molina',  p:'Central'},
+    {d:6,  n:'Acosta',   p:'Volante'},   {d:7,  n:'Duarte',  p:'Extremo'},
+    {d:9,  n:'Suárez',   p:'Delantero'}, {d:10, n:'Peralta', p:'Enganche'},
+    {d:11, n:'Godoy',    p:'Extremo'},   {d:12, n:'Ibarra',  p:'Lateral'},
+    {d:14, n:'Ramos',    p:'Volante'},   {d:15, n:'Vera',    p:'Central'},
+    {d:17, n:'Blanco',   p:'Lateral'},   {d:18, n:'Ojeda',   p:'Delantero'}
+  ],
+
+  /* Lo único que ve el cuerpo técnico. Sin diagnóstico: son datos de salud. */
+  disponibilidad: {
+    7:  {estado:'baja',     motivo:'tobillo', desde:'2026-08-11', hasta:'2026-09-15'},
+    12: {estado:'limitado', motivo:'hombro',  desde:'2026-08-20', hasta:'2026-09-02'},
+    15: {estado:'limitado', motivo:'lumbar',  desde:'2026-08-24', hasta:'2026-09-05'}
+  },
+
+  lesiones: [
+    { id:'L1', dorsal:7, zona:'Tobillo', lado:'derecho',
+      diagnostico:'Esguince lateral grado II',
+      mecanismo:'Caída tras disputa aérea, apoyo sobre el pie de un rival.',
+      fecha:'2026-08-11', fase:2, estado:'activa', alta:'2026-09-15', kine:'Vero',
+      criterios:[
+        {t:'Dolor en reposo por debajo de 2 sobre 10', ok:true},
+        {t:'Dorsiflexión igual a la del tobillo sano', ok:true},
+        {t:'Apoyo en un pie 30 segundos sin dolor', ok:false},
+        {t:'Fuerza de eversión al 80% del lado sano', ok:false}
+      ],
+      sesiones:[
+        {f:'2026-08-26', t:'Tratamiento', pre:3, post:2, nota:'Movilidad articular e isométricos de eversión. Tolera bien.'},
+        {f:'2026-08-24', t:'Tratamiento', pre:4, post:3, nota:'Bajó la inflamación. Sumamos carga en cadena cerrada.'},
+        {f:'2026-08-21', t:'Tratamiento', pre:4, post:4, nota:'Sigue con edema. Drenaje y descarga.'},
+        {f:'2026-08-12', t:'Evaluación',  pre:7, post:6, nota:'Esguince lateral grado II. Bota diez días.'}
+      ]},
+
+    { id:'L2', dorsal:12, zona:'Hombro', lado:'derecho',
+      diagnostico:'Tendinopatía del supraespinoso',
+      mecanismo:'Sobrecarga por volumen de lanzamiento en la pretemporada.',
+      fecha:'2026-08-20', fase:3, estado:'activa', alta:'2026-09-02', kine:'Vero',
+      criterios:[
+        {t:'Dolor al lanzar por debajo de 3 sobre 10', ok:true},
+        {t:'Rotación externa sin déficit', ok:true},
+        {t:'Tolera 30 lanzamientos al 70%', ok:true},
+        {t:'Tolera una serie completa a máxima intensidad', ok:false}
+      ],
+      sesiones:[
+        {f:'2026-08-27', t:'Gimnasio',    pre:2, post:2, nota:'Excéntricos de manguito rotador. Sin dolor.'},
+        {f:'2026-08-25', t:'Tratamiento', pre:3, post:2, nota:'Liberación y trabajo escapular.'},
+        {f:'2026-08-21', t:'Evaluación',  pre:5, post:4, nota:'Tendinopatía. Se corta el lanzamiento una semana.'}
+      ]},
+
+    { id:'L3', dorsal:15, zona:'Lumbar', lado:'—',
+      diagnostico:'Contractura paravertebral',
+      mecanismo:'Carga acumulada: tres partidos en ocho días.',
+      fecha:'2026-08-24', fase:4, estado:'activa', alta:'2026-09-05', kine:'Vero',
+      criterios:[
+        {t:'Sin dolor en flexión completa', ok:true},
+        {t:'Trabajo de core sin compensar', ok:true},
+        {t:'Entrenamiento completo sin molestia', ok:false}
+      ],
+      sesiones:[
+        {f:'2026-08-27', t:'Campo',       pre:1, post:1, nota:'Entrenó parcial. Sin dolor.'},
+        {f:'2026-08-25', t:'Tratamiento', pre:4, post:2, nota:'Descontracturante y activación de glúteo.'}
+      ]}
+  ],
+
+  agenda: {
+    '2026-08-28':[
+      {h:'08:30', dorsal:7,  tipo:'Tratamiento', estado:'atendido'},
+      {h:'09:00', dorsal:12, tipo:'Gimnasio',    estado:'atendido'},
+      {h:'09:30', dorsal:null},
+      {h:'10:00', dorsal:15, tipo:'Campo',       estado:'reservado'},
+      {h:'10:30', dorsal:null},
+      {h:'11:00', dorsal:7,  tipo:'Tratamiento', estado:'reservado'},
+      {h:'11:30', dorsal:null},
+      {h:'12:00', dorsal:null}
+    ],
+    '2026-08-31':[
+      {h:'08:30', dorsal:null}, {h:'09:00', dorsal:12, tipo:'Gimnasio', estado:'reservado'},
+      {h:'09:30', dorsal:null}, {h:'10:00', dorsal:null},
+      {h:'10:30', dorsal:15, tipo:'Campo', estado:'reservado'},
+      {h:'11:00', dorsal:null}, {h:'11:30', dorsal:null}, {h:'12:00', dorsal:null}
+    ]
+  },
+
+  /* Programa domiciliario por lesión y por fase */
+  programas: {
+    'L1':{
+      2:[ {n:'Movilidad de tobillo con banda', d:'3 series · 15 repeticiones', nota:'Rodilla adelante sin despegar el talón.'},
+          {n:'Eversión con banda',             d:'3 series · 12 repeticiones', nota:'Volvé lento. Sin dolor.'},
+          {n:'Elevación de talones sentado',   d:'3 series · 20 repeticiones', nota:'Subí en 2 segundos, bajá en 4.'},
+          {n:'Apoyo en un pie',                d:'4 series · 30 segundos',     nota:'Si te sale fácil, cerrá los ojos.'} ],
+      3:[ {n:'Elevación de talones de pie',    d:'4 series · 12 repeticiones', nota:'Con peso, apoyo completo.'},
+          {n:'Saltos en el lugar',             d:'3 series · 20 saltos',       nota:'Aterrizaje silencioso.'},
+          {n:'Escalera de coordinación',       d:'6 pasadas',                  nota:'Contacto corto, mirada al frente.'} ]
+    },
+    'L2':{
+      3:[ {n:'Rotación externa con banda',     d:'4 series · 12 repeticiones', nota:'Codo pegado al cuerpo.'},
+          {n:'Remo con banda',                 d:'3 series · 15 repeticiones', nota:'Junto los omóplatos.'},
+          {n:'Elevación en Y boca abajo',      d:'3 series · 10 repeticiones', nota:'Sin subir el hombro a la oreja.'} ]
+    },
+    'L3':{
+      4:[ {n:'Puente de glúteo',               d:'3 series · 15 repeticiones', nota:'Apretar arriba 2 segundos.'},
+          {n:'Plancha lateral',                d:'3 series · 30 segundos',     nota:'Cadera alineada.'},
+          {n:'Bird dog',                       d:'3 series · 10 por lado',     nota:'Sin mover la pelvis.'} ]
+    }
+  },
+
+  /* Los circuitos armados en el pizarrón */
+  ejercicios: [
+    { id:'C1', nombre:'Circuito de reintegro — 4 postas',
+      objetivo:'Tobillo · fase 4 · reintegro a la cancha',
+      zona:'Tobillo', fase:4, cancha:'media' }
+  ]
+};
+
+/* ── Quién está mirando ───────────────────────────────────────────────
+   En producción sale de firebase.js: el rol vive en la base, atado al UID.
+   Acá se puede cambiar desde la pantalla de inicio para probar las dos
+   vistas sin tener que crear cuentas.                                   */
+function rol(){
+  try{ return localStorage.getItem('estudio_rol') || 'kine'; }catch(e){ return 'kine'; }
+}
+function ponerRol(r){ try{ localStorage.setItem('estudio_rol', r); }catch(e){} }
+function miDorsal(){
+  try{ return +(localStorage.getItem('estudio_dorsal') || 7); }catch(e){ return 7; }
+}
+function ponerDorsal(d){ try{ localStorage.setItem('estudio_dorsal', d); }catch(e){} }
+
+/* ── Consultas ─────────────────────────────────────────────────────── */
+var FASES = [
+  {n:1, t:'Protección',   d:'Bajamos el dolor y protegemos la zona.'},
+  {n:2, t:'Rango',        d:'Recuperás movilidad y fuerza. Todavía sin cancha.'},
+  {n:3, t:'Readaptación', d:'Fuerza específica y aterrizajes. Empezás gimnasio.'},
+  {n:4, t:'Reintegro',    d:'Volvés a la cancha de a poco, con volumen controlado.'},
+  {n:5, t:'Alta',         d:'A competir sin restricciones.'}
+];
+
+function jugador(d){
+  for(var i=0;i<BASE.plantel.length;i++) if(BASE.plantel[i].d===d) return BASE.plantel[i];
+  return {d:d, n:'#'+d, p:''};
+}
+function nombre(d){ return jugador(d).n; }
+function lesionPorId(id){
+  for(var i=0;i<BASE.lesiones.length;i++) if(BASE.lesiones[i].id===id) return BASE.lesiones[i];
+  return null;
+}
+function lesionDe(d){
+  for(var i=0;i<BASE.lesiones.length;i++)
+    if(BASE.lesiones[i].dorsal===d && BASE.lesiones[i].estado==='activa') return BASE.lesiones[i];
+  return null;
+}
+function estadoDe(d){ return (BASE.disponibilidad[d] || {estado:'ok'}); }
+function dias(desde){ return Math.max(0, Math.round((new Date(HOY) - new Date(desde)) / 86400000)); }
+function faltan(hasta){ return Math.max(0, Math.round((new Date(hasta) - new Date(HOY)) / 86400000)); }
+function fechaCorta(f){
+  var M = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  var p = String(f).split('-');
+  return p[2].replace(/^0/,'') + ' ' + M[+p[1]-1];
+}
+function programaDe(L){
+  var p = BASE.programas[L.id];
+  return (p && p[L.fase]) ? p[L.fase] : [];
+}
+function criteriosListos(L){
+  var n = 0; L.criterios.forEach(function(c){ if(c.ok) n++; }); return n;
+}
+
+/* ── Escritura ─────────────────────────────────────────────────────
+   Hoy solo cambia lo que está en memoria. En producción es un fbSet
+   a la ruta que devuelve rutaDe().                                  */
+function guardar(ruta, valor){
+  if(typeof fbSet === 'function'){ try{ fbSet(ruta, valor); }catch(e){} }
+  try{ console.log('[guardar]', ruta, valor); }catch(e){}
+}
+
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   BASE — el encabezado y la navegación de todas las pantallas
+
+   Cada página pone <body data-pag="panel"> y este archivo dibuja arriba
+   la marca y abajo (en el celular) la barra. Así el menú se cambia en un
+   solo lugar y no en nueve.
+   ══════════════════════════════════════════════════════════════════════ */
+
+var MENU = {
+  kine: [
+    {id:'panel',      t:'Panel',       ic:'▤', a:'panel.html'},
+    {id:'agenda',     t:'Agenda',      ic:'▦', a:'agenda.html'},
+    {id:'ficha',      t:'Lesiones',    ic:'✚', a:'lesiones.html'},
+    {id:'pizarron',   t:'Pizarrón',    ic:'◈', a:'pizarron.html'},
+    {id:'ejercicios', t:'Ejercicios',  ic:'☰', a:'ejercicios.html'}
+  ],
+  jugador: [
+    {id:'mi',         t:'Mi recuperación', ic:'▤', a:'mi.html'},
+    {id:'turnos',     t:'Mis turnos',      ic:'▦', a:'agenda.html'},
+    {id:'diario',     t:'Cómo estoy',      ic:'◉', a:'diario.html'}
+  ]
+};
+
+
+/* ── La pista de recuperación ──────────────────────────────────────
+   El elemento firma del portal. Se usa igual en el panel, en la ficha
+   y en la pantalla del jugador: una sola lectura para todos.        */
+function pista(fase, conNombres){
+  var vias = FASES.map(function(f){
+    return '<i class="' + (f.n < fase ? 'hecho' : (f.n === fase ? 'ahora' : '')) + '"></i>';
+  }).join('');
+  var noms = conNombres === false ? '' :
+    '<div class="pista-nom">' + FASES.map(function(f){
+      return '<span class="' + (f.n === fase ? 'ahora' : '') + '">' + f.t + '</span>';
+    }).join('') + '</div>';
+  var solo = conNombres === false ? '' :
+    '<div class="pista-solo">Fase ' + fase + ' de 5 · ' + FASES[fase-1].t + '</div>';
+  return '<div class="pista"><div class="pista-vias">' + vias + '</div>' + noms + solo + '</div>';
+}
+
+/* ── Escala 0 a 10 ─────────────────────────────────────────────── */
+function escala(caja, alElegir, valor){
+  var h = '';
+  for(var i = 0; i <= 10; i++)
+    h += '<button type="button" data-v="' + i + '"' + (valor === i ? ' class="on"' : '') + '>' + i + '</button>';
+  caja.className = 'escala';
+  caja.innerHTML = h;
+  caja.querySelectorAll('button').forEach(function(b){
+    b.onclick = function(){
+      caja.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      alElegir(+b.dataset.v);
+    };
+  });
+}
+
+/* ── Pestañas ───────────────────────────────────────────────────── */
+function pestanias(alCambiar){
+  document.querySelectorAll('.pest[data-p]').forEach(function(t){
+    t.onclick = function(){
+      document.querySelectorAll('.pest[data-p]').forEach(function(x){ x.classList.remove('on'); });
+      document.querySelectorAll('.panel').forEach(function(x){ x.classList.remove('on'); });
+      t.classList.add('on');
+      var p = document.getElementById('p-' + t.dataset.p);
+      if(p) p.classList.add('on');
+      if(alCambiar) alCambiar(t.dataset.p);
+    };
+  });
+}
+
+
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   AYUDA — el botón ? de cada pantalla
+
+   El contenido vive todo acá, no repartido por los HTML. Una pantalla
+   nueva se documenta agregando una entrada a AYUDA con la misma clave
+   que su data-pag. Si no tiene entrada, el botón no aparece: mejor sin
+   botón que con un botón que abre un cartel vacío.
+
+   Cada entrada tiene:
+     titulo  — qué es
+     que_es  — una frase: para qué sirve
+     pasos   — cómo se usa, en orden
+     ojo     — la trampa, lo que nadie te dice hasta que la pisás
+   ══════════════════════════════════════════════════════════════════════ */
+
+var AYUDA = {
+
+  inicio: {
+    titulo: 'La puerta de entrada',
+    que_es: 'Desde acá se entra al portal. El kinesiólogo ve el panel del estudio; el jugador ve solo lo suyo.',
+    pasos: [
+      ['Elegí cómo entrar', 'El kinesiólogo va al panel. El jugador va a su ficha, su turno y sus ejercicios.'],
+      ['Si entrás como jugador, elegí cuál', 'Los tres primeros de la lista tienen una lesión abierta cargada.'],
+      ['Los números de arriba', 'Cuántos están disponibles, limitados y de baja, en este momento.']
+    ],
+    ojo: 'Esta pantalla de elegir rol existe solo para probar. En el portal publicado el rol viene de la cuenta y nadie lo elige.'
+  },
+
+  panel: {
+    titulo: 'El panel del estudio',
+    que_es: 'Lo primero que abrís a la mañana: qué hay que resolver hoy y cómo está el plantel.',
+    pasos: [
+      ['Turnos de hoy', 'Los del día en orden. Tocá uno ocupado y se abre la ficha de esa persona.'],
+      ['En tratamiento', 'Las lesiones abiertas, con la barra de fase y cuántos criterios lleva cumplidos.'],
+      ['Parte médico', 'El plantel entero con su semáforo. Verde disponible, ámbar limitado, rojo de baja.']
+    ],
+    ojo: 'El parte médico es lo ÚNICO que ve el cuerpo técnico. El diagnóstico no aparece ahí a propósito: es un dato de salud y el entrenador no lo necesita para armar el equipo.'
+  },
+
+  ficha: {
+    titulo: 'Las fichas de lesión',
+    que_es: 'El corazón del portal. Cada lesión avanza por criterios cumplidos, no por días en el calendario.',
+    pasos: [
+      ['Abrí una ficha', 'De la lista, o tocando a alguien en el panel.'],
+      ['Mirá la pista de fases', 'Cinco tramos. Los verdes ya pasaron, el marcado es donde está hoy.'],
+      ['Tildá los criterios', 'A medida que se cumplen. El botón de avanzar se enciende solo cuando están todos.'],
+      ['Cargá la sesión del día', 'Botón al final de la ficha. Elegís el tipo, tocás el dolor al llegar y al terminar, y la nota es opcional.']
+    ],
+    ojo: 'Los dos valores de dolor son obligatorios y la nota no: la diferencia entre el dolor al llegar y al terminar es el dato que muestra si la sesión sirvió. Al pasar de fase, los criterios se vacían y aparecen los de la fase nueva. Es a propósito: cada fase se gana de nuevo.'
+  },
+
+  agenda: {
+    titulo: 'La agenda',
+    que_es: 'Los turnos del estudio. La misma pantalla sirve para el kinesiólogo y para el jugador, pero cada uno ve cosas distintas.',
+    pasos: [
+      ['Elegí el día', 'Con las pestañas de arriba.'],
+      ['Un turno ocupado', 'Si sos el kine, se abre la ficha. Si sos jugador, solo ves el tuyo.'],
+      ['Un turno libre', 'El kine lo asigna a un dorsal. El jugador lo reserva para él.'],
+      ['El horario del estudio', 'Abajo, solo para el kine. Cambia la grilla de toda la semana.']
+    ],
+    ojo: 'El jugador ve "ocupado" en los turnos de otros, nunca de quién son. No tiene por qué saber quién más se está tratando.'
+  },
+
+  mi: {
+    titulo: 'Tu recuperación',
+    que_es: 'Todo lo tuyo en una pantalla: en qué fase estás, cuándo es tu turno y qué te toca hacer hoy.',
+    pasos: [
+      ['Dónde estás', 'La barra de cinco tramos. Abajo dice exactamente qué te falta para pasar a la siguiente.'],
+      ['Tu turno', 'El próximo que tenés reservado. Se cambia desde la agenda.'],
+      ['Tus ejercicios', 'Tildá cada uno cuando lo hacés. Si no te acordás cómo era, tocá "ver video".'],
+      ['Enviá al final', 'Marcá cuánto te dolió y qué tan exigente fue, y mandá.']
+    ],
+    ojo: 'Contestá con la verdad, aunque te haya dolido. Si decís que estuvo todo bien y no fue así, la carga de mañana se calcula mal y volvés para atrás.'
+  },
+
+  diario: {
+    titulo: 'Cómo estás hoy',
+    que_es: 'Cinco preguntas, medio minuto. Es la señal más temprana que tiene el kinesiólogo.',
+    pasos: [
+      ['Contestá las cinco', 'Sueño, cansancio, dolor muscular, ánimo y estrés.'],
+      ['Después de entrenar, no antes', 'Si lo cargás antes, estás midiendo cómo amaneciste, no cómo te dejó el entrenamiento.'],
+      ['Mirá tus últimos días', 'Abajo. Sirve para ver si venís mejorando o cayendo.']
+    ],
+    ojo: 'Si el dolor sube tres días seguidos, el kinesiólogo lo ve antes de que se lo cuentes. Por eso conviene cargarlo todos los días, no solo los malos.'
+  },
+
+  pizarron: {
+    titulo: 'El pizarrón de circuitos',
+    que_es: 'Para dibujar circuitos de readaptación en la cancha, con sus postas y sus consignas.',
+    pasos: [
+      ['Elegí la cancha', 'Entera, media, espacio reducido o gimnasio.'],
+      ['Colocá elementos', 'Elegí uno de la izquierda y tocá la cancha. Cada casillero tiene el color de la superficie donde va.'],
+      ['Movelos', 'Con "mover", arrastrás lo que ya está puesto.'],
+      ['Dibujá los recorridos', 'Correr es flecha derecha, conducir es ondulada (con pelota), pase es punteada. Arrastrá de un punto a otro.'],
+      ['Numerá las postas', 'Agregá una posta por estación y escribí qué se hace ahí.'],
+      ['Guardá', 'Queda en la biblioteca y se puede sumar al programa de cualquier jugador.']
+    ],
+    ojo: 'El circuito se guarda como datos, no como imagen: posiciones, trazos y textos. Por eso después se puede animar, traducir o mostrar en el celular con el video al lado. Un PNG no permite nada de eso.'
+  },
+
+  ejercicios: {
+    titulo: 'La biblioteca del estudio',
+    que_es: 'Los circuitos dibujados y los ejercicios sueltos con su video. Se filma una vez y se reusa para siempre.',
+    pasos: [
+      ['Filtrá por zona', 'Con las pestañas: tobillo, rodilla, hombro, lumbar.'],
+      ['Tocá un ejercicio', 'Se abre con su video, la dosis y a qué programa sumarlo.'],
+      ['Dibujá uno nuevo', 'Desde el pizarrón. Aparece acá solo.']
+    ],
+    ojo: 'Los videos no se guardan en el portal: pesan demasiado. Van a un hosting de video y acá queda el enlace.'
+  }
+};
+
+
+/* ── El botón y el panel ─────────────────────────────────────────── */
+
+function botonAyuda(pag){
+  if(!AYUDA[pag]) return '';
+  return '<button class="ayuda-bt" onclick="abrirAyuda(\'' + pag + '\')" '
+       + 'title="Cómo funciona esta pantalla" aria-label="Ayuda">?</button>';
+}
+
+function abrirAyuda(pag){
+  var a = AYUDA[pag];
+  if(!a) return;
+  cerrarAyuda();
+
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo';
+  caja.id = 'ayudaFondo';
+  caja.setAttribute('role', 'dialog');
+  caja.setAttribute('aria-modal', 'true');
+  caja.innerHTML =
+    '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarAyuda()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Cómo funciona</span>'
+    + '<h2>' + a.titulo + '</h2>'
+    + '<p>' + a.que_es + '</p>'
+    + a.pasos.map(function(p, i){
+        return '<div class="ayuda-paso"><span class="nn">' + (i + 1) + '</span>'
+             + '<div><b>' + p[0] + '</b><span>' + p[1] + '</span></div></div>';
+      }).join('')
+    + (a.ojo ? '<div class="nota aviso" style="margin:18px 0 0">' + a.ojo + '</div>' : '')
+    + '<button class="bt ancho" style="margin-top:16px" onclick="cerrarAyuda()">Entendido</button>'
+    + '</div>';
+
+  /* cerrar tocando afuera, pero no adentro */
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarAyuda(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+  var b = caja.querySelector('.cerrar'); if(b) b.focus();
+}
+
+function cerrarAyuda(){
+  var v = document.getElementById('ayudaFondo');
+  if(v) v.remove();
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') cerrarAyuda();
+});
+
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   ARMAZÓN — solo existe en esta versión de un archivo.
+   En el kit de varios archivos cada pantalla es un HTML propio y el
+   navegador hace de router. Acá lo hacemos a mano.
+   ══════════════════════════════════════════════════════════════════ */
+var PAGINAS = {"inicio": {"pag": "inicio", "cuerpo": "<div class=\"hoja angosta\">\n\n  <h1 class=\"tit\">El estudio, en un solo lugar</h1>\n  <p class=\"bajada\">Turnos, fichas de lesión, circuitos de readaptación y el programa de cada\n  jugador. El kinesiólogo carga una vez; el jugador ve lo suyo desde el celular.</p>\n\n  <div class=\"rejilla c3\" style=\"margin-bottom:26px\">\n    <div class=\"dato\"><div class=\"v\" id=\"dOk\">—</div><div class=\"l\">Disponibles</div></div>\n    <div class=\"dato\"><div class=\"v\" id=\"dLim\" style=\"color:var(--ambar)\">—</div><div class=\"l\">Limitados</div></div>\n    <div class=\"dato\"><div class=\"v\" id=\"dBaja\" style=\"color:var(--rojo)\">—</div><div class=\"l\">De baja</div></div>\n  </div>\n\n  <div class=\"tarjeta\">\n    <div class=\"tarjeta-cab\"><h2 class=\"sub\">Entrar</h2>\n      <span class=\"eti\">Elegí cómo mirar</span></div>\n\n    <button class=\"fila\" onclick=\"entrar('kine')\">\n      <span class=\"hh\">▤</span>\n      <span class=\"cu\"><b>Soy el kinesiólogo</b>\n        <small>Agenda del día, fichas, pizarrón de circuitos y biblioteca.</small></span>\n      <span class=\"pin reservado\">Panel</span>\n    </button>\n\n    <button class=\"fila\" onclick=\"entrar('jugador')\">\n      <span class=\"hh\">◉</span>\n      <span class=\"cu\"><b>Estoy lesionado</b>\n        <small>Mi fase, mi turno, mis ejercicios de hoy y cómo me siento.</small></span>\n      <span class=\"pin gris\">Mi vista</span>\n    </button>\n\n    <label class=\"campo\" style=\"margin-top:16px\">\n      <span class=\"eti\">Si entrás como jugador, ¿cuál sos?</span>\n      <select id=\"quien\"></select>\n    </label>\n\n    <p style=\"font-size:13px;color:var(--tinta2)\">\n      Esta pantalla existe para probar las dos vistas sin crear cuentas. En el portal\n      publicado el rol viene de la cuenta y no se puede elegir.\n    </p>\n  </div>\n\n  <div class=\"tarjeta\">\n    <div class=\"tarjeta-cab\"><h2 class=\"sub\">Quién ve qué</h2></div>\n    <p style=\"font-size:14px;color:var(--tinta2);margin-bottom:14px\">\n      El diagnóstico es un dato de salud y vive separado de la disponibilidad. El cuerpo\n      técnico ve si un jugador está, no qué tiene.</p>\n    <div class=\"fila\" style=\"cursor:default\">\n      <span class=\"cu\"><b>Kinesiólogo</b><small>Todo: fichas, sesiones, agenda, programas.</small></span></div>\n    <div class=\"fila\" style=\"cursor:default\">\n      <span class=\"cu\"><b>Jugador</b><small>Su ficha, su turno, su programa. Nada de los demás.</small></span></div>\n    <div class=\"fila\" style=\"cursor:default\">\n      <span class=\"cu\"><b>Cuerpo técnico</b><small>Solo el semáforo de disponibilidad y la fecha estimada.</small></span></div>\n  </div>\n\n</div>", "js": "\n/* contadores */\nvar c = {ok:0, limitado:0, baja:0};\nBASE.plantel.forEach(function(j){ c[estadoDe(j.d).estado]++; });\ndocument.getElementById('dOk').textContent   = c.ok;\ndocument.getElementById('dLim').textContent  = c.limitado;\ndocument.getElementById('dBaja').textContent = c.baja;\n\n/* quién */\ndocument.getElementById('quien').innerHTML = BASE.plantel.map(function(j){\n  var e = estadoDe(j.d);\n  var t = e.estado === 'ok' ? 'sin lesión' : e.motivo;\n  return '<option value=\"' + j.d + '\"' + (j.d === miDorsal() ? ' selected' : '') + '>'\n       + j.d + ' · ' + j.n + ' — ' + t + '</option>';\n}).join('');\n\nfunction entrar(r){\n  ponerRol(r);\n  if(r === 'jugador'){\n    ponerDorsal(+document.getElementById('quien').value);\n    irA('mi.html');\n  }else{\n    irA('panel.html');\n  }\n}\n\n\n/* Registra el sw para que el portal ande sin internet. Falla en silencio\n   si se abre con doble clic desde el disco: eso es normal. */\nif('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});\n"}, "panel": {"pag": "panel", "cuerpo": "<div class=\"hoja\">\n  <h1 class=\"tit\">Viernes 28 de agosto</h1>\n  <p class=\"bajada\">Lo que hay que resolver hoy, y cómo está el plantel.</p>\n\n  <div class=\"rejilla c4\" style=\"margin-bottom:20px\">\n    <div class=\"dato\"><div class=\"v\" id=\"kTurnos\">—</div><div class=\"l\">Turnos hoy</div></div>\n    <div class=\"dato\"><div class=\"v\" id=\"kOk\" style=\"color:var(--verde)\">—</div><div class=\"l\">Disponibles</div></div>\n    <div class=\"dato\"><div class=\"v\" id=\"kLim\" style=\"color:var(--ambar)\">—</div><div class=\"l\">Limitados</div></div>\n    <div class=\"dato\"><div class=\"v\" id=\"kBaja\" style=\"color:var(--rojo)\">—</div><div class=\"l\">De baja</div></div>\n  </div>\n\n  <div class=\"rejilla c2\">\n    <div>\n      <div class=\"tarjeta\">\n        <div class=\"tarjeta-cab\"><h2 class=\"sub\">Turnos de hoy</h2>\n          <a class=\"eti\" href=\"agenda.html\" style=\"text-decoration:none\">Ver agenda →</a></div>\n        <div id=\"turnos\"></div>\n      </div>\n    </div>\n\n    <div>\n      <div class=\"tarjeta\">\n        <div class=\"tarjeta-cab\"><h2 class=\"sub\">En tratamiento</h2>\n          <a class=\"eti\" href=\"lesiones.html\" style=\"text-decoration:none\">Todas →</a></div>\n        <div id=\"activas\"></div>\n      </div>\n    </div>\n  </div>\n\n  <div class=\"tarjeta\">\n    <div class=\"tarjeta-cab\"><h2 class=\"sub\">Parte médico</h2>\n      <span class=\"eti\">Lo único que ve el cuerpo técnico</span></div>\n    <div class=\"plantel\" id=\"plantel\"></div>\n  </div>\n</div>", "js": "\n/* ── contadores ── */\nvar c = {ok:0, limitado:0, baja:0};\nBASE.plantel.forEach(function(j){ c[estadoDe(j.d).estado]++; });\nvar turnos = BASE.agenda[HOY] || [];\ndocument.getElementById('kTurnos').textContent = turnos.filter(function(t){ return t.dorsal; }).length;\ndocument.getElementById('kOk').textContent   = c.ok;\ndocument.getElementById('kLim').textContent  = c.limitado;\ndocument.getElementById('kBaja').textContent = c.baja;\n\n/* ── turnos ── */\ndocument.getElementById('turnos').innerHTML = turnos.map(function(t){\n  if(!t.dorsal)\n    return '<div class=\"fila libre\"><span class=\"hh\">' + t.h + '</span>'\n         + '<span class=\"cu\"><b>Libre</b></span></div>';\n  var L = lesionDe(t.dorsal);\n  return '<button class=\"fila\" onclick=\"irA(\\'lesiones.html?f=' + (L ? L.id : '') + '\\')\">'\n       + '<span class=\"hh\">' + t.h + '</span>'\n       + '<span class=\"cu\"><b>' + nombre(t.dorsal) + '</b>'\n       + '<small>#' + t.dorsal + ' · ' + t.tipo + (L ? ' · ' + L.zona.toLowerCase() : '') + '</small></span>'\n       + '<span class=\"pin ' + t.estado + '\">' + t.estado + '</span></button>';\n}).join('');\n\n/* ── lesiones activas ── */\ndocument.getElementById('activas').innerHTML = BASE.lesiones.map(function(L){\n  var listos = criteriosListos(L), tot = L.criterios.length;\n  return '<button class=\"fila\" style=\"align-items:flex-start\" onclick=\"irA(\\'lesiones.html?f=' + L.id + '\\')\">'\n    + '<span class=\"cu\"><b>' + nombre(L.dorsal) + ' · ' + L.zona.toLowerCase() + '</b>'\n    + '<small>' + L.diagnostico + ' — día ' + dias(L.fecha) + '</small>'\n    + pista(L.fase, false)\n    + '<small class=\"mono\" style=\"margin-top:6px\">FASE ' + L.fase + ' · ' + FASES[L.fase-1].t.toUpperCase()\n    + ' · ' + listos + '/' + tot + ' CRITERIOS</small></span></button>';\n}).join('');\n\n/* ── semáforo ── */\ndocument.getElementById('plantel').innerHTML = BASE.plantel.map(function(j){\n  var e = estadoDe(j.d), L = lesionDe(j.d);\n  var txt = e.estado === 'ok' ? 'Disponible'\n          : e.motivo + ' · vuelve en ' + faltan(e.hasta) + ' d';\n  return '<button class=\"at ' + e.estado + '\" onclick=\"' + (L ? 'irA(\\'lesiones.html?f=' + L.id + '\\')' : 'void 0') + '\">'\n    + '<span class=\"d\">' + j.d + '</span><div class=\"n\">' + j.n + '</div>'\n    + '<div class=\"e\">' + txt + '</div></button>';\n}).join('');\n\n\n/* Registra el sw para que el portal ande sin internet. Falla en silencio\n   si se abre con doble clic desde el disco: eso es normal. */\nif('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});\n"}, "agenda": {"pag": "agenda", "cuerpo": "<div class=\"hoja\">\n  <h1 class=\"tit\" id=\"tit\">Agenda</h1>\n  <p class=\"bajada\" id=\"baj\"></p>\n\n  <div class=\"pestanias\">\n    <button class=\"pest on\" data-d=\"2026-08-28\">Viernes 28</button>\n    <button class=\"pest\" data-d=\"2026-08-31\">Lunes 31</button>\n  </div>\n\n  <div class=\"tarjeta\">\n    <div class=\"tarjeta-cab\"><h2 class=\"sub\" id=\"subDia\"></h2>\n      <span class=\"eti\" id=\"cuenta\"></span></div>\n    <div id=\"grilla\"></div>\n  </div>\n\n  <div class=\"tarjeta\" id=\"cajaCfg\">\n    <div class=\"tarjeta-cab\"><h2 class=\"sub\">Horario del estudio</h2>\n      <span class=\"eti\">Se aplica a toda la semana</span></div>\n    <div class=\"rejilla c3\">\n      <label class=\"campo\"><span class=\"eti\">Abre</span><input type=\"text\" value=\"08:30\"></label>\n      <label class=\"campo\"><span class=\"eti\">Cierra</span><input type=\"text\" value=\"12:30\"></label>\n      <label class=\"campo\"><span class=\"eti\">Minutos por turno</span><input type=\"number\" value=\"30\"></label>\n    </div>\n    <button class=\"bt hueco\" onclick=\"alert('Guardado. La grilla se rearma con estos horarios.')\">Guardar horario</button>\n  </div>\n</div>", "js": "\nvar dia = HOY, esKine = rol() === 'kine';\n\nif(!esKine){\n  document.getElementById('cajaCfg').style.display = 'none';\n  document.getElementById('tit').textContent = 'Mis turnos';\n}\n\ndocument.querySelectorAll('.pest[data-d]').forEach(function(b){\n  b.onclick = function(){\n    document.querySelectorAll('.pest[data-d]').forEach(function(x){ x.classList.remove('on'); });\n    b.classList.add('on'); dia = b.dataset.d; pintar();\n  };\n});\n\nfunction pintar(){\n  var lista = BASE.agenda[dia] || [];\n  var tomados = lista.filter(function(t){ return t.dorsal; }).length;\n  var M = ['viernes 28 de agosto','lunes 31 de agosto'];\n  document.getElementById('subDia').textContent = dia === HOY ? M[0] : M[1];\n  document.getElementById('cuenta').textContent = tomados + ' de ' + lista.length + ' ocupados';\n  document.getElementById('baj').textContent = esKine\n    ? 'Tocá un turno ocupado para abrir la ficha, o uno libre para asignarlo.'\n    : 'Tocá un horario libre para reservarlo. Te llega un aviso una hora antes.';\n\n  document.getElementById('grilla').innerHTML = lista.map(function(t, i){\n    if(!t.dorsal){\n      return '<button class=\"fila libre\" onclick=\"reservar(' + i + ')\">'\n        + '<span class=\"hh\">' + t.h + '</span>'\n        + '<span class=\"cu\"><b>' + (esKine ? 'Libre — asignar' : 'Libre — reservar') + '</b></span></button>';\n    }\n    if(!esKine && t.dorsal !== miDorsal()){\n      return '<div class=\"fila libre\" style=\"opacity:.5\"><span class=\"hh\">' + t.h + '</span>'\n        + '<span class=\"cu\"><b>Ocupado</b></span></div>';\n    }\n    var L = lesionDe(t.dorsal);\n    var mio = t.dorsal === miDorsal();\n    return '<button class=\"fila\" onclick=\"' + (esKine && L ? 'irA(\\'lesiones.html?f=' + L.id + '\\')' : 'void 0') + '\">'\n      + '<span class=\"hh\">' + t.h + '</span>'\n      + '<span class=\"cu\"><b>' + (esKine ? nombre(t.dorsal) : 'Tu turno') + '</b>'\n      + '<small>' + t.tipo + (esKine && L ? ' · ' + L.zona.toLowerCase() : ' · con Vero') + '</small></span>'\n      + '<span class=\"pin ' + (mio && !esKine ? 'reservado' : t.estado) + '\">'\n      + (mio && !esKine ? 'tuyo' : t.estado) + '</span></button>';\n  }).join('');\n}\n\nfunction reservar(i){\n  var t = (BASE.agenda[dia] || [])[i];\n  if(!t) return;\n  if(esKine){\n    var d = prompt('¿Qué dorsal asignás a las ' + t.h + '?');\n    if(!d) return;\n    t.dorsal = +d; t.tipo = 'Tratamiento'; t.estado = 'reservado';\n  }else{\n    t.dorsal = miDorsal(); t.tipo = 'Tratamiento'; t.estado = 'reservado';\n  }\n  guardar('kine/agenda/turnos/' + dia + '/' + t.h, {dorsal:t.dorsal, estado:'reservado'});\n  pintar();\n}\npintar();\n\n\n/* Registra el sw para que el portal ande sin internet. Falla en silencio\n   si se abre con doble clic desde el disco: eso es normal. */\nif('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});\n"}, "ficha": {"pag": "ficha", "cuerpo": "<div class=\"hoja\">\n  <h1 class=\"tit\" id=\"titulo\">Lesiones</h1>\n  <p class=\"bajada\" id=\"bajada\">Cada ficha avanza por criterios, no por calendario.</p>\n\n  <div id=\"lista\"></div>\n  <div id=\"ficha\"></div>\n</div>", "js": "\nvar abierta = PARAM('f');\n\nfunction pintar(){\n  var lista = document.getElementById('lista'), ficha = document.getElementById('ficha');\n\n  if(!abierta){\n    document.getElementById('titulo').textContent = 'Lesiones';\n    document.getElementById('bajada').textContent =\n      'Tres en tratamiento. Cada ficha avanza por criterios cumplidos, no por días transcurridos.';\n    ficha.innerHTML = '';\n    lista.innerHTML = '<div class=\"tarjeta\">' + BASE.lesiones.map(function(L){\n      var listos = criteriosListos(L);\n      return '<button class=\"fila\" style=\"align-items:flex-start\" onclick=\"abrir(\\'' + L.id + '\\')\">'\n        + '<span class=\"hh\">#' + L.dorsal + '</span>'\n        + '<span class=\"cu\"><b>' + nombre(L.dorsal) + ' — ' + L.zona + ' ' + L.lado + '</b>'\n        + '<small>' + L.diagnostico + '</small>' + pista(L.fase, false) + '</span>'\n        + '<span class=\"pin reservado\">' + listos + '/' + L.criterios.length + '</span></button>';\n    }).join('') + '</div>';\n    return;\n  }\n\n  var L = lesionPorId(abierta);\n  if(!L){ abierta = null; return pintar(); }\n  lista.innerHTML = '<button class=\"bt neutro chico\" style=\"margin-bottom:16px\" onclick=\"abrir(null)\">← Todas las lesiones</button>';\n\n  document.getElementById('titulo').textContent = nombre(L.dorsal) + ' · ' + L.zona.toLowerCase() + ' ' + L.lado;\n  document.getElementById('bajada').textContent = L.diagnostico + '. Lesionado el ' + fechaCorta(L.fecha) + '.';\n\n  var sigue  = Math.min(L.fase + 1, 5);\n  var faltanC = L.criterios.length - criteriosListos(L);\n\n  ficha.innerHTML =\n\n    /* estado */\n    '<div class=\"tarjeta\">'\n    + '<div class=\"rejilla c4\" style=\"margin-bottom:18px\">'\n    + '<div class=\"dato\"><div class=\"v\">' + dias(L.fecha) + '</div><div class=\"l\">Días de baja</div></div>'\n    + '<div class=\"dato\"><div class=\"v\" style=\"color:var(--azul)\">' + L.fase + '</div><div class=\"l\">Fase actual</div></div>'\n    + '<div class=\"dato\"><div class=\"v\">' + faltan(L.alta) + '</div><div class=\"l\">Días para el alta</div></div>'\n    + '<div class=\"dato\"><div class=\"v\">' + L.sesiones.length + '</div><div class=\"l\">Sesiones</div></div>'\n    + '</div>'\n    + pista(L.fase)\n    + '<p style=\"font-size:14px;color:var(--tinta2);margin-top:14px\">' + FASES[L.fase-1].d + '</p>'\n    + '</div>'\n\n    /* criterios */\n    + '<div class=\"tarjeta\">'\n    + '<div class=\"tarjeta-cab\"><h2 class=\"sub\">Para pasar a fase ' + sigue + ' — ' + FASES[sigue-1].t + '</h2></div>'\n    + (faltanC\n        ? '<div class=\"nota aviso\">Falta' + (faltanC > 1 ? 'n ' + faltanC + ' criterios' : ' un criterio') + '. Hasta que estén, no avanza.</div>'\n        : '<div class=\"nota bien\">Todos los criterios cumplidos. Se puede avanzar.</div>')\n    + L.criterios.map(function(c, i){\n        return '<label class=\"crit ' + (c.ok ? '' : 'falta') + '\">'\n          + '<input type=\"checkbox\" ' + (c.ok ? 'checked' : '') + ' onchange=\"tildar(' + i + ',this.checked)\">'\n          + '<span>' + c.t + '</span></label>';\n      }).join('')\n    + '<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:16px\">'\n    + '<button class=\"bt\" ' + (faltanC ? 'disabled' : '') + ' onclick=\"avanzar()\">Pasar a fase ' + sigue + '</button>'\n    + '<button class=\"bt neutro\" onclick=\"window.print()\">Imprimir ficha</button>'\n    + '</div></div>'\n\n    /* mecanismo */\n    + '<div class=\"tarjeta\"><div class=\"tarjeta-cab\"><h2 class=\"sub\">Cómo se lesionó</h2></div>'\n    + '<p style=\"color:var(--tinta2)\">' + L.mecanismo + '</p></div>'\n\n    /* programa */\n    + '<div class=\"tarjeta\"><div class=\"tarjeta-cab\"><h2 class=\"sub\">Programa de esta fase</h2>'\n    + '<a class=\"eti\" href=\"ejercicios.html\" style=\"text-decoration:none\">Biblioteca →</a></div>'\n    + (programaDe(L).length\n        ? programaDe(L).map(function(e){\n            return '<div class=\"fila\" style=\"cursor:default\"><span class=\"cu\"><b>' + e.n + '</b>'\n              + '<small>' + e.d + ' — ' + e.nota + '</small></span></div>';\n          }).join('')\n        : '<div class=\"vacio\"><b>Sin programa cargado para la fase ' + L.fase + '</b>'\n          + 'Armalo desde la biblioteca o dibujá un circuito en el pizarrón.</div>')\n    + '</div>'\n\n    /* sesiones */\n    + '<div class=\"tarjeta\"><div class=\"tarjeta-cab\"><h2 class=\"sub\">Sesiones</h2>'\n    + '<span class=\"eti\">Dolor antes → después</span></div>'\n    + L.sesiones.map(function(s){\n        var baja = s.post < s.pre;\n        return '<div class=\"fila\" style=\"cursor:default;align-items:flex-start\">'\n          + '<span class=\"hh\">' + fechaCorta(s.f) + '</span>'\n          + '<span class=\"cu\"><b>' + s.t + '</b><small>' + s.nota + '</small></span>'\n          + '<span class=\"pin ' + (baja ? 'atendido' : 'gris') + '\">' + s.pre + ' → ' + s.post + '</span></div>';\n      }).join('')\n    + '<button class=\"bt hueco ancho\" style=\"margin-top:12px\" onclick=\"abrirSesion()\">Cargar sesión de hoy</button>'\n    + '</div>';\n}\n\n/* ── Cargar la sesión del día ──────────────────────────────────────\n   Es la pantalla que el kinesiólogo usa quince veces por día, así que\n   tiene que ser rápida: el tipo y las dos escalas de dolor se tocan,\n   no se escriben. Solo la nota se tipea, y es opcional.\n\n   El dolor antes y después es el dato que importa: la diferencia entre\n   los dos es lo que muestra si la sesión sirvió. Por eso los dos son\n   obligatorios y la nota no.                                          */\nvar sesionNueva = null;\n\nfunction abrirSesion(){\n  var L = lesionPorId(abierta);\n  if(!L) return;\n  sesionNueva = {tipo:'Tratamiento', pre:null, post:null, nota:''};\n\n  var caja = document.createElement('div');\n  caja.className = 'ayuda-fondo';\n  caja.id = 'cajaSesion';\n  caja.innerHTML =\n    '<div class=\"ayuda-caja\">'\n    + '<button class=\"cerrar\" onclick=\"cerrarSesion()\" aria-label=\"Cerrar\">&times;</button>'\n    + '<span class=\"eti\">Sesión de hoy</span>'\n    + '<h2>' + nombre(L.dorsal) + ' · ' + L.zona.toLowerCase() + '</h2>'\n    + '<p>Día ' + dias(L.fecha) + ' · fase ' + L.fase + ', ' + FASES[L.fase-1].t.toLowerCase() + '</p>'\n\n    + '<label class=\"campo\"><span class=\"eti\">Qué tipo de sesión</span>'\n    + '<div class=\"pestanias\" id=\"tipoSes\" style=\"margin-bottom:0\">'\n    + ['Evaluación','Tratamiento','Gimnasio','Campo'].map(function(t){\n        return '<button class=\"pest' + (t === 'Tratamiento' ? ' on' : '') + '\" data-t=\"' + t + '\">' + t + '</button>';\n      }).join('')\n    + '</div></label>'\n\n    + '<label class=\"campo\"><span class=\"eti\">Dolor al llegar</span><div id=\"esPre\"></div></label>'\n    + '<label class=\"campo\"><span class=\"eti\">Dolor al terminar</span><div id=\"esPost\"></div></label>'\n    + '<label class=\"campo\"><span class=\"eti\">Qué se hizo (opcional)</span>'\n    + '<textarea id=\"notaSes\" placeholder=\"Movilidad articular, isométricos de eversión...\"></textarea></label>'\n\n    + '<div id=\"avisoSes\"></div>'\n    + '<button class=\"bt ancho\" onclick=\"guardarSesion()\">Guardar sesión</button>'\n    + '</div>';\n\n  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarSesion(); });\n  document.body.appendChild(caja);\n  document.body.style.overflow = 'hidden';\n\n  var tipos = document.getElementById('tipoSes');\n  tipos.querySelectorAll('.pest').forEach(function(b){\n    b.onclick = function(){\n      tipos.querySelectorAll('.pest').forEach(function(x){ x.classList.remove('on'); });\n      b.classList.add('on'); sesionNueva.tipo = b.dataset.t;\n    };\n  });\n  escala(document.getElementById('esPre'),  function(v){ sesionNueva.pre = v; });\n  escala(document.getElementById('esPost'), function(v){ sesionNueva.post = v; });\n}\n\nfunction cerrarSesion(){\n  var c = document.getElementById('cajaSesion');\n  if(c) c.remove();\n  document.body.style.overflow = '';\n}\n\nfunction guardarSesion(){\n  var av = document.getElementById('avisoSes');\n  if(sesionNueva.pre === null || sesionNueva.post === null){\n    av.innerHTML = '<div class=\"nota aviso\">Marcá el dolor al llegar y al terminar. '\n      + 'La diferencia entre los dos es el dato que sirve.</div>';\n    return;\n  }\n  var L = lesionPorId(abierta);\n  sesionNueva.nota = document.getElementById('notaSes').value.trim() || '—';\n\n  L.sesiones.unshift({f:HOY, t:sesionNueva.tipo, pre:sesionNueva.pre,\n                      post:sesionNueva.post, nota:sesionNueva.nota});\n  guardar('kine/sesiones/' + L.id + '/' + HOY, {\n    dorsal:L.dorsal, fecha:HOY, tipo:sesionNueva.tipo,\n    dolor_pre:sesionNueva.pre, dolor_post:sesionNueva.post,\n    notas:sesionNueva.nota, fase:L.fase\n  });\n  cerrarSesion();\n  pintar();\n}\n\nfunction abrir(id){\n  abierta = id;\n  PARAMSET('f', id);\n  pintar(); scrollTo(0, 0);\n}\nfunction tildar(i, v){\n  var L = lesionPorId(abierta);\n  L.criterios[i].ok = v;\n  guardar('kine/lesiones/' + L.id + '/criterios/' + i + '/ok', v);\n  pintar();\n}\nfunction avanzar(){\n  var L = lesionPorId(abierta);\n  if(L.fase >= 5) return;\n  L.fase++;\n  L.criterios.forEach(function(c){ c.ok = false; });\n  guardar('kine/lesiones/' + L.id + '/fase', L.fase);\n  pintar();\n}\npintar();\n\n\n/* Registra el sw para que el portal ande sin internet. Falla en silencio\n   si se abre con doble clic desde el disco: eso es normal. */\nif('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});\n"}, "pizarron": {"pag": "pizarron", "cuerpo": "<div class=\"hoja\">\n  <h1 class=\"tit\">Pizarrón de circuitos</h1>\n  <p class=\"bajada\">Armá el circuito en la cancha, numerá las postas y escribí qué se hace en cada\n  una. Se guarda como datos, no como imagen: por eso después se puede animar, traducir y mostrar\n  en el celular del jugador con el video al lado.</p>\n\n  <div class=\"taller\">\n\n    <div class=\"tarjeta\">\n      <div class=\"tarjeta-cab\" style=\"margin-bottom:12px\"><h2 class=\"sub\">Elementos</h2></div>\n      <div id=\"paleta\"></div>\n    </div>\n\n    <div class=\"tarjeta\">\n      <div class=\"pestanias\" style=\"margin-bottom:10px\">\n        <button class=\"pest on\" data-h=\"colocar\">Colocar</button>\n        <button class=\"pest\" data-h=\"mover\">Mover</button>\n        <button class=\"pest\" data-h=\"correr\">Correr</button>\n        <button class=\"pest\" data-h=\"conducir\">Conducir</button>\n        <button class=\"pest\" data-h=\"pase\">Pase</button>\n        <button class=\"pest rojo\" data-h=\"borrar\">Borrar</button>\n      </div>\n      <div class=\"pestanias\">\n        <button class=\"pest\" data-c=\"completa\">Cancha entera</button>\n        <button class=\"pest on\" data-c=\"media\">Media cancha</button>\n        <button class=\"pest\" data-c=\"reducido\">Reducido</button>\n        <button class=\"pest\" data-c=\"gimnasio\">Gimnasio</button>\n      </div>\n      <svg id=\"campo\" viewBox=\"0 0 1050 680\" xmlns=\"http://www.w3.org/2000/svg\">\n        <g id=\"fondo\"></g><g id=\"capaTrazos\"></g><g id=\"capaPiezas\"></g><g id=\"capaTemp\"></g>\n      </svg>\n      <p style=\"margin-top:10px;font-size:13px;color:var(--tinta2)\">\n        <b>Colocar:</b> elegí un elemento a la izquierda y tocá la cancha.\n        <b>Mover:</b> arrastrá lo que ya está puesto.\n        <b>Correr, conducir y pase:</b> arrastrá de un punto a otro.\n      </p>\n    </div>\n\n    <div class=\"tarjeta\">\n      <div class=\"tarjeta-cab\" style=\"margin-bottom:12px\"><h2 class=\"sub\">El ejercicio</h2></div>\n      <label class=\"campo\"><span class=\"eti\">Nombre</span><input type=\"text\" id=\"nom\"></label>\n      <label class=\"campo\"><span class=\"eti\">Para qué sirve</span><input type=\"text\" id=\"obj\"></label>\n      <span class=\"eti\" style=\"display:block;margin-bottom:8px\">Postas</span>\n      <div id=\"postas\"></div>\n      <button class=\"bt neutro ancho\" onclick=\"agregarPosta()\">+ Agregar posta</button>\n      <button class=\"bt ancho\" style=\"margin-top:8px\" onclick=\"guardarEj()\">Guardar en la biblioteca</button>\n      <button class=\"bt hueco ancho\" style=\"margin-top:8px\" onclick=\"bajarPNG()\">Bajar imagen</button>\n    </div>\n\n  </div>\n</div>", "js": "\n/* ══════════════════════════════════════════════════════════════════\n   CATÁLOGO — dibujado centrado en 0,0.\n   Sumar un elemento nuevo es sumar una línea acá. Nada más cambia.\n   ══════════════════════════════════════════════════════════════════ */\nvar ITEMS = {\n  cono:     {g:'Marcas', d:'<polygon points=\"0,-15 11,12 -11,12\" fill=\"#F97316\" stroke=\"#C2410C\" stroke-width=\"1.5\"/><ellipse cy=\"12\" rx=\"14\" ry=\"4\" fill=\"#EA580C\"/>'},\n  conoAmar: {g:'Marcas', d:'<polygon points=\"0,-15 11,12 -11,12\" fill=\"#FACC15\" stroke=\"#A16207\" stroke-width=\"1.5\"/><ellipse cy=\"12\" rx=\"14\" ry=\"4\" fill=\"#EAB308\"/>'},\n  plato:    {g:'Marcas', d:'<ellipse rx=\"14\" ry=\"6\" fill=\"#38BDF8\" stroke=\"#0284C7\" stroke-width=\"1.5\"/><ellipse rx=\"7\" ry=\"3\" fill=\"#0EA5E9\"/>'},\n  marca:    {g:'Marcas', d:'<circle r=\"7\" fill=\"#fff\" stroke=\"#94A3B8\" stroke-width=\"1.5\"/>'},\n\n  pica:     {g:'Obstáculos', d:'<rect x=\"-2\" y=\"-22\" width=\"4\" height=\"40\" fill=\"#DC2626\"/><rect x=\"-9\" y=\"16\" width=\"18\" height=\"4\" rx=\"2\" fill=\"#7F1D1D\"/>'},\n  valla:    {g:'Obstáculos', d:'<rect x=\"-16\" y=\"-14\" width=\"32\" height=\"4\" rx=\"2\" fill=\"#FACC15\"/><rect x=\"-16\" y=\"-14\" width=\"4\" height=\"26\" fill=\"#EAB308\"/><rect x=\"12\" y=\"-14\" width=\"4\" height=\"26\" fill=\"#EAB308\"/><rect x=\"-20\" y=\"10\" width=\"40\" height=\"4\" rx=\"2\" fill=\"#A16207\"/>'},\n  vallaBaja:{g:'Obstáculos', d:'<rect x=\"-15\" y=\"-4\" width=\"30\" height=\"4\" rx=\"2\" fill=\"#F97316\"/><rect x=\"-15\" y=\"-4\" width=\"3\" height=\"14\" fill=\"#EA580C\"/><rect x=\"12\" y=\"-4\" width=\"3\" height=\"14\" fill=\"#EA580C\"/>'},\n  escalera: {g:'Obstáculos', d:'<rect x=\"-13\" y=\"-30\" width=\"26\" height=\"60\" fill=\"none\" stroke=\"#FBBF24\" stroke-width=\"2.5\"/><line x1=\"-13\" y1=\"-15\" x2=\"13\" y2=\"-15\" stroke=\"#FBBF24\" stroke-width=\"2.5\"/><line x1=\"-13\" y1=\"0\" x2=\"13\" y2=\"0\" stroke=\"#FBBF24\" stroke-width=\"2.5\"/><line x1=\"-13\" y1=\"15\" x2=\"13\" y2=\"15\" stroke=\"#FBBF24\" stroke-width=\"2.5\"/>'},\n  aro:      {g:'Obstáculos', d:'<ellipse rx=\"17\" ry=\"9\" fill=\"none\" stroke=\"#22C55E\" stroke-width=\"4\"/>'},\n\n  arco:     {g:'Cancha', d:'<rect x=\"-30\" y=\"-16\" width=\"60\" height=\"22\" fill=\"rgba(255,255,255,.22)\" stroke=\"#fff\" stroke-width=\"2.5\"/><path d=\"M-30,-16 L-30,6 M-15,-16 L-15,6 M0,-16 L0,6 M15,-16 L15,6 M30,-16 L30,6\" stroke=\"rgba(255,255,255,.55)\" stroke-width=\"1\"/>'},\n  pelota:   {g:'Cancha', d:'<circle r=\"9\" fill=\"#fff\" stroke=\"#1E293B\" stroke-width=\"1.5\"/><polygon points=\"0,-4.5 4.3,-1.4 2.6,3.6 -2.6,3.6 -4.3,-1.4\" fill=\"#1E293B\"/>'},\n  jugador:  {g:'Cancha', d:'<circle r=\"13\" fill=\"#1D3E6E\" stroke=\"#fff\" stroke-width=\"2.5\"/>'},\n  kine:     {g:'Cancha', d:'<circle r=\"13\" fill=\"#0F766E\" stroke=\"#fff\" stroke-width=\"2.5\"/><path d=\"M-5,0 H5 M0,-5 V5\" stroke=\"#fff\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>'},\n\n  colchon:  {g:'Gimnasio', d:'<rect x=\"-26\" y=\"-14\" width=\"52\" height=\"28\" rx=\"5\" fill=\"#3B82F6\" stroke=\"#1D4ED8\" stroke-width=\"2\"/>'},\n  step:     {g:'Gimnasio', d:'<rect x=\"-22\" y=\"-8\" width=\"44\" height=\"12\" rx=\"3\" fill=\"#94A3B8\" stroke=\"#475569\" stroke-width=\"2\"/><rect x=\"-18\" y=\"4\" width=\"8\" height=\"9\" fill=\"#64748B\"/><rect x=\"10\" y=\"4\" width=\"8\" height=\"9\" fill=\"#64748B\"/>'},\n  bosu:     {g:'Gimnasio', d:'<path d=\"M-20,10 A20,18 0 0 1 20,10 Z\" fill=\"#60A5FA\" stroke=\"#2563EB\" stroke-width=\"2\"/><rect x=\"-22\" y=\"9\" width=\"44\" height=\"5\" rx=\"2\" fill=\"#1E293B\"/>'},\n  banda:    {g:'Gimnasio', d:'<path d=\"M-22,0 Q-14,-11 -6,0 T10,0 T22,0\" fill=\"none\" stroke=\"#A855F7\" stroke-width=\"4\" stroke-linecap=\"round\"/>'}\n};\n\nvar piezas = [], trazos = [], postas = [], cancha = 'media';\nvar herramienta = 'colocar', elegido = 'cono', selId = null, contador = 1;\n\nvar svg = document.getElementById('campo'),\n    gPz = document.getElementById('capaPiezas'),\n    gTr = document.getElementById('capaTrazos'),\n    gTm = document.getElementById('capaTemp'),\n    gBg = document.getElementById('fondo');\n\nvar LINEA = 'rgba(255,255,255,.75)';\nfunction pintarFondo(){\n  var L = 'stroke=\"' + LINEA + '\" stroke-width=\"3\" fill=\"none\"', rayas = '';\n  for(var i = 0; i < 10; i++)\n    rayas += '<rect x=\"' + (i*105) + '\" y=\"0\" width=\"105\" height=\"680\" fill=\"'\n           + (i % 2 ? 'rgba(255,255,255,.045)' : 'transparent') + '\"/>';\n  var h = '<rect width=\"1050\" height=\"680\" fill=\"#3F8F42\"/>' + rayas;\n\n  if(cancha === 'completa'){\n    h += '<rect x=\"40\" y=\"40\" width=\"970\" height=\"600\" ' + L + '/>'\n       + '<line x1=\"525\" y1=\"40\" x2=\"525\" y2=\"640\" ' + L + '/>'\n       + '<circle cx=\"525\" cy=\"340\" r=\"88\" ' + L + '/><circle cx=\"525\" cy=\"340\" r=\"4\" fill=\"' + LINEA + '\"/>'\n       + '<rect x=\"40\" y=\"180\" width=\"150\" height=\"320\" ' + L + '/><rect x=\"40\" y=\"255\" width=\"55\" height=\"170\" ' + L + '/>'\n       + '<rect x=\"860\" y=\"180\" width=\"150\" height=\"320\" ' + L + '/><rect x=\"955\" y=\"255\" width=\"55\" height=\"170\" ' + L + '/>';\n  }else if(cancha === 'media'){\n    h += '<rect x=\"40\" y=\"40\" width=\"970\" height=\"600\" ' + L + '/>'\n       + '<rect x=\"40\" y=\"150\" width=\"300\" height=\"380\" ' + L + '/>'\n       + '<rect x=\"40\" y=\"245\" width=\"110\" height=\"190\" ' + L + '/>'\n       + '<path d=\"M340,250 A110,110 0 0 1 340,430\" ' + L + '/>'\n       + '<circle cx=\"230\" cy=\"340\" r=\"5\" fill=\"' + LINEA + '\"/>';\n  }else if(cancha === 'reducido'){\n    h += '<rect x=\"120\" y=\"70\" width=\"810\" height=\"540\" ' + L + '/>'\n       + '<line x1=\"525\" y1=\"70\" x2=\"525\" y2=\"610\" ' + L + '/><circle cx=\"525\" cy=\"340\" r=\"70\" ' + L + '/>';\n  }else{\n    h = '<rect width=\"1050\" height=\"680\" fill=\"#2F3542\"/>';\n    for(var x = 0; x <= 1050; x += 70) h += '<line x1=\"'+x+'\" y1=\"0\" x2=\"'+x+'\" y2=\"680\" stroke=\"rgba(255,255,255,.08)\"/>';\n    for(var y = 0; y <= 680; y += 70) h += '<line x1=\"0\" y1=\"'+y+'\" x2=\"1050\" y2=\"'+y+'\" stroke=\"rgba(255,255,255,.08)\"/>';\n  }\n  gBg.innerHTML = h;\n  svg.style.background = cancha === 'gimnasio' ? '#2F3542' : '#3F8F42';\n}\n\n/* paleta */\n(function(){\n  var gr = {}, orden = [];\n  for(var k in ITEMS){ var g = ITEMS[k].g; if(!gr[g]){ gr[g] = []; orden.push(g); } gr[g].push(k); }\n  document.getElementById('paleta').innerHTML = orden.map(function(g){\n    return '<div class=\"grupo\"><span class=\"eti\">' + g + '</span><div class=\"paleta\">'\n      + gr[g].map(function(k){\n          return '<button class=\"pz' + (k === elegido ? ' on' : '') + (g === 'Gimnasio' ? ' gym' : '') + '\" data-k=\"' + k + '\" title=\"' + k + '\">'\n               + '<svg viewBox=\"-32 -32 64 64\">' + ITEMS[k].d + '</svg></button>';\n        }).join('') + '</div></div>';\n  }).join('');\n  document.querySelectorAll('.pz').forEach(function(p){\n    p.onclick = function(){\n      document.querySelectorAll('.pz').forEach(function(x){ x.classList.remove('on'); });\n      p.classList.add('on'); elegido = p.dataset.k; herramienta = 'colocar';\n      document.querySelectorAll('.pest[data-h]').forEach(function(x){ x.classList.toggle('on', x.dataset.h === 'colocar'); });\n    };\n  });\n})();\n\ndocument.querySelectorAll('.pest[data-h]').forEach(function(t){\n  t.onclick = function(){\n    document.querySelectorAll('.pest[data-h]').forEach(function(x){ x.classList.remove('on'); });\n    t.classList.add('on'); herramienta = t.dataset.h; selId = null; pintarPiezas();\n  };\n});\ndocument.querySelectorAll('.pest[data-c]').forEach(function(t){\n  t.onclick = function(){\n    document.querySelectorAll('.pest[data-c]').forEach(function(x){ x.classList.remove('on'); });\n    t.classList.add('on'); cancha = t.dataset.c; pintarFondo();\n  };\n});\n\nfunction pintarPiezas(){\n  gPz.innerHTML = piezas.map(function(p){\n    var cuerpo = p.tipo === '_posta'\n      ? '<circle r=\"16\" fill=\"#fff\" stroke=\"#1D3E6E\" stroke-width=\"3\"/>'\n        + '<text y=\"5.5\" text-anchor=\"middle\" font-family=\"IBM Plex Mono\" font-weight=\"600\" font-size=\"16\" fill=\"#1D3E6E\">' + p.n + '</text>'\n      : ITEMS[p.tipo].d;\n    return '<g class=\"pieza' + (p.id === selId ? ' sel' : '') + '\" data-id=\"' + p.id + '\" '\n      + 'transform=\"translate(' + p.x + ',' + p.y + ')\">'\n      + (p.id === selId ? '<circle class=\"halo\" r=\"26\"/>' : '')\n      + '<circle r=\"24\" fill=\"transparent\"/>' + cuerpo + '</g>';\n  }).join('');\n}\nfunction pintarTrazos(){\n  gTr.innerHTML = trazos.map(dibujar).join('')\n    + '<defs><marker id=\"pta\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"5\" markerHeight=\"5\" orient=\"auto\">'\n    + '<path d=\"M0,0 L10,5 L0,10 z\" fill=\"#fff\"/></marker></defs>';\n}\nfunction dibujar(t){\n  var com = 'stroke=\"#fff\" stroke-width=\"3.5\" fill=\"none\" marker-end=\"url(#pta)\" stroke-linecap=\"round\"';\n  if(t.tipo === 'pase')\n    return '<line x1=\"'+t.x1+'\" y1=\"'+t.y1+'\" x2=\"'+t.x2+'\" y2=\"'+t.y2+'\" stroke-dasharray=\"10 7\" ' + com + '/>';\n  if(t.tipo === 'conducir'){\n    var dx = t.x2-t.x1, dy = t.y2-t.y1, L = Math.hypot(dx,dy)||1, n = Math.max(3, Math.round(L/22));\n    var px = -dy/L*8, py = dx/L*8, d = 'M'+t.x1+','+t.y1;\n    for(var i = 1; i <= n; i++){\n      var s = (i%2?1:-1), a = (i-.5)/n, b = i/n;\n      d += ' Q'+(t.x1+dx*a+px*s)+','+(t.y1+dy*a+py*s)+' '+(t.x1+dx*b)+','+(t.y1+dy*b);\n    }\n    return '<path d=\"'+d+'\" ' + com + '/>';\n  }\n  return '<line x1=\"'+t.x1+'\" y1=\"'+t.y1+'\" x2=\"'+t.x2+'\" y2=\"'+t.y2+'\" ' + com + '/>';\n}\nfunction pos(e){\n  var r = svg.getBoundingClientRect();\n  return {x:(e.clientX-r.left)/r.width*1050, y:(e.clientY-r.top)/r.height*680};\n}\nfunction distSeg(px,py,x1,y1,x2,y2){\n  var dx = x2-x1, dy = y2-y1, L2 = dx*dx+dy*dy;\n  var t = L2 ? Math.max(0, Math.min(1, ((px-x1)*dx+(py-y1)*dy)/L2)) : 0;\n  return Math.hypot(px-(x1+t*dx), py-(y1+t*dy));\n}\n\nvar arrastre = null, trazando = null;\nsvg.addEventListener('pointerdown', function(e){\n  var p = pos(e), g = e.target.closest('.pieza');\n  if(herramienta === 'borrar'){\n    if(g){ var id = +g.dataset.id; piezas = piezas.filter(function(x){ return x.id !== id; }); pintarPiezas(); }\n    else{\n      var mejor = -1, dm = 30;\n      trazos.forEach(function(t,i){ var d = distSeg(p.x,p.y,t.x1,t.y1,t.x2,t.y2); if(d<dm){dm=d;mejor=i;} });\n      if(mejor >= 0){ trazos.splice(mejor,1); pintarTrazos(); }\n    }\n    return;\n  }\n  if(herramienta === 'colocar'){\n    piezas.push({id:contador++, tipo:elegido, x:Math.round(p.x), y:Math.round(p.y)});\n    pintarPiezas(); return;\n  }\n  if(herramienta === 'mover'){\n    if(g){\n      var i2 = +g.dataset.id;\n      piezas.forEach(function(x){ if(x.id === i2) arrastre = {p:x, dx:x.x-p.x, dy:x.y-p.y}; });\n      selId = i2; pintarPiezas(); svg.setPointerCapture(e.pointerId);\n    }else{ selId = null; pintarPiezas(); }\n    return;\n  }\n  trazando = {tipo:herramienta, x1:p.x, y1:p.y, x2:p.x, y2:p.y};\n  svg.setPointerCapture(e.pointerId);\n});\nsvg.addEventListener('pointermove', function(e){\n  var p = pos(e);\n  if(arrastre){ arrastre.p.x = Math.round(p.x+arrastre.dx); arrastre.p.y = Math.round(p.y+arrastre.dy); pintarPiezas(); }\n  else if(trazando){ trazando.x2 = p.x; trazando.y2 = p.y; gTm.innerHTML = dibujar(trazando); }\n});\nsvg.addEventListener('pointerup', function(){\n  if(trazando){\n    if(Math.hypot(trazando.x2-trazando.x1, trazando.y2-trazando.y1) > 20){ trazos.push(trazando); pintarTrazos(); }\n    gTm.innerHTML = ''; trazando = null;\n  }\n  arrastre = null;\n});\n\n/* postas */\nfunction agregarPosta(){\n  var n = postas.length + 1;\n  postas.push({n:n, txt:''});\n  piezas.push({id:contador++, tipo:'_posta', n:n, x:130+n*80, y:600});\n  pintarPostas(); pintarPiezas();\n}\nfunction borrarPosta(n){\n  postas = postas.filter(function(p){ return p.n !== n; });\n  piezas = piezas.filter(function(p){ return !(p.tipo === '_posta' && p.n === n); });\n  postas.forEach(function(p,i){\n    var v = p.n; p.n = i+1;\n    piezas.forEach(function(z){ if(z.tipo === '_posta' && z.n === v) z.n = i+1; });\n  });\n  pintarPostas(); pintarPiezas();\n}\nfunction pintarPostas(){\n  var c = document.getElementById('postas');\n  if(!postas.length){\n    c.innerHTML = '<p style=\"font-size:14px;color:var(--tinta2);margin-bottom:10px\">'\n      + 'Agregá la primera posta y escribí qué se hace ahí.</p>';\n    return;\n  }\n  c.innerHTML = postas.map(function(p){\n    return '<div class=\"posta\"><div class=\"posta-h\"><span class=\"posta-n\">'+p.n+'</span>'\n      + '<b>Posta '+p.n+'</b><span class=\"x\" onclick=\"borrarPosta('+p.n+')\">×</span></div>'\n      + '<textarea placeholder=\"Qué se hace acá\" oninput=\"postas['+(p.n-1)+'].txt=this.value;crecer(this)\">'+p.txt+'</textarea></div>';\n  }).join('');\n}\n\nfunction crecer(t){ t.style.height='auto'; t.style.height=(t.scrollHeight+2)+'px'; }\nfunction guardarEj(){\n  var n = document.getElementById('nom').value.trim();\n  if(!n){ alert('Ponele un nombre al circuito antes de guardar.'); return; }\n  var ej = {nombre:n, objetivo:document.getElementById('obj').value.trim(),\n            cancha:cancha, piezas:piezas, trazos:trazos, postas:postas};\n  guardar('kine/ejercicios/' + n.replace(/[^a-zA-Z0-9]+/g,'_'), ej);\n  var a = document.createElement('a');\n  a.href = URL.createObjectURL(new Blob([JSON.stringify(ej,null,2)], {type:'application/json'}));\n  a.download = n.replace(/[^a-zA-Z0-9]+/g,'_') + '.json';\n  a.click();\n}\nfunction bajarPNG(){\n  var c2 = svg.cloneNode(true);\n  c2.setAttribute('width', 2100); c2.setAttribute('height', 1360);\n  var img = new Image();\n  img.onload = function(){\n    var cv = document.createElement('canvas'); cv.width = 2100; cv.height = 1360;\n    cv.getContext('2d').drawImage(img, 0, 0);\n    var a = document.createElement('a');\n    a.href = cv.toDataURL('image/png');\n    a.download = (document.getElementById('nom').value.trim() || 'circuito') + '.png';\n    a.click();\n  };\n  img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(new XMLSerializer().serializeToString(c2))));\n}\n\n/* ── ejemplo cargado: el circuito de cuatro postas ── */\npintarFondo();\ndocument.getElementById('nom').value = 'Circuito de reintegro — 4 postas';\ndocument.getElementById('obj').value = 'Tobillo · fase 4 · reintegro a la cancha';\n[\n /* carril 1 — skipping con devolución */\n [250,150,'arco'],[360,120,'plato'],[360,150,'plato'],[360,180,'plato'],\n [470,150,'pelota'],[560,120,'valla'],[560,180,'valla'],[680,150,'conoAmar'],\n /* carril 2 — zig zag */\n [250,300,'arco'],[370,270,'pica'],[420,330,'pica'],[470,270,'pica'],[520,330,'pica'],\n [570,270,'pica'],[660,300,'conoAmar'],[730,300,'pelota'],\n /* carril 3 — desplazamiento lateral */\n [250,450,'arco'],[380,450,'vallaBaja'],[450,450,'vallaBaja'],[520,450,'vallaBaja'],\n [610,450,'conoAmar'],[690,420,'pelota'],[690,480,'pelota'],\n /* carril 4 — escalera y definición */\n [250,590,'arco'],[380,590,'escalera'],[500,590,'plato'],[570,590,'plato'],\n [650,558,'valla'],[730,590,'pelota']\n].forEach(function(p){ piezas.push({id:contador++, tipo:p[2], x:p[0], y:p[1]}); });\n[[1,120,590],[2,120,450],[3,120,300],[4,120,150]].forEach(function(p){\n  piezas.push({id:contador++, tipo:'_posta', n:p[0], x:p[1], y:p[2]});\n});\npostas = [\n  {n:1, txt:'Skipping de un lado con devolución, skipping del otro con devolución (4 en total). En la última, control y conducción lineal.'},\n  {n:2, txt:'Zig zag, devolución en ambos lados del cono. Vuelvo en zig zag y definición.'},\n  {n:3, txt:'Desplazamiento lateral, paso por detrás del cono, defino de un lado y del otro.'},\n  {n:4, txt:'Skipping frontal, giro a la figura, anticipo de un lado, paso por atrás y defino de primera.'}\n];\npintarPiezas(); pintarTrazos(); pintarPostas();\ndocument.querySelectorAll('.posta textarea').forEach(crecer);\n\n\n/* Registra el sw para que el portal ande sin internet. Falla en silencio\n   si se abre con doble clic desde el disco: eso es normal. */\nif('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});\n"}, "ejercicios": {"pag": "ejercicios", "cuerpo": "<div class=\"hoja\">\n  <h1 class=\"tit\">Biblioteca del estudio</h1>\n  <p class=\"bajada\">Los circuitos que se dibujan en el pizarrón y los ejercicios sueltos con su\n  video. Se filma una vez y se reusa en cada programa.</p>\n\n  <div class=\"pestanias\">\n    <button class=\"pest on\" data-f=\"todos\">Todos</button>\n    <button class=\"pest\" data-f=\"Tobillo\">Tobillo</button>\n    <button class=\"pest\" data-f=\"Rodilla\">Rodilla</button>\n    <button class=\"pest\" data-f=\"Hombro\">Hombro</button>\n    <button class=\"pest\" data-f=\"Lumbar\">Lumbar</button>\n  </div>\n\n  <div class=\"tarjeta\">\n    <div class=\"tarjeta-cab\"><h2 class=\"sub\">Circuitos en cancha</h2>\n      <a class=\"eti\" href=\"pizarron.html\" style=\"text-decoration:none\">Dibujar uno nuevo →</a></div>\n    <div class=\"ejs\" id=\"circuitos\"></div>\n  </div>\n\n  <div class=\"tarjeta\">\n    <div class=\"tarjeta-cab\"><h2 class=\"sub\">Ejercicios sueltos</h2>\n      <span class=\"eti\" id=\"cuenta\"></span></div>\n    <div class=\"ejs\" id=\"sueltos\"></div>\n  </div>\n</div>", "js": "\nvar SUELTOS = [\n  {n:'Movilidad de tobillo con banda', z:'Tobillo', f:2, lugar:'gym', video:true},\n  {n:'Eversión con banda',             z:'Tobillo', f:2, lugar:'gym', video:true},\n  {n:'Elevación de talones sentado',   z:'Tobillo', f:2, lugar:'gym', video:false},\n  {n:'Apoyo en un pie',                z:'Tobillo', f:2, lugar:'gym', video:true},\n  {n:'Saltos con aterrizaje',          z:'Rodilla', f:3, lugar:'cancha', video:true},\n  {n:'Sentadilla búlgara',             z:'Rodilla', f:3, lugar:'gym', video:true},\n  {n:'Nórdico de isquiotibiales',      z:'Rodilla', f:3, lugar:'gym', video:true},\n  {n:'Rotación externa con banda',     z:'Hombro',  f:3, lugar:'gym', video:true},\n  {n:'Remo con banda',                 z:'Hombro',  f:2, lugar:'gym', video:false},\n  {n:'Elevación en Y boca abajo',      z:'Hombro',  f:3, lugar:'gym', video:true},\n  {n:'Puente de glúteo',               z:'Lumbar',  f:2, lugar:'gym', video:true},\n  {n:'Plancha lateral',                z:'Lumbar',  f:3, lugar:'gym', video:false},\n  {n:'Bird dog',                       z:'Lumbar',  f:2, lugar:'gym', video:true}\n];\nvar filtro = 'todos';\n\ndocument.querySelectorAll('.pest[data-f]').forEach(function(b){\n  b.onclick = function(){\n    document.querySelectorAll('.pest[data-f]').forEach(function(x){ x.classList.remove('on'); });\n    b.classList.add('on'); filtro = b.dataset.f; pintar();\n  };\n});\n\nfunction tarjeta(e){\n  return '<button class=\"ej\" onclick=\"alert(\\'Acá se abre el ejercicio: video, dosis y a qué programa sumarlo.\\')\">'\n    + '<div class=\"mini ' + (e.lugar === 'gym' ? 'gym' : '') + '\">'\n    + '<span>' + (e.video ? 'Con video' : 'Sin video') + '</span></div>'\n    + '<div class=\"cu\"><b>' + e.n + '</b>'\n    + '<small class=\"mono\">' + e.z.toUpperCase() + ' · DESDE FASE ' + e.f + '</small></div></button>';\n}\n\nfunction pintar(){\n  var c = BASE.ejercicios.filter(function(e){ return filtro === 'todos' || e.zona === filtro; });\n  document.getElementById('circuitos').innerHTML = c.length\n    ? c.map(function(e){\n        return '<button class=\"ej\" onclick=\"irA(\\'pizarron.html\\')\">'\n          + '<div class=\"mini\"><span>4 postas</span></div>'\n          + '<div class=\"cu\"><b>' + e.nombre + '</b>'\n          + '<small class=\"mono\">' + e.zona.toUpperCase() + ' · FASE ' + e.fase + '</small></div></button>';\n      }).join('')\n    : '<div class=\"vacio\" style=\"grid-column:1/-1\"><b>Sin circuitos para esa zona</b>'\n      + 'Dibujá uno en el pizarrón y queda guardado acá.</div>';\n\n  var s = SUELTOS.filter(function(e){ return filtro === 'todos' || e.z === filtro; });\n  document.getElementById('sueltos').innerHTML = s.map(tarjeta).join('');\n  document.getElementById('cuenta').textContent = s.length + ' ejercicios · '\n    + s.filter(function(e){ return e.video; }).length + ' con video';\n}\npintar();\n\n\n/* Registra el sw para que el portal ande sin internet. Falla en silencio\n   si se abre con doble clic desde el disco: eso es normal. */\nif('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});\n"}, "mi": {"pag": "mi", "cuerpo": "<div class=\"hoja angosta\" id=\"todo\"></div>", "js": "\nvar L = lesionDe(miDorsal());\nvar hechos = {}, dolor = null, esfuerzo = null;\n\nif(!L){\n  document.getElementById('todo').innerHTML =\n    '<h1 class=\"tit\">Estás al día</h1>'\n    + '<p class=\"bajada\">No tenés ninguna lesión abierta. Si te empezó a molestar algo, '\n    + 'pedí un turno y lo vemos.</p>'\n    + '<a class=\"bt\" href=\"agenda.html\" style=\"text-decoration:none;display:inline-block\">Pedir un turno</a>';\n}else{\n  pintar();\n}\n\nfunction pintar(){\n  var prog = programaDe(L);\n  var prox = null;\n  (BASE.agenda[HOY] || []).concat(BASE.agenda['2026-08-31'] || []).forEach(function(t){\n    if(!prox && t.dorsal === miDorsal() && t.estado === 'reservado') prox = t;\n  });\n\n  document.getElementById('todo').innerHTML =\n\n    '<h1 class=\"tit\">' + L.zona + ' ' + (L.lado === '—' ? '' : L.lado) + '</h1>'\n    + '<p class=\"bajada\">' + L.diagnostico + '. Llevás ' + dias(L.fecha)\n    + ' días y faltan ' + faltan(L.alta) + ' para el alta prevista.</p>'\n\n    /* dónde estás */\n    + '<div class=\"tarjeta\">'\n    + '<div class=\"tarjeta-cab\"><h2 class=\"sub\">Dónde estás</h2>'\n    + '<span class=\"eti\">Día ' + dias(L.fecha) + '</span></div>'\n    + pista(L.fase)\n    + '<p style=\"margin-top:14px\">' + FASES[L.fase-1].d + '</p>'\n    + '<div class=\"nota info\" style=\"margin-top:14px\">'\n    + 'Para pasar a <b>' + FASES[Math.min(L.fase,4)].t.toLowerCase() + '</b> te falta: '\n    + L.criterios.filter(function(c){ return !c.ok; }).map(function(c){ return c.t.toLowerCase(); }).join('; ')\n    + '.</div></div>'\n\n    /* turno */\n    + '<div class=\"tarjeta\">'\n    + '<div class=\"tarjeta-cab\"><h2 class=\"sub\">Tu próximo turno</h2>'\n    + '<a class=\"eti\" href=\"agenda.html\" style=\"text-decoration:none\">Cambiar →</a></div>'\n    + (prox\n        ? '<div class=\"fila\" style=\"cursor:default;border-color:var(--azul)\">'\n          + '<span class=\"hh\">' + prox.h + '</span>'\n          + '<span class=\"cu\"><b>' + prox.tipo + ' con Vero</b>'\n          + '<small>En el estudio. Te avisamos una hora antes.</small></span>'\n          + '<span class=\"pin reservado\">reservado</span></div>'\n        : '<div class=\"vacio\"><b>No tenés turno reservado</b>Pedilo desde la agenda.</div>')\n    + '</div>'\n\n    /* programa */\n    + '<div class=\"tarjeta\">'\n    + '<div class=\"tarjeta-cab\"><h2 class=\"sub\">Tus ejercicios de hoy</h2>'\n    + '<span class=\"eti\" id=\"cuenta\">0 de ' + prog.length + '</span></div>'\n    + (prog.length\n        ? prog.map(function(e, i){\n            return '<div class=\"fila\" style=\"align-items:flex-start;cursor:pointer\" onclick=\"marcar(' + i + ')\" id=\"ej' + i + '\">'\n              + '<input type=\"checkbox\" style=\"width:19px;height:19px;accent-color:var(--azul);margin-top:3px\" '\n              + 'onclick=\"event.stopPropagation();marcar(' + i + ')\">'\n              + '<span class=\"cu\"><b>' + e.n + '</b>'\n              + '<small class=\"mono\" style=\"color:var(--azul)\">' + e.d + '</small>'\n              + '<small>' + e.nota + '</small></span>'\n              + '<span class=\"pin gris\" onclick=\"event.stopPropagation();alert(\\'Acá abre el video filmado en el estudio.\\')\">Ver video</span>'\n              + '</div>';\n          }).join('')\n        : '<div class=\"vacio\"><b>Todavía no hay programa</b>Vero lo carga después de tu próximo turno.</div>')\n\n    + (prog.length\n        ? '<label class=\"campo\" style=\"margin-top:18px\"><span class=\"eti\">Cuánto te dolió mientras los hacías</span>'\n          + '<div id=\"esDolor\"></div></label>'\n          + '<label class=\"campo\"><span class=\"eti\">Qué tan exigente te resultó</span>'\n          + '<div id=\"esEsf\"></div></label>'\n          + '<button class=\"bt ancho\" onclick=\"enviar()\">Enviar al kinesiólogo</button>'\n          + '<div class=\"nota bien\" id=\"listo\" style=\"display:none;margin-top:12px\">'\n          + 'Enviado. Vero lo ve antes de tu próximo turno.</div>'\n        : '')\n    + '</div>'\n\n    /* historial */\n    + '<div class=\"tarjeta\">'\n    + '<div class=\"tarjeta-cab\"><h2 class=\"sub\">Lo que llevás hecho</h2>'\n    + '<span class=\"eti\">' + L.sesiones.length + ' sesiones</span></div>'\n    + L.sesiones.map(function(s){\n        return '<div class=\"fila\" style=\"cursor:default\"><span class=\"hh\">' + fechaCorta(s.f) + '</span>'\n          + '<span class=\"cu\"><b>' + s.t + '</b></span>'\n          + '<span class=\"pin ' + (s.post < s.pre ? 'atendido' : 'gris') + '\">dolor ' + s.pre + ' → ' + s.post + '</span></div>';\n      }).join('')\n    + '</div>';\n\n  if(prog.length){\n    escala(document.getElementById('esDolor'), function(v){ dolor = v; }, dolor);\n    escala(document.getElementById('esEsf'),  function(v){ esfuerzo = v; }, esfuerzo);\n  }\n  actualizarCuenta();\n}\n\nfunction marcar(i){\n  hechos[i] = !hechos[i];\n  var f = document.getElementById('ej' + i);\n  f.querySelector('input').checked = hechos[i];\n  f.style.background = hechos[i] ? 'var(--verde-suave)' : '';\n  f.style.borderColor = hechos[i] ? '#BCDCC9' : '';\n  actualizarCuenta();\n}\nfunction actualizarCuenta(){\n  var c = document.getElementById('cuenta');\n  if(!c) return;\n  var n = 0; for(var k in hechos) if(hechos[k]) n++;\n  c.textContent = n + ' de ' + programaDe(L).length;\n}\nfunction enviar(){\n  if(dolor === null || esfuerzo === null){\n    alert('Marcá cuánto te dolió y qué tan exigente te resultó.'); return;\n  }\n  guardar('kine/adherencia/' + miDorsal() + '/' + HOY,\n          {hechos:hechos, dolor:dolor, esfuerzo:esfuerzo});\n  document.getElementById('listo').style.display = 'block';\n}\n\n\n/* Registra el sw para que el portal ande sin internet. Falla en silencio\n   si se abre con doble clic desde el disco: eso es normal. */\nif('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});\n"}, "diario": {"pag": "diario", "cuerpo": "<div class=\"hoja angosta\">\n  <h1 class=\"tit\">Cómo estás hoy</h1>\n  <p class=\"bajada\">Cinco preguntas, medio minuto. Se completa <b>después</b> de entrenar,\n  no antes. Es la señal más temprana que tiene el kinesiólogo: si el dolor sube tres días\n  seguidos lo ve antes de que se lo cuentes.</p>\n\n  <div class=\"tarjeta\" id=\"preguntas\"></div>\n\n  <button class=\"bt ancho\" onclick=\"enviar()\">Guardar</button>\n  <div class=\"nota bien\" id=\"listo\" style=\"display:none;margin-top:12px\">\n    Guardado. Gracias — con esto se ajusta tu carga de mañana.</div>\n\n  <div class=\"tarjeta\" style=\"margin-top:20px\">\n    <div class=\"tarjeta-cab\"><h2 class=\"sub\">Tus últimos días</h2>\n      <span class=\"eti\">1 mal · 5 muy bien</span></div>\n    <div id=\"historial\"></div>\n  </div>\n</div>", "js": "\n/* Las cinco métricas son las del índice de Hooper, las mismas que ya usa la app\n   del club. Si los dos sistemas usan las mismas cinco, el día que se quieran\n   cruzar los datos hablan el mismo idioma. */\nvar PREGUNTAS = [\n  {id:'sueno',  t:'Cómo dormiste',        ext:['Malísimo','Regular','Normal','Bien','Muy bien']},\n  {id:'fatiga', t:'Qué tan cansado estás', ext:['Agotado','Bastante','Normal','Descansado','Como nuevo']},\n  {id:'dolor',  t:'Dolor muscular',        ext:['Mucho','Bastante','Algo','Poco','Nada']},\n  {id:'animo',  t:'Cómo andás de ánimo',   ext:['Bajón','Flojo','Normal','Bien','Muy bien']},\n  {id:'estres', t:'Nivel de estrés',       ext:['Altísimo','Alto','Normal','Bajo','Nada']}\n];\nvar HISTORIAL = [\n  {f:'2026-08-27', v:3.6}, {f:'2026-08-26', v:3.2}, {f:'2026-08-25', v:2.8},\n  {f:'2026-08-24', v:3.0}, {f:'2026-08-23', v:3.8}\n];\nvar resp = {};\n\ndocument.getElementById('preguntas').innerHTML = PREGUNTAS.map(function(p){\n  return '<label class=\"campo\"><span class=\"eti\">' + p.t + '</span>'\n    + '<div class=\"escala\" id=\"e_' + p.id + '\">'\n    + p.ext.map(function(x, i){\n        return '<button type=\"button\" data-v=\"' + (i+1) + '\" style=\"width:auto;flex:1;min-width:64px;'\n             + 'font-family:var(--txt);font-size:12.5px;font-weight:500;height:auto;padding:9px 4px\">'\n             + x + '</button>';\n      }).join('')\n    + '</div></label>';\n}).join('');\n\nPREGUNTAS.forEach(function(p){\n  var caja = document.getElementById('e_' + p.id);\n  caja.querySelectorAll('button').forEach(function(b){\n    b.onclick = function(){\n      caja.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });\n      b.classList.add('on'); resp[p.id] = +b.dataset.v;\n    };\n  });\n});\n\ndocument.getElementById('historial').innerHTML = HISTORIAL.map(function(h){\n  var col = h.v >= 3.5 ? 'atendido' : (h.v >= 3 ? 'reservado' : 'ausente');\n  return '<div class=\"fila\" style=\"cursor:default\"><span class=\"hh\">' + fechaCorta(h.f) + '</span>'\n    + '<span class=\"cu\"><b>' + (h.v >= 3.5 ? 'Bien' : h.v >= 3 ? 'Normal' : 'Flojo') + '</b></span>'\n    + '<span class=\"pin ' + col + '\">' + h.v.toFixed(1) + '</span></div>';\n}).join('');\n\nfunction enviar(){\n  if(Object.keys(resp).length < 5){ alert('Contestá las cinco antes de guardar.'); return; }\n  guardar('kine/wellness/' + miDorsal() + '/' + HOY, resp);\n  document.getElementById('listo').style.display = 'block';\n}\n\n\n/* Registra el sw para que el portal ande sin internet. Falla en silencio\n   si se abre con doble clic desde el disco: eso es normal. */\nif('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});\n"}};
+var _params = {};
+function PARAM(k){ return _params[k] || null; }
+function PARAMSET(k, v){ if(v){ _params[k] = v; } else { delete _params[k]; } }
+
+function irA(url){
+  var p = String(url).split('?');
+  var clave = ({'index.html':'inicio','panel.html':'panel','agenda.html':'agenda',
+    'lesiones.html':'ficha','pizarron.html':'pizarron','ejercicios.html':'ejercicios',
+    'mi.html':'mi','diario.html':'diario'})[p[0]];
+  if(!clave) return;
+  _params = {};
+  if(p[1]) p[1].split('&').forEach(function(x){ var y = x.split('='); _params[y[0]] = y[1]; });
+  mostrar(clave);
+}
+
+function cabecera(pag){
+  var r = rol();
+  var items = MENU[r === 'kine' ? 'kine' : 'jugador'];
+  var quien = r === 'kine' ? {ini:'VR', txt:'Vero · kinesióloga'}
+                           : {ini:'#' + miDorsal(), txt:nombre(miDorsal())};
+  document.getElementById('armazon').innerHTML =
+    '<div class="top"><div class="top-in">'
+    + '<a class="marca" href="#" onclick="irA(\'index.html\');return false"><span class="sig"></span>'
+    + '<span><b>ESTUDIO</b><span>Kinesiología del club</span></span></a>'
+    + '<div class="quien">'
+    + '<span class="av">' + quien.ini + '</span>' + quien.txt
+    + '&nbsp;' + botonAyuda(pag) + '</div>'
+    + '</div></div>'
+    + '<div class="nav"><div class="nav-in">' + items.map(function(i){
+        return '<a href="#" onclick="irA(\'' + i.a + '\');return false"'
+             + (i.id === pag ? ' class="on"' : '') + '>' + i.t + '</a>';
+      }).join('') + '</div></div>';
+
+  var vieja = document.querySelector('.barra-abajo');
+  if(vieja) vieja.remove();
+  var ab = document.createElement('nav');
+  ab.className = 'barra-abajo';
+  ab.innerHTML = items.map(function(i){
+      return '<a href="#" onclick="irA(\'' + i.a + '\');return false"'
+           + (i.id === pag ? ' class="on"' : '') + '>'
+           + '<span class="ic">' + i.ic + '</span>' + i.t + '</a>';
+    }).join('');
+  document.body.appendChild(ab);
+}
+
+function mostrar(clave){
+  var p = PAGINAS[clave];
+  if(!p) return;
+  document.body.dataset.pag = p.pag;
+  cabecera(p.pag);
+  var v = document.getElementById('vista');
+  v.innerHTML = p.cuerpo;
+  /* La pantalla corre en el ámbito global, NO en una burbuja.
+     Tiene que ser así: los botones usan onclick="miFuncion()" y eso se
+     busca siempre en el ámbito global. Metido en una burbuja, ningún
+     botón de ninguna pantalla funciona.
+     Que dos pantallas tengan una función pintar() no molesta: solo hay
+     una pantalla viva por vez y el código se vuelve a correr entero en
+     cada navegación. */
+  var sc = document.createElement('script');
+  sc.textContent = p.js;
+  document.getElementById('vista').appendChild(sc);
+  scrollTo(0, 0);
+}
+
+/* los enlaces sueltos que quedaron dentro de las pantallas */
+document.addEventListener('click', function(e){
+  var a = e.target.closest('a[href$=".html"]');
+  if(a){ e.preventDefault(); irA(a.getAttribute('href')); }
+});
+
+mostrar('inicio');
+</script>
+</body></html>

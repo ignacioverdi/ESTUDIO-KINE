@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cómo estoy · Estudio</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+</head>
+<body data-pag="diario">
+
+<div class="hoja angosta">
+  <h1 class="tit">Cómo estás hoy</h1>
+  <p class="bajada">Cinco preguntas, medio minuto. Se completa <b>después</b> de entrenar,
+  no antes. Es la señal más temprana que tiene el kinesiólogo: si el dolor sube tres días
+  seguidos lo ve antes de que se lo cuentes.</p>
+
+  <div class="tarjeta" id="preguntas"></div>
+
+  <button class="bt ancho" onclick="enviar()">Guardar</button>
+  <div class="nota bien" id="listo" style="display:none;margin-top:12px">
+    Guardado. Gracias — con esto se ajusta tu carga de mañana.</div>
+
+  <div class="tarjeta" style="margin-top:20px">
+    <div class="tarjeta-cab"><h2 class="sub">Tus últimos días</h2>
+      <span class="eti">1 mal · 5 muy bien</span></div>
+    <div id="historial"></div>
+  </div>
+</div>
+
+<script>
+/* Las cinco métricas son las del índice de Hooper, las mismas que ya usa la app
+   del club. Si los dos sistemas usan las mismas cinco, el día que se quieran
+   cruzar los datos hablan el mismo idioma. */
+var PREGUNTAS = [
+  {id:'sueno',  t:'Cómo dormiste',        ext:['Malísimo','Regular','Normal','Bien','Muy bien']},
+  {id:'fatiga', t:'Qué tan cansado estás', ext:['Agotado','Bastante','Normal','Descansado','Como nuevo']},
+  {id:'dolor',  t:'Dolor muscular',        ext:['Mucho','Bastante','Algo','Poco','Nada']},
+  {id:'animo',  t:'Cómo andás de ánimo',   ext:['Bajón','Flojo','Normal','Bien','Muy bien']},
+  {id:'estres', t:'Nivel de estrés',       ext:['Altísimo','Alto','Normal','Bajo','Nada']}
+];
+var HISTORIAL = [
+  {f:'2026-08-27', v:3.6}, {f:'2026-08-26', v:3.2}, {f:'2026-08-25', v:2.8},
+  {f:'2026-08-24', v:3.0}, {f:'2026-08-23', v:3.8}
+];
+var resp = {};
+
+document.getElementById('preguntas').innerHTML = PREGUNTAS.map(function(p){
+  return '<label class="campo"><span class="eti">' + p.t + '</span>'
+    + '<div class="escala" id="e_' + p.id + '">'
+    + p.ext.map(function(x, i){
+        return '<button type="button" data-v="' + (i+1) + '" style="width:auto;flex:1;min-width:64px;'
+             + 'font-family:var(--txt);font-size:12.5px;font-weight:500;height:auto;padding:9px 4px">'
+             + x + '</button>';
+      }).join('')
+    + '</div></label>';
+}).join('');
+
+PREGUNTAS.forEach(function(p){
+  var caja = document.getElementById('e_' + p.id);
+  caja.querySelectorAll('button').forEach(function(b){
+    b.onclick = function(){
+      caja.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on'); resp[p.id] = +b.dataset.v;
+    };
+  });
+});
+
+document.getElementById('historial').innerHTML = HISTORIAL.map(function(h){
+  var col = h.v >= 3.5 ? 'atendido' : (h.v >= 3 ? 'reservado' : 'ausente');
+  return '<div class="fila" style="cursor:default"><span class="hh">' + fechaCorta(h.f) + '</span>'
+    + '<span class="cu"><b>' + (h.v >= 3.5 ? 'Bien' : h.v >= 3 ? 'Normal' : 'Flojo') + '</b></span>'
+    + '<span class="pin ' + col + '">' + h.v.toFixed(1) + '</span></div>';
+}).join('');
+
+function enviar(){
+  if(Object.keys(resp).length < 5){ alert('Contestá las cinco antes de guardar.'); return; }
+  guardar('kine/wellness/' + miDorsal() + '/' + HOY, resp);
+  document.getElementById('listo').style.display = 'block';
+}
+</script>
+<script>
+/* Registra el sw para que el portal ande sin internet. Falla en silencio
+   si se abre con doble clic desde el disco: eso es normal. */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+</script>
+</body></html>
