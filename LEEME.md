@@ -205,7 +205,7 @@ y se manda por WhatsApp.
 **El kit de varios archivos es el bueno para trabajar.** El de un archivo se
 regenera cuando se toca una pantalla:
 
-Doble clic en `EMPEZAR.bat`. Lo regenera solo, junto con todo lo demás.
+Doble clic en `ABRIR.bat`. Lo regenera solo, junto con todo lo demás.
 
 Lo único que existe solo ahí es el armazón que hace de router. En el kit real
 cada pantalla es un HTML propio y de eso se encarga el navegador.

@@ -12,6 +12,19 @@ Devuelve 0 si está todo bien, 1 si hay algo roto. Los avisos no cuentan
 como error: son cosas pendientes, no cosas rotas.
 """
 
+# ── Windows y los acentos ─────────────────────────────────────────────
+# Cuando la salida va a un archivo en vez de a la pantalla, Windows usa
+# una codificacion vieja (cp1252) que no sabe escribir acentos ni las
+# lineas de los recuadros, y el script se cae con UnicodeEncodeError.
+# Esto lo fuerza a UTF-8 siempre. Sin esto, ABRIR.bat falla en Windows.
+import sys as _sys
+for _f in (_sys.stdout, _sys.stderr):
+    try:
+        if _f and getattr(_f, 'encoding', '') and _f.encoding.lower() not in ('utf-8', 'utf8'):
+            _f.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 import io, os, re, sys, glob
 
 ROTO, AVISO = [], []
@@ -119,7 +132,7 @@ def sw_al_dia():
 
 def inventario_cuadra():
     s = leer('crear_estudio.py')
-    esp = set(re.findall(r"\('([^']+\.(?:html|css|js|json|png|md|py|txt|bat))'", s)) | {'.gitignore'}
+    esp = set(re.findall(r"\('([^']+\.(?:html|css|js|json|png|md|py|txt|bat|pdf))'", s)) | {'.gitignore'}
     real = {os.path.relpath(os.path.join(r, f), '.').replace('\\', '/')
             for r, d, fs in os.walk('.') for f in fs if '.git' not in r}
     for e in sorted(esp - real):

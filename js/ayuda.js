@@ -147,7 +147,7 @@ var AYUDA = {
       ['Completá la matrícula', 'Va impresa en la historia clínica: es un documento profesional.'],
       ['Contá quién sos', 'Escribilo como se lo contarías a alguien en la sala de espera, no como un currículum.']
     ],
-    ojo: 'El teléfono que cargues acá es al que llegan los avisos de turno por WhatsApp. Si lo dejás vacío, ese botón no funciona.'
+    ojo: 'Abajo de todo está el botón para vaciar los datos de demostración. Usalo ANTES de cargar el primer paciente de verdad: si no, en un mes no vas a saber cuál es real y cuál inventado. No se puede deshacer, por eso pide escribir una palabra.'
   },
 
   caja: {

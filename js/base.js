@@ -28,6 +28,12 @@ var MENU = {
   ]
 };
 
+/* Si el estudio ya vació la demostración, los datos inventados no se
+   vuelven a cargar nunca. Esto corre antes que cualquier pantalla. */
+if(typeof esDemo === 'function' && !esDemo() && typeof vaciarTodo === 'function'){
+  vaciarTodo();
+}
+
 function armarCabecera(){
   var pag = document.body.dataset.pag || '';
   var r   = rol();
@@ -61,7 +67,17 @@ function armarCabecera(){
 
   document.body.insertBefore(nav, document.body.firstChild);
   document.body.insertBefore(top, document.body.firstChild);
+  if(typeof esDemo === 'function' && esDemo()) document.body.insertBefore(cartelDemo(), document.body.firstChild);
   document.body.appendChild(abajo);
+}
+
+function cartelDemo(){
+  var d = document.createElement('div');
+  d.className = 'cartel-demo';
+  d.innerHTML = '<span><b>Datos de demostración.</b> Marcela Ríos, Diego Sosa y los demás '
+    + 'son inventados. Antes de cargar el primer paciente de verdad, vaciá todo.</span>'
+    + '<a href="perfil.html">Vaciar y empezar</a>';
+  return d;
 }
 
 /* ── La pista de recuperación ──────────────────────────────────────

@@ -98,7 +98,31 @@ function pintar(){
     + 'contarías a alguien en la sala de espera, no como un currículum.</p></div>'
 
     + '<div id="aviso"></div>'
-    + '<button class="bt ancho" onclick="guardarPerfil()">Guardar</button>';
+    + '<button class="bt ancho" onclick="guardarPerfil()">Guardar</button>'
+
+    /* Vaciar es lo último de la pantalla y no se puede deshacer. Va
+       separado, explicado, y pide escribir una palabra: un botón suelto
+       que borra todo se toca sin querer. */
+    + (esDemo()
+        ? '<div class="tarjeta" style="margin-top:26px;border-color:var(--ambar-borde)">'
+          + '<div class="tarjeta-cab"><h2 class="sub">Empezar de cero</h2>'
+          + '<span class="eti">Una sola vez</span></div>'
+          + '<p style="color:var(--tinta2);margin-bottom:14px">El portal viene con pacientes '
+          + 'inventados para que se vea andando: Marcela Ríos, Diego Sosa y los demás no existen. '
+          + '<b>Antes de cargar el primer paciente de verdad, vaciá todo.</b> Si no, dentro de un '
+          + 'mes no vas a saber cuál es real y cuál no.</p>'
+          + '<p style="color:var(--tinta2);margin-bottom:14px">Se borran los pacientes, las '
+          + 'lesiones, las historias, los turnos y la caja. <b>No</b> se borran las plantillas de '
+          + 'lesión, la biblioteca de ejercicios, tu perfil ni el horario del estudio: eso es la '
+          + 'herramienta, no los datos.</p>'
+          + '<div class="nota reserva">Esto no se puede deshacer.</div>'
+          + '<label class="campo"><span class="eti">Escribí VACIAR para confirmar</span>'
+          + '<input type="text" id="cVaciar" placeholder="VACIAR"></label>'
+          + '<button class="bt ancho" style="background:var(--rojo);border-color:var(--rojo)" '
+          + 'onclick="confirmarVaciado()">Vaciar y empezar de cero</button>'
+          + '</div>'
+        : '<div class="nota bien" style="margin-top:26px">El portal está limpio. Los datos de '
+          + 'demostración se borraron y no vuelven.</div>');
 }
 
 function campo(k, l){
@@ -134,6 +158,31 @@ function subirImagen(input, destino, lado){
 }
 
 function borrar(k){ perfil()[k] = null; pintar(); }
+
+function confirmarVaciado(){
+  var t = (document.getElementById('cVaciar').value || '').trim().toUpperCase();
+  if(t !== 'VACIAR'){
+    document.getElementById('aviso').innerHTML =
+      '<div class="nota aviso">Escribí VACIAR en el campo para confirmar.</div>';
+    document.getElementById('cVaciar').focus();
+    return;
+  }
+  var P = perfil();
+  vaciarTodo();
+  BASE.perfil = P;
+  guardar('kine/perfil', P);
+  document.getElementById('todo').innerHTML =
+    '<div class="tarjeta" style="margin-top:40px"><div class="vacio">'
+    + '<b>Listo. El portal está en cero.</b>'
+    + 'Ya podés cargar tu primer paciente de verdad. El cartel amarillo desapareció.</div>'
+    + '<a class="bt ancho" href="cartel.html" style="text-decoration:none;text-align:center">'
+    + 'Ver el cartel con el QR para repartir</a>'
+    + '<a class="bt neutro ancho" href="pacientes.html" style="text-decoration:none;text-align:center;margin-top:8px">'
+    + 'Ir al padrón</a></div>';
+  var c = document.querySelector('.cartel-demo');
+  if(c) c.remove();
+  scrollTo(0, 0);
+}
 
 function guardarPerfil(){
   guardar('kine/perfil', perfil());

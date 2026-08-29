@@ -16,6 +16,49 @@
 
 var HOY = '2026-08-28';
 
+/* ══════════════════════════════════════════════════════════════════════
+   MODO DEMOSTRACION
+
+   Todo lo que hay abajo es inventado: Marcela Ríos no existe.
+   Sirve para mostrar el portal andando, pero es peligroso si se mezcla
+   con pacientes de verdad: dentro de un mes nadie sabría cuál es cuál, y
+   eso en una historia clínica no se puede permitir.
+
+   Por eso mientras el modo demostración está encendido aparece un cartel
+   arriba de todo, y hay un botón para vaciar todo y arrancar limpio.
+
+   Al conectar Firebase esto se apaga solo: si la base trae pacientes de
+   verdad, se usan esos y los inventados no se cargan nunca.
+   ══════════════════════════════════════════════════════════════════════ */
+function esDemo(){
+  try{ return localStorage.getItem('estudio_vaciado') !== 'si'; }catch(e){ return true; }
+}
+
+/* Deja el portal en cero: sin pacientes, sin lesiones, sin turnos
+   ocupados, sin caja. Conserva el horario, las plantillas de lesión y la
+   biblioteca de ejercicios, que son la herramienta y no los datos. */
+function vaciarTodo(){
+  BASE.pacientes = [];
+  BASE.lesiones = [];
+  BASE.disponibilidad = {};
+  BASE.programas = {};
+  BASE.historia = {};
+  BASE.accesos = [];
+  BASE.caja = [];
+  BASE.ejercicios = [];
+  for(var d in BASE.agenda){
+    BASE.agenda[d].forEach(function(t){
+      delete t.pid; delete t.dorsal; delete t.tipo; delete t.estado;
+    });
+  }
+  try{
+    localStorage.setItem('estudio_vaciado', 'si');
+    localStorage.removeItem('estudio_pid');
+  }catch(e){}
+  guardar('kine/_vaciado', {fecha: HOY, por: 'el estudio'});
+}
+
+
 var BASE = {
 
   club: 'Club Atlético — Estudio de kinesiología',

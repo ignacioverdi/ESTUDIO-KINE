@@ -14,7 +14,7 @@
    volverte loco preguntándote por qué no se ve el cambio.
    ══════════════════════════════════════════════════════════════════════ */
 
-var VERSION = 'estudio-v33';
+var VERSION = 'estudio-v34';
 
 var ARCHIVOS = [
   'index.html',
@@ -87,4 +87,4 @@ self.addEventListener('fetch', function(e){
   );
 });
 
-/* huella: 4aa9a3383e36 */
+/* huella: 45efdf1a4d5e */

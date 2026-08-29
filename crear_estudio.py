@@ -13,6 +13,19 @@ para arrancar un estudio nuevo, o para comparar contra lo que ya tenés.
 NO pisa nada: si la carpeta existe, avisa y corta.
 """
 
+# ── Windows y los acentos ─────────────────────────────────────────────
+# Cuando la salida va a un archivo en vez de a la pantalla, Windows usa
+# una codificacion vieja (cp1252) que no sabe escribir acentos ni las
+# lineas de los recuadros, y el script se cae con UnicodeEncodeError.
+# Esto lo fuerza a UTF-8 siempre. Sin esto, ABRIR.bat falla en Windows.
+import sys as _sys
+for _f in (_sys.stdout, _sys.stderr):
+    try:
+        if _f and getattr(_f, 'encoding', '') and _f.encoding.lower() not in ('utf-8', 'utf8'):
+            _f.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 import io, os, sys
 
 DESTINO = sys.argv[1] if len(sys.argv) > 1 else 'ESTUDIO_NUEVO'
@@ -73,7 +86,11 @@ INVENTARIO = [
     ('armar_demo.py',   'Junta todo en un ESTUDIO.html de un solo archivo para mostrarlo.', False),
     ('INSTALAR.md',     'Paso a paso: instalar, publicar en GitHub y en Vercel, conectar Firebase.', False),
     ('INVESTIGACION.md','Que le falta al portal: obligaciones legales, evidencia clinica y competencia.', False),
-    ('EMPEZAR.bat',     'EL BOTON. Revisa la maquina, prepara todo y abre el portal.', False),
+    ('INSTALAR_DESDE_CERO.pdf','La guia imprimible para una PC en blanco. Se genera con armar_pdf.py.', False),
+    ('armar_pdf.py',    'Genera la guia en PDF para instalar desde cero.', False),
+    ('ABRIR.bat',       'EL DE TODOS LOS DIAS. Prepara, abre el portal y se cierra solo.', False),
+    ('PROBAR_COMO_APP.bat','Solo para probar sin internet y la instalacion como app.', False),
+    ('CREAR_ACCESO_DIRECTO.bat','Deja el icono del portal en el escritorio del kinesiologo.', False),
     ('PUBLICAR.bat',    'EL OTRO BOTON. Prepara, audita, muestra que sube y publica.', False),
     ('preparar.py',     'El motor de los dos botones: sube la version de sw.js sola, arma y audita.', False),
     ('auditar.py',      'Revisa el PROYECTO: enlaces rotos, archivos que faltan, claves expuestas.', False),
@@ -182,8 +199,10 @@ def crear():
           % (DESTINO, len(INVENTARIO), obligatorios))
     print('')
     print('Para trabajar hay DOS archivos de doble clic:')
-    print('  EMPEZAR.bat    revisa, prepara y abre el portal')
-    print('  PUBLICAR.bat   prepara, audita y sube a GitHub')
+    print('  ABRIR.bat      prepara y abre el portal. No deja ventanas.')
+    print('  PUBLICAR.bat   prepara, audita y sube a GitHub. Se cierra solo.')
+    print('')
+    print('El kinesiologo no toca ninguno: usa el portal publicado.')
     print('')
     print('Orden sugerido para llenar los archivos:')
     print('  1. css/estudio.css   primero el aspecto, si no no ves nada')

@@ -10,6 +10,19 @@ no alcanza con mirarlo: hay que decodificarlo.
 Necesita:  pip install playwright opencv-python-headless
            playwright install chromium
 """
+
+# ── Windows y los acentos ─────────────────────────────────────────────
+# Cuando la salida va a un archivo en vez de a la pantalla, Windows usa
+# una codificacion vieja (cp1252) que no sabe escribir acentos ni las
+# lineas de los recuadros, y el script se cae con UnicodeEncodeError.
+# Esto lo fuerza a UTF-8 siempre. Sin esto, ABRIR.bat falla en Windows.
+import sys as _sys
+for _f in (_sys.stdout, _sys.stderr):
+    try:
+        if _f and getattr(_f, 'encoding', '') and _f.encoding.lower() not in ('utf-8', 'utf8'):
+            _f.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 from playwright.sync_api import sync_playwright
 import pathlib, cv2, io as _io
 

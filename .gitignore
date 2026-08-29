@@ -40,3 +40,4 @@ __pycache__/
 
 # Salidas que se regeneran solas
 *.zip
+.ultimo_chequeo.txt

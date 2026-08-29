@@ -18,6 +18,19 @@ Lo llaman EMPEZAR.bat y PUBLICAR.bat. No hace falta correrlo a mano.
 Devuelve 0 si está todo bien, 1 si la auditoría encontró algo roto.
 """
 
+# ── Windows y los acentos ─────────────────────────────────────────────
+# Cuando la salida va a un archivo en vez de a la pantalla, Windows usa
+# una codificacion vieja (cp1252) que no sabe escribir acentos ni las
+# lineas de los recuadros, y el script se cae con UnicodeEncodeError.
+# Esto lo fuerza a UTF-8 siempre. Sin esto, ABRIR.bat falla en Windows.
+import sys as _sys
+for _f in (_sys.stdout, _sys.stderr):
+    try:
+        if _f and getattr(_f, 'encoding', '') and _f.encoding.lower() not in ('utf-8', 'utf8'):
+            _f.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 import hashlib, io, re, subprocess, sys, os
 
 
