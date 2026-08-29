@@ -2,6 +2,7 @@
 <html lang="es"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cómo estoy · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
 <link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
@@ -48,10 +49,9 @@ var resp = {};
 
 document.getElementById('preguntas').innerHTML = PREGUNTAS.map(function(p){
   return '<label class="campo"><span class="eti">' + p.t + '</span>'
-    + '<div class="escala" id="e_' + p.id + '">'
+    + '<div class="escala palabras" id="e_' + p.id + '">'
     + p.ext.map(function(x, i){
-        return '<button type="button" data-v="' + (i+1) + '" style="width:auto;flex:1;min-width:64px;'
-             + 'font-family:var(--txt);font-size:12.5px;font-weight:500;height:auto;padding:9px 4px">'
+        return '<button type="button" data-v="' + (i+1) + '">'
              + x + '</button>';
       }).join('')
     + '</div></label>';

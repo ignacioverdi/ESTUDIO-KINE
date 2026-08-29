@@ -50,11 +50,16 @@ def todas_cargan_lo_comun():
        Ya pasó una vez con index.html."""
     for p in PANTALLAS:
         s = leer(p)
+        # Una pantalla marcada como PANTALLA PUBLICA no lleva menú a propósito:
+        # el que entra todavía no tiene cuenta ni rol (ej: alta.html).
+        publica = 'PANTALLA PUBLICA' in s
         for req, porque in [('css/tema.css', 'se ve sin colores'),
                             ('css/estudio.css', 'se ve sin formato'),
                             ('js/datos.js', 'no tiene datos'),
                             ('js/base.js', 'queda sin encabezado ni menú'),
                             ('js/ayuda.js', 'se queda sin el botón ?')]:
+            if publica and req == 'js/base.js':
+                continue
             if req not in s:
                 ROTO.append('%s no carga %s: %s' % (p, req, porque))
 

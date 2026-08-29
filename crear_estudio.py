@@ -30,6 +30,8 @@ INVENTARIO = [
     ('agenda.html',     'Turnos. La misma pantalla sirve para el kine (asigna) y el jugador (reserva).', True),
     ('mi.html',         'Lo que ve el lesionado: en qué fase está, su turno, sus ejercicios de hoy.', True),
     ('diario.html',     'Las cinco preguntas diarias de cómo se siente. Índice de Hooper.', False),
+    ('pacientes.html',  'El padrón: plantel y particulares. Se cargan solos.', True),
+    ('alta.html',       'PUBLICA: el paciente se da de alta solo. No lleva menú ni sesión.', True),
     ('pizarron.html',   'Dibuja circuitos en la cancha con postas. Se guarda como datos, no como imagen.', False),
     ('ejercicios.html', 'La biblioteca del estudio: circuitos y ejercicios sueltos con su video.', False),
 
@@ -64,6 +66,7 @@ INVENTARIO = [
     ('PUBLICAR.bat',    'EL OTRO BOTON. Prepara, audita, muestra que sube y publica.', False),
     ('preparar.py',     'El motor de los dos botones: sube la version de sw.js sola, arma y audita.', False),
     ('auditar.py',      'Revisa el PROYECTO: enlaces rotos, archivos que faltan, claves expuestas.', False),
+    ('medir_pantallas.py','Revisa el portal en celular, tablet y monitor: desbordes y botones chicos.', False),
 
     ('videos/LEEME.txt','Los videos NO van al repo: pesan. Van a un hosting y acá queda el enlace.', False),
     ('ARMAR_DESDE_CERO.md', 'Esta guía: qué tiene que haber, en qué orden y qué no subir nunca.', False),

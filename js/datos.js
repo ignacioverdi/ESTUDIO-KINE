@@ -29,6 +29,49 @@ var BASE = {
     {d:17, n:'Blanco',   p:'Lateral'},   {d:18, n:'Ojeda',   p:'Delantero'}
   ],
 
+  /* ── EL PADRON ──────────────────────────────────────────────────
+     Hasta acá la identidad era el dorsal, pero un paciente particular
+     no tiene dorsal. Así que la clave pasa a ser un id propio, y el
+     dorsal queda como un dato más de los que son del plantel.
+
+     tipo: 'plantel'    juega en el club, tiene dorsal
+           'particular' viene de afuera, paga por sesión
+
+     estado: 'activo'    ya lo atendieron
+             'pendiente' se dio de alta solo y el kine todavía no lo vio
+     ──────────────────────────────────────────────────────────────── */
+  pacientes: [
+    {id:'P07', tipo:'plantel', dorsal:7,  nombre:'Tomás Duarte',
+     nacimiento:'2003-04-12', doc:'44987123', tel:'11 5555 0107',
+     email:'tduarte@mail.com', estado:'activo', alta:'2026-08-11',
+     consentimiento:{aceptado:true, fecha:'2026-08-11'}},
+    {id:'P12', tipo:'plantel', dorsal:12, nombre:'Nicolás Ibarra',
+     nacimiento:'2001-09-30', doc:'43112876', tel:'11 5555 0112',
+     email:'nibarra@mail.com', estado:'activo', alta:'2026-08-20',
+     consentimiento:{aceptado:true, fecha:'2026-08-20'}},
+    {id:'P15', tipo:'plantel', dorsal:15, nombre:'Julián Vera',
+     nacimiento:'2004-01-18', doc:'45330091', tel:'11 5555 0115',
+     email:'jvera@mail.com', estado:'activo', alta:'2026-08-24',
+     consentimiento:{aceptado:true, fecha:'2026-08-24'}},
+
+    {id:'P31', tipo:'particular', nombre:'Marcela Ríos',
+     nacimiento:'1988-06-05', doc:'33772109', tel:'11 4444 8890',
+     email:'mrios@mail.com', obra_social:'OSDE 210', estado:'activo',
+     alta:'2026-08-19', motivo:'Dolor de hombro al nadar',
+     consentimiento:{aceptado:true, fecha:'2026-08-19'}},
+    {id:'P32', tipo:'particular', nombre:'Diego Sosa',
+     nacimiento:'1975-11-22', doc:'24551038', tel:'11 3333 7712',
+     email:'dsosa@mail.com', obra_social:'Swiss Medical', estado:'activo',
+     alta:'2026-08-22', motivo:'Lumbalgia por trabajo de oficina',
+     consentimiento:{aceptado:true, fecha:'2026-08-22'}},
+    {id:'P33', tipo:'particular', nombre:'Camila Ferreyra',
+     nacimiento:'2011-03-14', doc:'56920014', tel:'11 6666 2231',
+     email:'flia.ferreyra@mail.com', obra_social:'Particular', estado:'pendiente',
+     alta:'2026-08-28', motivo:'Esguince de rodilla jugando al hockey',
+     tutor:{nombre:'Laura Ferreyra', tel:'11 6666 2231', vinculo:'Madre'},
+     consentimiento:{aceptado:true, fecha:'2026-08-28'}}
+  ],
+
   /* Lo único que ve el cuerpo técnico. Sin diagnóstico: son datos de salud. */
   disponibilidad: {
     7:  {estado:'baja',     motivo:'tobillo', desde:'2026-08-11', hasta:'2026-09-15'},
@@ -37,7 +80,7 @@ var BASE = {
   },
 
   lesiones: [
-    { id:'L1', dorsal:7, zona:'Tobillo', lado:'derecho',
+    { id:'L1', pid:'P07', dorsal:7, zona:'Tobillo', lado:'derecho',
       diagnostico:'Esguince lateral grado II',
       mecanismo:'Caída tras disputa aérea, apoyo sobre el pie de un rival.',
       fecha:'2026-08-11', fase:2, estado:'activa', alta:'2026-09-15', kine:'Vero',
@@ -54,7 +97,7 @@ var BASE = {
         {f:'2026-08-12', t:'Evaluación',  pre:7, post:6, nota:'Esguince lateral grado II. Bota diez días.'}
       ]},
 
-    { id:'L2', dorsal:12, zona:'Hombro', lado:'derecho',
+    { id:'L2', pid:'P12', dorsal:12, zona:'Hombro', lado:'derecho',
       diagnostico:'Tendinopatía del supraespinoso',
       mecanismo:'Sobrecarga por volumen de lanzamiento en la pretemporada.',
       fecha:'2026-08-20', fase:3, estado:'activa', alta:'2026-09-02', kine:'Vero',
@@ -70,7 +113,7 @@ var BASE = {
         {f:'2026-08-21', t:'Evaluación',  pre:5, post:4, nota:'Tendinopatía. Se corta el lanzamiento una semana.'}
       ]},
 
-    { id:'L3', dorsal:15, zona:'Lumbar', lado:'—',
+    { id:'L3', pid:'P15', dorsal:15, zona:'Lumbar', lado:'—',
       diagnostico:'Contractura paravertebral',
       mecanismo:'Carga acumulada: tres partidos en ocho días.',
       fecha:'2026-08-24', fase:4, estado:'activa', alta:'2026-09-05', kine:'Vero',
@@ -156,6 +199,40 @@ var FASES = [
   {n:4, t:'Reintegro',    d:'Volvés a la cancha de a poco, con volumen controlado.'},
   {n:5, t:'Alta',         d:'A competir sin restricciones.'}
 ];
+
+function paciente(id){
+  for(var i=0;i<BASE.pacientes.length;i++) if(BASE.pacientes[i].id===id) return BASE.pacientes[i];
+  return null;
+}
+function pacientePorDorsal(d){
+  for(var i=0;i<BASE.pacientes.length;i++)
+    if(BASE.pacientes[i].dorsal===d) return BASE.pacientes[i];
+  return null;
+}
+function nombrePaciente(L){
+  var p = L.pid ? paciente(L.pid) : null;
+  return p ? p.nombre : (L.dorsal ? nombre(L.dorsal) : 'Sin nombre');
+}
+function edad(nac){
+  if(!nac) return null;
+  var h = new Date(HOY), n = new Date(nac);
+  var a = h.getFullYear() - n.getFullYear();
+  var m = h.getMonth() - n.getMonth();
+  if(m < 0 || (m === 0 && h.getDate() < n.getDate())) a--;
+  return a;
+}
+function esMenor(nac){ var e = edad(nac); return e !== null && e < 18; }
+
+/* Un id nuevo para cada alta. En producción lo da Firebase con push(),
+   que garantiza que no se repita ni con dos altas al mismo tiempo. */
+function nuevoIdPaciente(){
+  var n = 34;
+  BASE.pacientes.forEach(function(p){
+    var x = parseInt(String(p.id).replace(/\D/g,''), 10);
+    if(x >= n) n = x + 1;
+  });
+  return 'P' + n;
+}
 
 function jugador(d){
   for(var i=0;i<BASE.plantel.length;i++) if(BASE.plantel[i].d===d) return BASE.plantel[i];

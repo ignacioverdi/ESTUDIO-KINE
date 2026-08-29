@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pacientes · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+</head>
+<body data-pag="pacientes">
+
+<div class="hoja">
+  <h1 class="tit">Pacientes</h1>
+  <p class="bajada">Todos los que pasaron por el estudio. Se dan de alta solos desde el
+  enlace de abajo: vos no cargás datos a mano, solo atendés.</p>
+
+  <div class="rejilla c4" style="margin-bottom:20px">
+    <div class="dato"><div class="v" id="kTotal">—</div><div class="l">En el padrón</div></div>
+    <div class="dato"><div class="v" id="kPlantel">—</div><div class="l">Del plantel</div></div>
+    <div class="dato"><div class="v" id="kPart">—</div><div class="l">Particulares</div></div>
+    <div class="dato"><div class="v" id="kPend" style="color:var(--ambar)">—</div><div class="l">Sin atender</div></div>
+  </div>
+
+  <div class="tarjeta">
+    <div class="tarjeta-cab"><h2 class="sub">El enlace para darse de alta</h2>
+      <span class="eti">Pegalo en la puerta del estudio</span></div>
+    <p style="color:var(--tinta2);font-size:14px;margin-bottom:12px">
+      Mandáselo por WhatsApp al paciente nuevo, o dejalo a la vista en la recepción.
+      Se completa en dos minutos desde el celular y queda cargado acá solo.</p>
+    <div class="fila" style="cursor:default">
+      <span class="cu mono" id="enlace" style="overflow-wrap:anywhere;font-size:14px"></span>
+      <button class="bt hueco chico" onclick="copiarEnlace()">Copiar</button>
+    </div>
+    <div class="nota bien" id="copiado" style="display:none">Copiado. Pegalo donde quieras.</div>
+  </div>
+
+  <div class="pestanias">
+    <button class="pest on" data-f="todos">Todos</button>
+    <button class="pest" data-f="pendiente">Sin atender</button>
+    <button class="pest" data-f="plantel">Plantel</button>
+    <button class="pest" data-f="particular">Particulares</button>
+  </div>
+
+  <div class="tarjeta">
+    <label class="campo"><span class="eti">Buscar</span>
+      <input type="text" id="buscar" placeholder="Nombre o documento"></label>
+    <div id="lista"></div>
+  </div>
+
+  <div id="detalle"></div>
+</div>
+
+<script>
+var filtro = 'todos', abierto = null;
+
+document.getElementById('enlace').textContent = enlaceAlta();
+function enlaceAlta(){
+  var u = location.href.split('?')[0].replace(/[^\/]*$/, 'alta.html');
+  return u.indexOf('file:') === 0 ? 'https://estudio-kine.vercel.app/alta.html' : u;
+}
+function copiarEnlace(){
+  var t = enlaceAlta();
+  if(navigator.clipboard) navigator.clipboard.writeText(t);
+  document.getElementById('copiado').style.display = 'block';
+}
+
+document.querySelectorAll('.pest[data-f]').forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll('.pest[data-f]').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on'); filtro = b.dataset.f; pintar();
+  };
+});
+document.getElementById('buscar').oninput = pintar;
+
+function pintar(){
+  var q = (document.getElementById('buscar').value || '').toLowerCase().trim();
+  var todos = BASE.pacientes;
+
+  document.getElementById('kTotal').textContent   = todos.length;
+  document.getElementById('kPlantel').textContent = todos.filter(function(p){ return p.tipo === 'plantel'; }).length;
+  document.getElementById('kPart').textContent    = todos.filter(function(p){ return p.tipo === 'particular'; }).length;
+  document.getElementById('kPend').textContent    = todos.filter(function(p){ return p.estado === 'pendiente'; }).length;
+
+  var l = todos.filter(function(p){
+    if(filtro === 'pendiente' && p.estado !== 'pendiente') return false;
+    if((filtro === 'plantel' || filtro === 'particular') && p.tipo !== filtro) return false;
+    if(q && (p.nombre + ' ' + p.doc).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+
+  document.getElementById('lista').innerHTML = l.length
+    ? l.map(function(p){
+        var L = lesionesDe(p);
+        var marca = p.estado === 'pendiente' ? '<span class="pin limitado">sin atender</span>'
+                  : (L ? '<span class="pin reservado">en tratamiento</span>'
+                       : '<span class="pin gris">al día</span>');
+        return '<button class="fila" onclick="abrir(\'' + p.id + '\')">'
+          + '<span class="hh">' + (p.tipo === 'plantel' ? '#' + (p.dorsal || '?') : 'P') + '</span>'
+          + '<span class="cu"><b>' + p.nombre + '</b><small>'
+          + (edad(p.nacimiento) !== null ? edad(p.nacimiento) + ' años · ' : '')
+          + (p.tipo === 'plantel' ? 'plantel del club' : (p.obra_social || 'particular'))
+          + '</small></span>' + marca + '</button>';
+      }).join('')
+    : '<div class="vacio"><b>Nadie con ese filtro</b>Probá con otro, o borrá la búsqueda.</div>';
+}
+
+function lesionesDe(p){
+  for(var i=0;i<BASE.lesiones.length;i++)
+    if(BASE.lesiones[i].pid === p.id && BASE.lesiones[i].estado === 'activa') return BASE.lesiones[i];
+  return null;
+}
+
+function abrir(id){
+  abierto = id;
+  var p = paciente(id), L = lesionesDe(p);
+  var menor = esMenor(p.nacimiento);
+
+  document.getElementById('detalle').innerHTML =
+    '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">' + p.nombre + '</h2>'
+    + '<span class="eti">' + p.id + '</span></div>'
+
+    + (p.estado === 'pendiente'
+        ? '<div class="nota aviso">Se dio de alta solo el ' + fechaCorta(p.alta)
+          + ' y todavía no lo atendiste. Cuando le cargues la primera sesión pasa a activo.</div>'
+        : '')
+    + (menor
+        ? '<div class="nota info">Es menor de edad. Autoriza <b>' + (p.tutor ? p.tutor.nombre : '—')
+          + '</b> (' + (p.tutor ? p.tutor.vinculo : '—') + '), tel ' + (p.tutor ? p.tutor.tel : '—') + '.</div>'
+        : '')
+
+    + '<div class="rejilla c2">'
+    + campo('Documento', p.doc) + campo('Edad', edad(p.nacimiento) + ' años')
+    + campo('Teléfono', p.tel) + campo('Correo', p.email || '—')
+    + campo(p.tipo === 'plantel' ? 'Camiseta' : 'Obra social',
+            p.tipo === 'plantel' ? '#' + (p.dorsal || '?') : (p.obra_social || 'Particular'))
+    + campo('En el padrón desde', fechaCorta(p.alta))
+    + '</div>'
+
+    + (p.motivo ? '<label class="campo"><span class="eti">Por qué vino, en sus palabras</span>'
+        + '<p style="color:var(--tinta2)">' + p.motivo + '</p></label>' : '')
+
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">'
+    + (L ? '<a class="bt" href="lesiones.html?f=' + L.id + '" style="text-decoration:none">Ver su ficha</a>'
+         : '<button class="bt" onclick="alert(\'Acá se abre el alta de lesión para este paciente.\')">Abrir una lesión</button>')
+    + '<a class="bt neutro" href="agenda.html" style="text-decoration:none">Darle un turno</a>'
+    + '<button class="bt neutro" onclick="cerrar()">Cerrar</button>'
+    + '</div></div>';
+  document.getElementById('detalle').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function campo(l, v){
+  return '<div style="margin-bottom:12px"><span class="eti">' + l + '</span>'
+       + '<div class="mono" style="font-size:15px;margin-top:3px">' + v + '</div></div>';
+}
+function cerrar(){ abierto = null; document.getElementById('detalle').innerHTML = ''; }
+
+pintar();
+</script>
+</body></html>

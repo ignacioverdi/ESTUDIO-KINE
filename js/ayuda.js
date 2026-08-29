@@ -98,6 +98,31 @@ var AYUDA = {
     ojo: 'El circuito se guarda como datos, no como imagen: posiciones, trazos y textos. Por eso después se puede animar, traducir o mostrar en el celular con el video al lado. Un PNG no permite nada de eso.'
   },
 
+  alta: {
+    titulo: 'Darse de alta',
+    que_es: 'Se completa una sola vez. Después podés pedir turno y ver tus ejercicios desde el celular.',
+    pasos: [
+      ['Decí si sos del plantel', 'Si jugás en el club te pedimos el número de camiseta. Si venís por tu cuenta, la obra social.'],
+      ['Tus datos', 'Nombre como figura en el documento, para que no queden dos fichas de la misma persona.'],
+      ['Cómo ubicarte', 'El teléfono es el que importa: por ahí te llega el aviso del turno.'],
+      ['Por qué venís', 'Contalo en tus palabras. El kinesiólogo lo lee antes de la primera sesión.'],
+      ['Autorizá', 'Sin esa tilde no podemos guardar nada: es información de salud.']
+    ],
+    ojo: 'Si sos menor de edad te vamos a pedir los datos de un adulto responsable. No es un trámite: un menor no puede autorizar su propio tratamiento.'
+  },
+
+  pacientes: {
+    titulo: 'El padrón',
+    que_es: 'Todos los que pasaron por el estudio, del plantel y particulares. Se cargan solos.',
+    pasos: [
+      ['Repartí el enlace', 'Mandáselo por WhatsApp al paciente nuevo o dejalo en la recepción. Se completa en dos minutos.'],
+      ['Mirá los que dicen "sin atender"', 'Son los que se dieron de alta y todavía no viste. Pasan a activo con la primera sesión.'],
+      ['Buscá por nombre o documento', 'Con el buscador de arriba de la lista.'],
+      ['Abrí una ficha', 'Tocá el paciente y desde ahí le abrís una lesión o le das turno.']
+    ],
+    ojo: 'Vos no cargás datos a mano: los carga el paciente. Eso evita los errores de tipeo y te ahorra el trabajo administrativo, que es donde se va el tiempo del estudio.'
+  },
+
   ejercicios: {
     titulo: 'La biblioteca del estudio',
     que_es: 'Los circuitos dibujados y los ejercicios sueltos con su video. Se filma una vez y se reusa para siempre.',

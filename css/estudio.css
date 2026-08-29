@@ -91,7 +91,7 @@ h2.sub{font-family:var(--tit);font-size:17px;font-weight:var(--tit-peso);
 .pista-vias i.ahora::after{content:'';position:absolute;left:50%;top:-7px;transform:translateX(-50%);
   border:5px solid transparent;border-top-color:var(--acc)}
 .pista-nom{display:flex;gap:3px;margin-top:7px}
-.pista-nom span{flex:1;font-family:var(--dat);font-size:9px;font-weight:500;letter-spacing:.6px;
+.pista-nom span{flex:1;font-family:var(--dat);font-size:10.5px;font-weight:500;letter-spacing:.6px;
   text-transform:uppercase;color:var(--tinta3);text-align:center;line-height:1.25}
 .pista-nom span.ahora{color:var(--acc);font-weight:600}
 .pista-solo{display:none;font-family:var(--dat);font-size:10.5px;font-weight:500;letter-spacing:1.1px;
@@ -166,10 +166,13 @@ label.campo>.eti{display:block;margin-bottom:5px}
 .panel{display:none}.panel.on{display:block}
 
 .escala{display:flex;gap:5px;flex-wrap:wrap}
-.escala button{width:34px;height:34px;border-radius:var(--r);border:var(--borde) solid var(--linea2);
+.escala button{width:38px;height:38px;border-radius:var(--r);border:var(--borde) solid var(--linea2);
   background:var(--sup2);font-family:var(--dat);font-size:13px;font-weight:600;color:var(--tinta2);cursor:pointer}
 .escala button:hover{border-color:var(--acc);color:var(--acc-texto)}
 .escala button.on{background:var(--acc);border-color:var(--acc);color:var(--sobre-acc);box-shadow:var(--fulgor)}
+/* variante con palabras en lugar de numeros (el diario diario) */
+.escala.palabras button{width:auto;flex:1;min-width:74px;height:auto;min-height:44px;
+  font-family:var(--txt);font-size:13px;font-weight:500;padding:9px 6px;line-height:1.2}
 
 .crit{display:flex;align-items:flex-start;gap:11px;padding:11px 0;
   border-bottom:var(--borde) solid var(--linea);cursor:pointer}
@@ -218,10 +221,50 @@ label.campo>.eti{display:block;margin-bottom:5px}
   .rejilla.c2,.rejilla.c3,.rejilla.c4{grid-template-columns:1fr 1fr}
   h1.tit{font-size:calc(var(--tit-tam) * .82)}
 }
-@media(max-width:560px){
+@media(max-width:640px){
+  /* Una sola columna. Con dos, las filas de turnos no entran y la
+     pagina se desborda hacia el costado. */
+  .rejilla.c2{grid-template-columns:1fr}
   .rejilla.c3,.rejilla.c4{grid-template-columns:1fr 1fr}
+  .fila{gap:10px;padding:11px 12px}
+  .fila .hh{min-width:44px}
+  .hoja{padding:18px 14px}
+  .tarjeta{padding:16px}
+}
+@media(max-width:560px){
   .pista-nom{display:none}
   .pista-solo{display:block}
+
+  /* El encabezado se partia en dos lineas. En pantalla angosta
+     alcanza con la marca, las iniciales y el boton de ayuda: el
+     subtitulo y el nombre completo se caen sin perder nada. */
+  .marca>span:last-child>span{display:none}
+  .quien{font-size:0;gap:8px}
+  .quien .av{font-size:12px}
+  .top-in{gap:10px}
+}
+
+/* ── DEDO ───────────────────────────────────────────────────────
+   En pantalla tactil todo lo que se toca sube a 44px de alto, que es
+   el minimo con el que se acierta sin errores. En monitor no hace
+   falta: el mouse apunta fino y agrandar solo ocupa lugar.          */
+@media(pointer:coarse){
+  .bt{min-height:44px}
+  .bt.chico{min-height:44px}
+  .pest{min-height:44px;display:flex;align-items:center}
+  .escala button{min-width:44px;height:44px;font-size:15px}
+  .ayuda-bt{width:44px;height:44px;font-size:18px}
+  .marca{min-height:44px}
+  /* los enlaces chiquitos del encabezado de tarjeta ("Ver agenda →")
+     median 16px de alto: imposibles de acertar con el dedo */
+  a.eti{padding:14px 0;display:inline-block}
+  .nav a{min-height:44px;display:flex;align-items:center}
+  .barra-abajo a{min-height:50px}
+  .crit{padding:14px 0}
+  .crit input{width:22px;height:22px}
+  input,select,textarea{min-height:44px;font-size:16px}
+  .quien .av{width:34px;height:34px}
+  button.fila,.at{min-height:52px}
 }
 @media print{
   .top,.nav,.barra-abajo,.bt,.pestanias,.ayuda-fondo{display:none!important}

@@ -2,6 +2,7 @@
 <html lang="es"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pizarrón · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
 <link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
@@ -31,6 +32,8 @@
   .posta-h .x:hover{color:var(--rojo)}
   .posta textarea{font-size:14px;min-height:78px;line-height:1.4}
   @media(max-width:1100px){ .taller{grid-template-columns:1fr} .paleta{grid-template-columns:repeat(8,1fr)} }
+  @media(max-width:640px){ .paleta{grid-template-columns:repeat(5,1fr)} }
+  @media(pointer:coarse){ .pz{min-height:48px} }
 </style>
 </head>
 <body data-pag="pizarron">

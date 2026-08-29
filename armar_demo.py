@@ -11,16 +11,19 @@ cada vez que se toca una pantalla.
 import io, os, re, json
 
 KIT = '.'
-PAGINAS = [
-    ('inicio',     'index.html'),
-    ('panel',      'panel.html'),
-    ('agenda',     'agenda.html'),
-    ('ficha',      'lesiones.html'),
-    ('pizarron',   'pizarron.html'),
-    ('ejercicios', 'ejercicios.html'),
-    ('mi',         'mi.html'),
-    ('diario',     'diario.html'),
-]
+# La lista NO se escribe a mano: se arma leyendo la carpeta. Escrita a
+# mano, una pantalla nueva se olvida y el archivo unico queda sin ella.
+# La clave de cada una sale de su data-pag, que es la misma que usan el
+# menu y la ayuda.
+import glob as _glob
+PAGINAS = []
+for _f in sorted(_glob.glob(os.path.join(KIT, '*.html'))):
+    _n = os.path.basename(_f)
+    if _n == 'ESTUDIO.html':
+        continue
+    _m = re.search(r'data-pag="([a-z]+)"', io.open(_f, encoding='utf-8').read())
+    if _m:
+        PAGINAS.append((_m.group(1), _n))
 
 def leer(p):
     return io.open(os.path.join(KIT, p), encoding='utf-8').read()
@@ -91,15 +94,14 @@ __BASE__
    navegador hace de router. Acá lo hacemos a mano.
    ══════════════════════════════════════════════════════════════════ */
 var PAGINAS = __PAGINAS__;
+var MAPA = __MAPA__;
 var _params = {};
 function PARAM(k){ return _params[k] || null; }
 function PARAMSET(k, v){ if(v){ _params[k] = v; } else { delete _params[k]; } }
 
 function irA(url){
   var p = String(url).split('?');
-  var clave = ({'index.html':'inicio','panel.html':'panel','agenda.html':'agenda',
-    'lesiones.html':'ficha','pizarron.html':'pizarron','ejercicios.html':'ejercicios',
-    'mi.html':'mi','diario.html':'diario'})[p[0]];
+  var clave = MAPA[p[0]];
   if(!clave) return;
   _params = {};
   if(p[1]) p[1].split('&').forEach(function(x){ var y = x.split('='); _params[y[0]] = y[1]; });
@@ -171,7 +173,8 @@ SALIDA = SALIDA.replace('__FUENTES__', ''.join('<link href="%s" rel="stylesheet"
 SALIDA = (SALIDA.replace('__CSS__', css)
                 .replace('__DATOS__', datos)
                 .replace('__BASE__', base)
-                .replace('__PAGINAS__', json.dumps(paginas, ensure_ascii=False)))
+                .replace('__PAGINAS__', json.dumps(paginas, ensure_ascii=False))
+                .replace('__MAPA__', json.dumps({a: c for c, a in PAGINAS})))
 
 io.open('ESTUDIO.html', 'w', encoding='utf-8').write(SALIDA)
 print('ESTUDIO.html — %d KB, %d pantallas' % (len(SALIDA) / 1024, len(paginas)))

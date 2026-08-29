@@ -11,6 +11,7 @@ var MENU = {
     {id:'panel',      t:'Panel',       ic:'▤', a:'panel.html'},
     {id:'agenda',     t:'Agenda',      ic:'▦', a:'agenda.html'},
     {id:'ficha',      t:'Lesiones',    ic:'✚', a:'lesiones.html'},
+    {id:'pacientes',  t:'Pacientes',   ic:'◫', a:'pacientes.html'},
     {id:'pizarron',   t:'Pizarrón',    ic:'◈', a:'pizarron.html'},
     {id:'ejercicios', t:'Ejercicios',  ic:'☰', a:'ejercicios.html'}
   ],

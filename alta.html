@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Darse de alta · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/ayuda.js"></script>
+</head>
+<body data-pag="alta">
+
+<!-- PANTALLA PUBLICA — no lleva base.js a propósito: es pública. El que entra
+     todavía no es paciente y no tiene rol, así que no hay menú ni sesión.
+     Se llega por un enlace o un código QR pegado en el estudio. -->
+
+<div class="top"><div class="top-in">
+  <a class="marca" href="index.html"><span class="sig"></span>
+  <span><b>ESTUDIO</b><span>Kinesiología del club</span></span></a>
+  <div class="quien" style="margin-left:auto">
+    <button class="ayuda-bt" onclick="abrirAyuda('alta')" title="Cómo funciona">?</button>
+  </div>
+</div></div>
+
+<div class="hoja angosta" id="todo"></div>
+
+<script>
+var F = {};
+
+function pintar(){
+  document.getElementById('todo').innerHTML =
+
+    '<h1 class="tit">Darse de alta</h1>'
+    + '<p class="bajada">Completá esto una sola vez. Después vas a poder pedir turno, '
+    + 'ver tus ejercicios y seguir tu recuperación desde el celular.</p>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Quién sos</h2></div>'
+
+    + '<label class="campo"><span class="eti">¿Sos del plantel del club?</span>'
+    + '<div class="pestanias" id="tipo" style="margin-bottom:0">'
+    + '<button class="pest" data-t="plantel">Sí, juego en el club</button>'
+    + '<button class="pest" data-t="particular">No, vengo por mi cuenta</button>'
+    + '</div></label>'
+
+    + '<div id="camposTipo"></div>'
+
+    + '<label class="campo"><span class="eti">Nombre y apellido</span>'
+    + '<input type="text" id="f_nombre" placeholder="Como figura en tu documento"></label>'
+
+    + '<div class="rejilla c2">'
+    + '<label class="campo"><span class="eti">Documento</span>'
+    + '<input type="text" id="f_doc" inputmode="numeric" placeholder="Sin puntos"></label>'
+    + '<label class="campo"><span class="eti">Fecha de nacimiento</span>'
+    + '<input type="date" id="f_nac" onchange="revisarEdad()"></label>'
+    + '</div>'
+
+    + '<div id="cajaTutor"></div>'
+    + '</div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Cómo te ubicamos</h2>'
+    + '<span class="eti">Para el aviso del turno</span></div>'
+    + '<div class="rejilla c2">'
+    + '<label class="campo"><span class="eti">Teléfono</span>'
+    + '<input type="text" id="f_tel" inputmode="tel" placeholder="11 5555 0000"></label>'
+    + '<label class="campo"><span class="eti">Correo</span>'
+    + '<input type="text" id="f_mail" inputmode="email" placeholder="vos@mail.com"></label>'
+    + '</div>'
+    + '<label class="campo"><span class="eti">¿Por qué venís? (en tus palabras)</span>'
+    + '<textarea id="f_motivo" placeholder="Me duele el hombro cuando levanto el brazo, hace tres semanas..."></textarea></label>'
+    + '</div>'
+
+    /* El consentimiento no es un trámite: son datos de salud y sin esto
+       no se pueden guardar. Va explicado en castellano, no en jurídico. */
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Tus datos</h2></div>'
+    + '<p style="color:var(--tinta2);font-size:14px;margin-bottom:14px">'
+    + 'Lo que cargues acá es información de salud y se trata como tal. '
+    + 'Lo ve el kinesiólogo que te atiende y lo ves vos. Nadie más: ni el entrenador, '
+    + 'ni los otros pacientes. Si sos del plantel, el cuerpo técnico ve solamente si '
+    + 'estás disponible para entrenar, nunca tu diagnóstico.</p>'
+    + '<label class="crit"><input type="checkbox" id="f_ok">'
+    + '<span>Entiendo y autorizo al estudio a guardar mis datos para mi tratamiento.</span></label>'
+    + '</div>'
+
+    + '<div id="aviso"></div>'
+    + '<button class="bt ancho" onclick="enviar()">Darme de alta</button>'
+    + '<p style="text-align:center;color:var(--tinta3);font-size:13px;margin-top:14px">'
+    + '¿Ya te diste de alta antes? <a href="index.html" style="color:var(--acc-texto)">Entrá por acá</a></p>';
+
+  document.querySelectorAll('#tipo .pest').forEach(function(b){
+    b.onclick = function(){
+      document.querySelectorAll('#tipo .pest').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on'); F.tipo = b.dataset.t; pintarTipo();
+    };
+  });
+  if(F.tipo){
+    var sel = document.querySelector('#tipo .pest[data-t=' + F.tipo + ']');
+    if(sel) sel.classList.add('on');
+    pintarTipo();
+  }
+  ['nombre','doc','nac','tel','mail','motivo'].forEach(function(k){
+    var e = document.getElementById('f_' + k);
+    if(e && F[k]) e.value = F[k];
+    if(e) e.oninput = function(){ F[k] = e.value; };
+  });
+  if(F.nac) revisarEdad();
+}
+
+function pintarTipo(){
+  var c = document.getElementById('camposTipo');
+  if(F.tipo === 'plantel'){
+    c.innerHTML = '<label class="campo"><span class="eti">Tu número de camiseta</span>'
+      + '<input type="number" id="f_dorsal" inputmode="numeric" placeholder="Ej: 7"></label>';
+    var e = document.getElementById('f_dorsal');
+    if(F.dorsal) e.value = F.dorsal;
+    e.oninput = function(){ F.dorsal = e.value; };
+  }else if(F.tipo === 'particular'){
+    c.innerHTML = '<label class="campo"><span class="eti">Obra social o prepaga</span>'
+      + '<input type="text" id="f_obra" placeholder="Si no tenés, poné Particular"></label>';
+    var o = document.getElementById('f_obra');
+    if(F.obra) o.value = F.obra;
+    o.oninput = function(){ F.obra = o.value; };
+  }else{
+    c.innerHTML = '';
+  }
+}
+
+/* Si el paciente es menor, hacen falta los datos de quien lo autoriza.
+   No es opcional: un menor no puede consentir su propio tratamiento. */
+function revisarEdad(){
+  var e = document.getElementById('f_nac');
+  F.nac = e.value;
+  var caja = document.getElementById('cajaTutor');
+  if(F.nac && esMenor(F.nac)){
+    if(caja.innerHTML) return;
+    caja.innerHTML =
+      '<div class="nota info">Sos menor de edad, así que necesitamos los datos '
+      + 'de tu mamá, tu papá o quien te acompañe.</div>'
+      + '<div class="rejilla c2">'
+      + '<label class="campo"><span class="eti">Nombre del adulto</span>'
+      + '<input type="text" id="f_tutor"></label>'
+      + '<label class="campo"><span class="eti">Su teléfono</span>'
+      + '<input type="text" id="f_tutortel" inputmode="tel"></label></div>'
+      + '<label class="campo"><span class="eti">¿Qué es tuyo?</span>'
+      + '<input type="text" id="f_vinculo" placeholder="Madre, padre, tutor..."></label>';
+    ['tutor','tutortel','vinculo'].forEach(function(k){
+      var x = document.getElementById('f_' + k);
+      if(F[k]) x.value = F[k];
+      x.oninput = function(){ F[k] = x.value; };
+    });
+  }else{
+    caja.innerHTML = '';
+  }
+}
+
+/* Al enviar, TODO se lee del formulario y nada de la memoria.
+   Guardar en memoria depende de que el usuario tipee, y el celular
+   muchas veces autocompleta sin disparar ese aviso: el campo se ve
+   lleno en pantalla y el sistema lo cree vacío. */
+function leer(id){ var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
+
+function enviar(){
+  var av = document.getElementById('aviso'), falta = [];
+  F.nombre   = leer('f_nombre');
+  F.doc      = leer('f_doc');
+  F.nac      = leer('f_nac');
+  F.tel      = leer('f_tel');
+  F.motivo   = leer('f_motivo');
+  F.dorsal   = leer('f_dorsal');
+  F.obra     = leer('f_obra');
+  F.tutor    = leer('f_tutor');
+  F.tutortel = leer('f_tutortel');
+  F.vinculo  = leer('f_vinculo');
+
+  if(!F.tipo)             falta.push('si sos del plantel o venís por tu cuenta');
+  if(F.nombre.length < 4) falta.push('tu nombre y apellido');
+  if(F.doc.length < 6)    falta.push('tu documento');
+  if(!F.nac)              falta.push('tu fecha de nacimiento');
+  if(F.tel.length < 6)    falta.push('un teléfono');
+  if(F.nac && esMenor(F.nac) && !F.tutor)
+    falta.push('el nombre del adulto responsable');
+  if(!document.getElementById('f_ok').checked)
+    falta.push('tu autorización para guardar los datos');
+
+  if(falta.length){
+    av.innerHTML = '<div class="nota aviso">Falta ' + falta.join(', ') + '.</div>';
+    av.scrollIntoView({block:'center'});
+    return;
+  }
+
+  /* Mismo documento = misma persona. Evita que alguien se cargue dos veces
+     y termine con dos historias clínicas partidas al medio. */
+  var repetido = null;
+  BASE.pacientes.forEach(function(p){ if(p.doc === F.doc) repetido = p; });
+  if(repetido){
+    av.innerHTML = '<div class="nota info">Ya estás en el sistema, ' + repetido.nombre.split(' ')[0]
+      + '. No hace falta que te des de alta de nuevo — '
+      + '<a href="index.html" style="color:var(--acc-texto)">entrá por acá</a>.</div>';
+    av.scrollIntoView({block:'center'});
+    return;
+  }
+
+  var nuevo = {
+    id: nuevoIdPaciente(),
+    tipo: F.tipo,
+    nombre: F.nombre,
+    nacimiento: F.nac,
+    doc: F.doc,
+    tel: F.tel,
+    email: leer('f_mail'),
+    motivo: F.motivo,
+    estado: 'pendiente',
+    alta: HOY,
+    consentimiento: {aceptado:true, fecha:HOY}
+  };
+  if(F.tipo === 'plantel' && F.dorsal) nuevo.dorsal = +F.dorsal;
+  if(F.tipo === 'particular') nuevo.obra_social = F.obra || 'Particular';
+  if(esMenor(F.nac)) nuevo.tutor = {nombre:F.tutor, tel:F.tutortel || F.tel, vinculo:F.vinculo || '—'};
+
+  BASE.pacientes.push(nuevo);
+  guardar('kine/pacientes/' + nuevo.id, nuevo);
+  try{ ponerRol('jugador'); localStorage.setItem('estudio_pid', nuevo.id); }catch(e){}
+
+  document.getElementById('todo').innerHTML =
+    '<div class="tarjeta" style="margin-top:30px">'
+    + '<div class="vacio"><b>Listo, ' + F.nombre.split(' ')[0] + '</b>'
+    + 'Ya estás en el sistema. El kinesiólogo te va a ver en la lista y '
+    + 'podés pedir turno cuando quieras.</div>'
+    + '<a class="bt ancho" href="agenda.html" style="text-decoration:none;text-align:center">Pedir mi primer turno</a>'
+    + '<a class="bt neutro ancho" href="index.html" style="text-decoration:none;text-align:center;margin-top:8px">Ir al inicio</a>'
+    + '</div>';
+  scrollTo(0, 0);
+}
+
+pintar();
+</script>
+</body></html>
