@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Caja · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script>
+<script src="js/qr.js"></script><script src="js/historia.js"></script>
+<script src="js/dinero.js"></script><script src="js/atender.js"></script>
+<script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<style>
+  .barras{display:flex;align-items:flex-end;gap:6px;height:120px;margin:10px 0 6px}
+  .barras div{flex:1;border-radius:3px 3px 0 0;min-height:2px;position:relative}
+  .barras .ing{background:var(--verde)}
+  .barras .egr{background:var(--rojo);opacity:.75}
+  .barras-pie{display:flex;gap:6px}
+  .barras-pie span{flex:1;text-align:center;font-family:var(--dat);font-size:10px;color:var(--tinta3)}
+</style>
+</head>
+<body data-pag="caja">
+
+<div class="hoja">
+  <h1 class="tit">Caja</h1>
+  <p class="bajada">Lo que entra y lo que sale. Las sesiones y los planes se anotan solos;
+  los gastos los cargás vos.</p>
+
+  <div class="rejilla c4" style="margin-bottom:20px">
+    <div class="dato"><div class="v" id="kIng" style="color:var(--verde)">—</div><div class="l">Ingresos del mes</div></div>
+    <div class="dato"><div class="v" id="kEgr" style="color:var(--rojo)">—</div><div class="l">Egresos del mes</div></div>
+    <div class="dato"><div class="v" id="kSal">—</div><div class="l">Saldo</div></div>
+    <div class="dato"><div class="v" id="kAus" style="color:var(--ambar)">—</div><div class="l">Ausencias</div></div>
+  </div>
+
+  <div class="rejilla c2">
+    <div class="tarjeta">
+      <div class="tarjeta-cab"><h2 class="sub">Los últimos seis meses</h2>
+        <span class="eti">Verde entra · rojo sale</span></div>
+      <div class="barras" id="barras"></div>
+      <div class="barras-pie" id="barrasPie"></div>
+    </div>
+
+    <div class="tarjeta">
+      <div class="tarjeta-cab"><h2 class="sub">Anotar un movimiento</h2></div>
+      <div class="pestanias" id="tipoMov" style="margin-bottom:12px">
+        <button class="pest on" data-t="egreso">Un gasto</button>
+        <button class="pest" data-t="ingreso">Un cobro suelto</button>
+      </div>
+      <label class="campo"><span class="eti">Concepto</span>
+        <input type="text" id="mConcepto" placeholder="Alquiler, camilla, insumos..."></label>
+      <label class="campo"><span class="eti">Monto</span>
+        <input type="number" id="mMonto" inputmode="numeric" placeholder="0"></label>
+      <div id="avisoMov"></div>
+      <button class="bt ancho" onclick="anotar()">Anotar</button>
+    </div>
+  </div>
+
+  <div class="tarjeta">
+    <div class="tarjeta-cab"><h2 class="sub">Planes de cada paciente</h2>
+      <span class="eti">El crédito se descuenta al atender, no al reservar</span></div>
+    <div id="planes"></div>
+  </div>
+
+  <div class="tarjeta">
+    <div class="tarjeta-cab"><h2 class="sub">Movimientos del mes</h2>
+      <span class="eti" id="cuentaMov"></span></div>
+    <div id="lista"></div>
+  </div>
+</div>
+
+<script>
+var tipoMov = 'egreso';
+
+/* Algunos movimientos de ejemplo, para que la pantalla tenga qué mostrar. */
+if(!movimientos().length){
+  [['2026-08-02','egreso','Alquiler del local',420000,'fijos'],
+   ['2026-08-03','ingreso','Plan de 10 — Marcela Ríos',150000,'planes'],
+   ['2026-08-05','egreso','Insumos: vendas y bandas',38000,'insumos'],
+   ['2026-08-08','ingreso','Sesión suelta — Diego Sosa',18000,'sesiones'],
+   ['2026-08-12','ingreso','Plan de 10 — Camila Ferreyra',150000,'planes'],
+   ['2026-08-14','egreso','Luz y gas',56000,'fijos'],
+   ['2026-08-19','ingreso','Sesión suelta — Diego Sosa',18000,'sesiones'],
+   ['2026-08-21','ingreso','Convenio con el club — agosto',380000,'club'],
+   ['2026-08-24','egreso','Camilla nueva',290000,'equipamiento'],
+   ['2026-08-26','ingreso','Sesión suelta — Diego Sosa',18000,'sesiones']
+  ].forEach(function(m){
+    movimientos().push({id:'M'+m[0]+m[3], fecha:m[0], tipo:m[1], concepto:m[2],
+                        monto:m[3], categoria:m[4], metodo:'efectivo', pid:null});
+  });
+  /* meses anteriores, solo para el gráfico */
+  [['2026-03',980000,640000],['2026-04',1120000,690000],['2026-05',1040000,720000],
+   ['2026-06',1260000,700000],['2026-07',1180000,760000]].forEach(function(m){
+    movimientos().push({id:'H'+m[0]+'i', fecha:m[0]+'-15', tipo:'ingreso',
+                        concepto:'Cierre de mes', monto:m[1], categoria:'historico'});
+    movimientos().push({id:'H'+m[0]+'e', fecha:m[0]+'-15', tipo:'egreso',
+                        concepto:'Cierre de mes', monto:m[2], categoria:'historico'});
+  });
+}
+
+document.querySelectorAll('#tipoMov .pest').forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll('#tipoMov .pest').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on'); tipoMov = b.dataset.t;
+  };
+});
+
+function anotar(){
+  var c = (document.getElementById('mConcepto').value || '').trim();
+  var m = +document.getElementById('mMonto').value;
+  if(!c || !m){
+    document.getElementById('avisoMov').innerHTML =
+      '<div class="nota aviso">Poné un concepto y un monto.</div>';
+    return;
+  }
+  anotarMovimiento({tipo:tipoMov, concepto:c, monto:m});
+  document.getElementById('mConcepto').value = '';
+  document.getElementById('mMonto').value = '';
+  document.getElementById('avisoMov').innerHTML = '';
+  pintar();
+}
+
+function pintar(){
+  var r = resumenMes(), t = estadisticaTurnos();
+  document.getElementById('kIng').textContent = plata(r.ingresos);
+  document.getElementById('kEgr').textContent = plata(r.egresos);
+  document.getElementById('kSal').textContent = plata(r.saldo);
+  document.getElementById('kSal').style.color = r.saldo >= 0 ? 'var(--verde)' : 'var(--rojo)';
+  document.getElementById('kAus').textContent = t.porcentajeAusencia + '%';
+
+  /* gráfico de seis meses */
+  var meses = [], d = new Date(HOY);
+  for(var i = 5; i >= 0; i--){
+    var x = new Date(d.getFullYear(), d.getMonth() - i, 1);
+    meses.push(x.toISOString().slice(0, 7));
+  }
+  var datos = meses.map(function(m){ return resumenMes(m); });
+  var tope = Math.max.apply(null, datos.map(function(x){ return Math.max(x.ingresos, x.egresos); })) || 1;
+
+  document.getElementById('barras').innerHTML = datos.map(function(x){
+    return '<div style="display:flex;gap:3px;align-items:flex-end;height:100%">'
+      + '<div class="ing" style="flex:1;height:' + Math.max(2, x.ingresos/tope*100) + '%" '
+      + 'title="' + plata(x.ingresos) + '"></div>'
+      + '<div class="egr" style="flex:1;height:' + Math.max(2, x.egresos/tope*100) + '%" '
+      + 'title="' + plata(x.egresos) + '"></div></div>';
+  }).join('');
+  var M = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  document.getElementById('barrasPie').innerHTML = meses.map(function(m){
+    return '<span>' + M[+m.slice(5) - 1] + '</span>';
+  }).join('');
+
+  /* planes */
+  document.getElementById('planes').innerHTML = BASE.pacientes.map(function(p){
+    var pl = planDe(p), av = avisoCreditos(p);
+    return '<div class="fila" style="cursor:default;flex-wrap:wrap">'
+      + '<span class="hh">' + (p.dorsal ? '#' + p.dorsal : 'P') + '</span>'
+      + '<span class="cu"><b>' + p.nombre + '</b><small>' + pl.nombre
+      + (pl.precio ? ' · ' + plata(pl.precio) : '') + '</small></span>'
+      + (av ? '<span class="pin ' + (av.nivel === 'reserva' ? 'ausente'
+              : av.nivel === 'aviso' ? 'limitado' : 'atendido') + '">'
+              + (p.creditos || 0) + ' sesiones</span>'
+            : '<span class="pin gris">' + (pl.precio ? 'sin créditos' : 'lo cubre el club') + '</span>')
+      + '<button class="bt hueco chico" onclick="cambiarPlan(\'' + p.id + '\')">Cambiar plan</button>'
+      + '</div>';
+  }).join('');
+
+  /* movimientos */
+  var m = delMes().filter(function(x){ return x.categoria !== 'historico'; })
+                  .sort(function(a, b){ return a.fecha < b.fecha ? 1 : -1; });
+  document.getElementById('cuentaMov').textContent = m.length + ' movimientos';
+  document.getElementById('lista').innerHTML = m.length
+    ? m.map(function(x){
+        return '<div class="fila" style="cursor:default">'
+          + '<span class="hh">' + fechaCorta(x.fecha) + '</span>'
+          + '<span class="cu"><b>' + x.concepto + '</b><small>' + x.categoria + '</small></span>'
+          + '<span class="pin ' + (x.tipo === 'ingreso' ? 'atendido' : 'ausente') + '">'
+          + (x.tipo === 'ingreso' ? '+' : '−') + plata(x.monto) + '</span></div>';
+      }).join('')
+    : '<div class="vacio"><b>Sin movimientos este mes</b>Anotá el primero arriba.</div>';
+}
+
+function cambiarPlan(pid){
+  var p = paciente(pid);
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo'; caja.id = 'cajaPlan';
+  caja.innerHTML = '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarPlan()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Plan</span><h2>' + p.nombre + '</h2>'
+    + '<p>Hoy tiene: ' + planDe(p).nombre + ', con ' + (p.creditos || 0) + ' sesiones.</p>'
+    + Object.keys(PLANES).map(function(k){
+        var pl = PLANES[k];
+        return '<button class="fila" onclick="asignar(\'' + pid + '\',\'' + k + '\')">'
+          + '<span class="cu"><b>' + pl.nombre + '</b><small>' + pl.detalle + '</small></span>'
+          + '<span class="pin ' + (k === p.plan ? 'reservado' : 'gris') + '">'
+          + (pl.precio ? plata(pl.precio) : 'sin cargo') + '</span></button>';
+      }).join('')
+    + '<div class="nota info" style="margin-top:14px">Al asignar un plan con precio se anota '
+    + 'el cobro en la caja automáticamente.</div></div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarPlan(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+}
+function cerrarPlan(){
+  var c = document.getElementById('cajaPlan');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+function asignar(pid, clave){
+  venderPlan(pid, clave);
+  cerrarPlan();
+  pintar();
+}
+
+pintar();
+</script>
+</body></html>

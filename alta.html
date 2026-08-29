@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/ayuda.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script>
 </head>
 <body data-pag="alta">
 
@@ -46,6 +46,20 @@ function pintar(){
 
     + '<div id="camposTipo"></div>'
 
+    + '<div style="display:flex;gap:16px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'
+    + (F.foto ? '<img src="' + F.foto + '" style="width:86px;height:86px;border-radius:50%;'
+        + 'object-fit:cover;border:2px solid var(--acc)">'
+        : '<div style="width:86px;height:86px;border-radius:50%;border:2px dashed var(--linea2);'
+        + 'background:var(--sup2);display:flex;align-items:center;justify-content:center;'
+        + 'color:var(--tinta3);font-family:var(--dat);font-size:10px">SIN FOTO</div>')
+    + '<div style="flex:1;min-width:180px">'
+    + '<input type="file" id="f_foto" accept="image/*" capture="user" style="display:none" '
+    + 'onchange="subirFoto(this)">'
+    + '<button class="bt hueco chico" onclick="document.getElementById(\'f_foto\').click()">'
+    + (F.foto ? 'Cambiar la foto' : 'Sacate una foto') + '</button>'
+    + '<p style="font-size:12.5px;color:var(--tinta3);margin-top:8px">Es optativa. Sirve para '
+    + 'que el kinesiólogo te reconozca cuando llegás.</p></div></div>'
+
     + '<label class="campo"><span class="eti">Nombre y apellido</span>'
     + '<input type="text" id="f_nombre" placeholder="Como figura en tu documento"></label>'
 
@@ -72,6 +86,32 @@ function pintar(){
     + '<textarea id="f_motivo" placeholder="Me duele el hombro cuando levanto el brazo, hace tres semanas..."></textarea></label>'
     + '</div>'
 
+    /* Admisión. Estos datos cambian el tratamiento: no es lo mismo un
+       dolor lumbar en alguien que pasa ocho horas sentado que en un
+       jugador de hockey. Y los antecedentes quirúrgicos pueden
+       contraindicar ejercicios enteros. */
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Tu vida y tu deporte</h2>'
+    + '<span class="eti">Cambia el tratamiento</span></div>'
+    + '<div class="rejilla c2">'
+    + '<label class="campo"><span class="eti">¿De qué trabajás?</span>'
+    + '<input type="text" id="f_ocupacion" placeholder="Contador, docente, albañil..."></label>'
+    + '<label class="campo"><span class="eti">¿Qué deporte hacés?</span>'
+    + '<input type="text" id="f_deporte" placeholder="Fútbol, natación, ninguno..."></label>'
+    + '</div>'
+    + '<label class="campo"><span class="eti">¿Con qué frecuencia?</span>'
+    + '<div class="pestanias" id="frec" style="margin-bottom:0">'
+    + ['Sedentario','1 a 2 por semana','3 a 4 por semana','5 o más','Todos los días'].map(function(x){
+        return '<button class="pest" data-f="' + x + '">' + x + '</button>';
+      }).join('') + '</div></label>'
+    + '<label class="campo"><span class="eti">Cirugías o lesiones anteriores</span>'
+    + '<textarea id="f_antecedentes" placeholder="Operación de menisco en 2019, esguinces de tobillo a repetición... Si no tuviste, poné ninguna."></textarea></label>'
+    + '<label class="campo"><span class="eti">¿Qué querés poder volver a hacer?</span>'
+    + '<textarea id="f_objetivos" placeholder="Correr 10 kilómetros, levantar a mi hija, jugar el torneo de primavera..."></textarea></label>'
+    + '<div class="nota info" style="margin-bottom:0">Esta última es la más importante. '
+    + 'Es contra lo que se va a medir si el tratamiento sirvió.</div>'
+    + '</div>'
+
     /* El consentimiento no es un trámite: son datos de salud y sin esto
        no se pueden guardar. Va explicado en castellano, no en jurídico. */
     + '<div class="tarjeta">'
@@ -90,6 +130,13 @@ function pintar(){
     + '<p style="text-align:center;color:var(--tinta3);font-size:13px;margin-top:14px">'
     + '¿Ya te diste de alta antes? <a href="index.html" style="color:var(--acc-texto)">Entrá por acá</a></p>';
 
+  document.querySelectorAll('#frec .pest').forEach(function(b){
+    if(F.frecuencia === b.dataset.f) b.classList.add('on');
+    b.onclick = function(){
+      document.querySelectorAll('#frec .pest').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on'); F.frecuencia = b.dataset.f;
+    };
+  });
   document.querySelectorAll('#tipo .pest').forEach(function(b){
     b.onclick = function(){
       document.querySelectorAll('#tipo .pest').forEach(function(x){ x.classList.remove('on'); });
@@ -101,7 +148,7 @@ function pintar(){
     if(sel) sel.classList.add('on');
     pintarTipo();
   }
-  ['nombre','doc','nac','tel','mail','motivo'].forEach(function(k){
+  ['nombre','doc','nac','tel','mail','motivo','ocupacion','deporte','antecedentes','objetivos'].forEach(function(k){
     var e = document.getElementById('f_' + k);
     if(e && F[k]) e.value = F[k];
     if(e) e.oninput = function(){ F[k] = e.value; };
@@ -162,6 +209,28 @@ function revisarEdad(){
    lleno en pantalla y el sistema lo cree vacío. */
 function leer(id){ var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
 
+/* La foto se achica a 300 píxeles antes de guardarse. Una foto de
+   celular pesa cuatro megas; así pesa treinta kilos. */
+function subirFoto(input){
+  var f = input.files && input.files[0];
+  if(!f) return;
+  var lector = new FileReader();
+  lector.onload = function(ev){
+    var img = new Image();
+    img.onload = function(){
+      var esc = Math.min(1, 300 / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width * esc);
+      c.height = Math.round(img.height * esc);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      F.foto = c.toDataURL('image/jpeg', 0.8);
+      pintar();
+    };
+    img.src = ev.target.result;
+  };
+  lector.readAsDataURL(f);
+}
+
 function enviar(){
   var av = document.getElementById('aviso'), falta = [];
   F.nombre   = leer('f_nombre');
@@ -174,6 +243,10 @@ function enviar(){
   F.tutor    = leer('f_tutor');
   F.tutortel = leer('f_tutortel');
   F.vinculo  = leer('f_vinculo');
+  F.ocupacion    = leer('f_ocupacion');
+  F.deporte      = leer('f_deporte');
+  F.antecedentes = leer('f_antecedentes');
+  F.objetivos    = leer('f_objetivos');
 
   if(!F.tipo)             falta.push('si sos del plantel o venís por tu cuenta');
   if(F.nombre.length < 4) falta.push('tu nombre y apellido');
@@ -214,6 +287,13 @@ function enviar(){
     motivo: F.motivo,
     estado: 'pendiente',
     alta: HOY,
+    ocupacion: F.ocupacion || '—',
+    deporte: F.deporte || '—',
+    frecuencia: F.frecuencia || '—',
+    antecedentes: F.antecedentes || 'No declaró.',
+    objetivos: F.objetivos || '—',
+    plan: 'sesion', creditos: 0,
+    foto: F.foto || null,
     consentimiento: {aceptado:true, fecha:HOY}
   };
   if(F.tipo === 'plantel' && F.dorsal) nuevo.dorsal = +F.dorsal;
@@ -222,7 +302,22 @@ function enviar(){
 
   BASE.pacientes.push(nuevo);
   guardar('kine/pacientes/' + nuevo.id, nuevo);
+
+  /* Primeros dos asientos de la historia: el alta y el consentimiento.
+     El consentimiento es un asiento propio porque la ley pide que conste
+     de forma expresa y destacada, con fecha. */
   try{ ponerRol('jugador'); localStorage.setItem('estudio_pid', nuevo.id); }catch(e){}
+  asentar(nuevo.id, 'alta_paciente',
+          'Se dio de alta en el padrón como ' + (nuevo.tipo === 'plantel' ? 'jugador del plantel' : 'paciente particular')
+          + '. Ocupación: ' + nuevo.ocupacion + '. Deporte: ' + nuevo.deporte
+          + ' (' + nuevo.frecuencia + '). Antecedentes: ' + nuevo.antecedentes
+          + ' Motivo de consulta declarado: ' + (nuevo.motivo || 'no lo indicó')
+          + '. Objetivo del paciente: ' + nuevo.objetivos);
+  asentar(nuevo.id, 'consentimiento',
+          'Otorgó consentimiento informado para el tratamiento de sus datos de salud'
+          + (esMenor(nuevo.nac || F.nac) && nuevo.tutor
+             ? ', con autorización de ' + nuevo.tutor.nombre + ' (' + nuevo.tutor.vinculo + ')' : '')
+          + '.');
 
   document.getElementById('todo').innerHTML =
     '<div class="tarjeta" style="margin-top:30px">'

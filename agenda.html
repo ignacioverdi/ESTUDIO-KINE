@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="agenda">
 
@@ -77,24 +77,157 @@ function pintar(){
     var mio = t.dorsal === miDorsal();
     return '<button class="fila" onclick="' + (esKine && L ? 'irA(\'lesiones.html?f=' + L.id + '\')' : 'void 0') + '">'
       + '<span class="hh">' + t.h + '</span>'
-      + '<span class="cu"><b>' + (esKine ? nombre(t.dorsal) : 'Tu turno') + '</b>'
+      + '<span class="cu"><b>' + (esKine ? (t.pid ? paciente(t.pid).nombre : nombre(t.dorsal)) : 'Tu turno') + '</b>'
       + '<small>' + t.tipo + (esKine && L ? ' · ' + L.zona.toLowerCase() : ' · con Vero') + '</small></span>'
       + '<span class="pin ' + (mio && !esKine ? 'reservado' : t.estado) + '">'
-      + (mio && !esKine ? 'tuyo' : t.estado) + '</span></button>';
+      + (mio && !esKine ? 'tuyo' : t.estado) + '</span>'
+      + (esKine && t.estado === 'reservado'
+          ? '<button class="bt hueco chico" onclick="event.stopPropagation();atender(dia,\'' + t.h + '\')">Atender</button>'
+          : '')
+      + '</button>';
   }).join('');
 }
+
+/* Antes esto pedía el dorsal con una ventanita del navegador. No servía:
+   los pacientes particulares no tienen dorsal, y había que acordarse el
+   número de memoria. Ahora se elige del padrón. */
+var TURNO = null;
 
 function reservar(i){
   var t = (BASE.agenda[dia] || [])[i];
   if(!t) return;
-  if(esKine){
-    var d = prompt('¿Qué dorsal asignás a las ' + t.h + '?');
-    if(!d) return;
-    t.dorsal = +d; t.tipo = 'Tratamiento'; t.estado = 'reservado';
-  }else{
+
+  if(!esKine){
+    var p = pacientePorDorsal(miDorsal());
+    t.pid = p ? p.id : null;
     t.dorsal = miDorsal(); t.tipo = 'Tratamiento'; t.estado = 'reservado';
+    guardar('kine/agenda/turnos/' + dia + '/' + t.h,
+            {pid:t.pid, dorsal:t.dorsal, tipo:t.tipo, estado:'reservado'});
+    if(p) asentar(p.id, 'turno', 'Reservó turno para el ' + fechaLarga(dia) + ' a las ' + t.h + '.');
+    avisarDelTurno(p, dia, t.h);
+    pintar();
+    return;
   }
-  guardar('kine/agenda/turnos/' + dia + '/' + t.h, {dorsal:t.dorsal, estado:'reservado'});
+
+  TURNO = {i: i, hora: t.h, pid: null, tipo: 'Tratamiento'};
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo';
+  caja.id = 'cajaTurno';
+  caja.innerHTML =
+    '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarTurno()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Turno nuevo</span>'
+    + '<h2>' + t.h + '</h2>'
+    + '<p>' + (dia === HOY ? 'Viernes 28 de agosto' : 'Lunes 31 de agosto') + '</p>'
+
+    + '<label class="campo"><span class="eti">Quién viene</span>'
+    + '<select id="tPac"><option value="">Elegí un paciente</option>'
+    + BASE.pacientes.map(function(p){
+        var l = lesionDePaciente(p.id);
+        return '<option value="' + p.id + '">' + p.nombre
+             + (p.dorsal ? ' (#' + p.dorsal + ')' : '')
+             + (l ? ' — ' + l.zona.toLowerCase() : '') + '</option>';
+      }).join('') + '</select></label>'
+
+    + '<label class="campo"><span class="eti">Qué tipo de sesión</span>'
+    + '<div class="pestanias" id="tTipo" style="margin-bottom:0">'
+    + ['Evaluación','Tratamiento','Gimnasio','Campo'].map(function(x){
+        return '<button class="pest' + (x === 'Tratamiento' ? ' on' : '') + '" data-t="' + x + '">' + x + '</button>';
+      }).join('') + '</div></label>'
+
+    + '<div id="avisoTurno"></div>'
+    + '<button class="bt ancho" onclick="guardarTurno()">Dar el turno</button>'
+    + '</div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarTurno(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+
+  document.querySelectorAll('#tTipo .pest').forEach(function(b){
+    b.onclick = function(){
+      document.querySelectorAll('#tTipo .pest').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on'); TURNO.tipo = b.dataset.t;
+    };
+  });
+}
+
+/* Cuando un paciente reserva, el kinesiólogo se tiene que enterar.
+   Hasta que estén los avisos push, se le arma el mensaje de WhatsApp y
+   se le ofrece mandarlo: un toque, sin copiar y pegar nada. */
+function avisarDelTurno(p, fecha, hora){
+  if(!p) return;
+  var telKine = (BASE.perfil && BASE.perfil.tel) ? BASE.perfil.tel.replace(/\D/g,'') : '';
+  var txt = 'Turno nuevo: ' + p.nombre + ' reservó para el ' + fechaLarga(fecha)
+          + ' a las ' + hora + '. Teléfono: ' + p.tel + '.';
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo'; caja.id = 'cajaAviso';
+  caja.innerHTML = '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarAviso()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Turno reservado</span>'
+    + '<h2>' + hora + ' · ' + fechaLarga(fecha) + '</h2>'
+    + '<div class="nota bien">Listo. Te va a llegar un recordatorio una hora antes.</div>'
+    + '<p>Si querés, avisale al estudio ahora mismo:</p>'
+    + '<a class="bt ancho" style="text-decoration:none;text-align:center" target="_blank" rel="noopener" '
+    + 'href="https://wa.me/' + telKine + '?text=' + encodeURIComponent(txt) + '">Avisar por WhatsApp</a>'
+    + '<button class="bt neutro ancho" style="margin-top:8px" onclick="cerrarAviso()">Listo</button>'
+    + '</div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarAviso(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+}
+function cerrarAviso(){
+  var c = document.getElementById('cajaAviso');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
+function lesionDePaciente(pid){
+  for(var i=0;i<BASE.lesiones.length;i++)
+    if(BASE.lesiones[i].pid === pid && BASE.lesiones[i].estado === 'activa') return BASE.lesiones[i];
+  return null;
+}
+
+function cerrarTurno(){
+  var c = document.getElementById('cajaTurno');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
+/* Marcar atendido descuenta el crédito y anota el cobro si paga por
+   sesión. Es el único momento en que se toca la plata: si se cobrara al
+   reservar, una cancelación a tiempo generaría una discusión. */
+function marcarAtendido(i){
+  var t = BASE.agenda[dia][i];
+  if(!t || !t.pid) return;
+  t.estado = 'atendido';
+  var p = paciente(t.pid), pl = planDe(p);
+  consumirCredito(t.pid);
+  if(pl.sesiones === 1 && pl.precio > 0){
+    anotarMovimiento({tipo:'ingreso', concepto:'Sesión suelta — ' + p.nombre,
+                      monto:pl.precio, pid:t.pid, categoria:'sesiones'});
+  }
+  guardar('kine/agenda/turnos/' + dia + '/' + t.h + '/estado', 'atendido');
+  pintar();
+}
+function marcarAusente(i){
+  var t = BASE.agenda[dia][i];
+  if(!t || !t.pid) return;
+  t.estado = 'ausente';
+  guardar('kine/agenda/turnos/' + dia + '/' + t.h + '/estado', 'ausente');
+  pintar();
+}
+
+function guardarTurno(){
+  var pid = document.getElementById('tPac').value;
+  if(!pid){
+    document.getElementById('avisoTurno').innerHTML =
+      '<div class="nota aviso">Elegí a quién le das el turno.</div>';
+    return;
+  }
+  var p = paciente(pid), t = BASE.agenda[dia][TURNO.i];
+  t.pid = pid; t.dorsal = p.dorsal || null; t.tipo = TURNO.tipo; t.estado = 'reservado';
+  guardar('kine/agenda/turnos/' + dia + '/' + t.h,
+          {pid:pid, dorsal:t.dorsal, tipo:t.tipo, estado:'reservado'});
+  cerrarTurno();
   pintar();
 }
 pintar();

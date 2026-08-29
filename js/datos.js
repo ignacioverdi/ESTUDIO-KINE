@@ -41,15 +41,15 @@ var BASE = {
              'pendiente' se dio de alta solo y el kine todavía no lo vio
      ──────────────────────────────────────────────────────────────── */
   pacientes: [
-    {id:'P07', tipo:'plantel', dorsal:7,  nombre:'Tomás Duarte',
+    {id:'P07', plan:'club', creditos:0, tipo:'plantel', dorsal:7,  nombre:'Tomás Duarte',
      nacimiento:'2003-04-12', doc:'44987123', tel:'11 5555 0107',
      email:'tduarte@mail.com', estado:'activo', alta:'2026-08-11',
      consentimiento:{aceptado:true, fecha:'2026-08-11'}},
-    {id:'P12', tipo:'plantel', dorsal:12, nombre:'Nicolás Ibarra',
+    {id:'P12', plan:'club', creditos:0, tipo:'plantel', dorsal:12, nombre:'Nicolás Ibarra',
      nacimiento:'2001-09-30', doc:'43112876', tel:'11 5555 0112',
      email:'nibarra@mail.com', estado:'activo', alta:'2026-08-20',
      consentimiento:{aceptado:true, fecha:'2026-08-20'}},
-    {id:'P15', tipo:'plantel', dorsal:15, nombre:'Julián Vera',
+    {id:'P15', plan:'club', creditos:0, tipo:'plantel', dorsal:15, nombre:'Julián Vera',
      nacimiento:'2004-01-18', doc:'45330091', tel:'11 5555 0115',
      email:'jvera@mail.com', estado:'activo', alta:'2026-08-24',
      consentimiento:{aceptado:true, fecha:'2026-08-24'}},
@@ -58,16 +58,27 @@ var BASE = {
      nacimiento:'1988-06-05', doc:'33772109', tel:'11 4444 8890',
      email:'mrios@mail.com', obra_social:'OSDE 210', estado:'activo',
      alta:'2026-08-19', motivo:'Dolor de hombro al nadar',
+     ocupacion:'Arquitecta', deporte:'Natación', frecuencia:'3 veces por semana',
+     antecedentes:'Cirugía de menisco izquierdo en 2019.',
+     objetivos:'Volver a nadar 2000 metros sin dolor.',
+     plan:'p10', creditos:6,
      consentimiento:{aceptado:true, fecha:'2026-08-19'}},
     {id:'P32', tipo:'particular', nombre:'Diego Sosa',
      nacimiento:'1975-11-22', doc:'24551038', tel:'11 3333 7712',
      email:'dsosa@mail.com', obra_social:'Swiss Medical', estado:'activo',
      alta:'2026-08-22', motivo:'Lumbalgia por trabajo de oficina',
+     ocupacion:'Contador', deporte:'Ninguno', frecuencia:'Sedentario',
+     antecedentes:'Hernia de disco L4-L5 diagnosticada en 2021, sin cirugía.',
+     objetivos:'Trabajar ocho horas sentado sin dolor.',
+     plan:'sesion', creditos:0,
      consentimiento:{aceptado:true, fecha:'2026-08-22'}},
     {id:'P33', tipo:'particular', nombre:'Camila Ferreyra',
      nacimiento:'2011-03-14', doc:'56920014', tel:'11 6666 2231',
      email:'flia.ferreyra@mail.com', obra_social:'Particular', estado:'pendiente',
      alta:'2026-08-28', motivo:'Esguince de rodilla jugando al hockey',
+     ocupacion:'Estudiante', deporte:'Hockey', frecuencia:'4 veces por semana',
+     antecedentes:'Sin antecedentes.', objetivos:'Volver a jugar el torneo de primavera.',
+     plan:'p10', creditos:9,
      tutor:{nombre:'Laura Ferreyra', tel:'11 6666 2231', vinculo:'Madre'},
      consentimiento:{aceptado:true, fecha:'2026-08-28'}}
   ],
@@ -150,23 +161,23 @@ var BASE = {
   /* Programa domiciliario por lesión y por fase */
   programas: {
     'L1':{
-      2:[ {n:'Movilidad de tobillo con banda', d:'3 series · 15 repeticiones', nota:'Rodilla adelante sin despegar el talón.'},
-          {n:'Eversión con banda',             d:'3 series · 12 repeticiones', nota:'Volvé lento. Sin dolor.'},
-          {n:'Elevación de talones sentado',   d:'3 series · 20 repeticiones', nota:'Subí en 2 segundos, bajá en 4.'},
-          {n:'Apoyo en un pie',                d:'4 series · 30 segundos',     nota:'Si te sale fácil, cerrá los ojos.'} ],
-      3:[ {n:'Elevación de talones de pie',    d:'4 series · 12 repeticiones', nota:'Con peso, apoyo completo.'},
-          {n:'Saltos en el lugar',             d:'3 series · 20 saltos',       nota:'Aterrizaje silencioso.'},
-          {n:'Escalera de coordinación',       d:'6 pasadas',                  nota:'Contacto corto, mirada al frente.'} ]
+      2:[ {n:'Movilidad de tobillo con banda', series:3, reps:'15', carga:'Banda verde', nota:'Rodilla adelante sin despegar el talón.', video:'https://www.youtube.com/watch?v=IODxDxX7oi4'},
+          {n:'Eversión con banda',             series:3, reps:'12', carga:'Banda roja',  nota:'Volvé lento. Sin dolor.', video:'https://www.youtube.com/watch?v=IODxDxX7oi4'},
+          {n:'Elevación de talones sentado',   series:3, reps:'20', carga:'5 kg',        nota:'Subí en 2 segundos, bajá en 4.'},
+          {n:'Apoyo en un pie',                series:4, reps:'30 seg', carga:'Sin peso',nota:'Si te sale fácil, cerrá los ojos.', video:'https://www.youtube.com/watch?v=IODxDxX7oi4'} ],
+      3:[ {n:'Elevación de talones de pie',    series:4, reps:'12', carga:'20 kg', nota:'Apoyo completo.'},
+          {n:'Saltos en el lugar',             series:3, reps:'20', carga:'Peso corporal', nota:'Aterrizaje silencioso.'},
+          {n:'Escalera de coordinación',       series:6, reps:'1 pasada', carga:'—', nota:'Contacto corto, mirada al frente.'} ]
     },
     'L2':{
-      3:[ {n:'Rotación externa con banda',     d:'4 series · 12 repeticiones', nota:'Codo pegado al cuerpo.'},
-          {n:'Remo con banda',                 d:'3 series · 15 repeticiones', nota:'Junto los omóplatos.'},
-          {n:'Elevación en Y boca abajo',      d:'3 series · 10 repeticiones', nota:'Sin subir el hombro a la oreja.'} ]
+      3:[ {n:'Rotación externa con banda',     series:4, reps:'12', carga:'Banda azul', nota:'Codo pegado al cuerpo.'},
+          {n:'Remo con banda',                 series:3, reps:'15', carga:'Banda verde', nota:'Junto los omóplatos.'},
+          {n:'Elevación en Y boca abajo',      series:3, reps:'10', carga:'1 kg', nota:'Sin subir el hombro a la oreja.'} ]
     },
     'L3':{
-      4:[ {n:'Puente de glúteo',               d:'3 series · 15 repeticiones', nota:'Apretar arriba 2 segundos.'},
-          {n:'Plancha lateral',                d:'3 series · 30 segundos',     nota:'Cadera alineada.'},
-          {n:'Bird dog',                       d:'3 series · 10 por lado',     nota:'Sin mover la pelvis.'} ]
+      4:[ {n:'Puente de glúteo',               series:3, reps:'15', carga:'Peso corporal', nota:'Apretar arriba 2 segundos.'},
+          {n:'Plancha lateral',                series:3, reps:'30 seg', carga:'—', nota:'Cadera alineada.'},
+          {n:'Bird dog',                       series:3, reps:'10 por lado', carga:'—', nota:'Sin mover la pelvis.'} ]
     }
   },
 
@@ -255,6 +266,23 @@ function fechaCorta(f){
   var M = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   var p = String(f).split('-');
   return p[2].replace(/^0/,'') + ' ' + M[+p[1]-1];
+}
+/* Con año. En un documento clínico la fecha corta no alcanza: hay que
+   poder leer un asiento cinco años después y saber de cuándo es. */
+function fechaLarga(f){
+  var M = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  var p = String(f).split('-');
+  return p[2].replace(/^0/,'') + ' ' + M[+p[1]-1] + ' ' + p[0];
+}
+/* La dosis escrita en una línea, a partir de las tres partes. Antes era
+   un texto suelto; separado se puede editar, filtrar y comparar. */
+function dosis(e){
+  if(e.d) return e.d;                       /* ejercicios viejos */
+  var p = [];
+  if(e.series) p.push(e.series + (e.series === 1 ? ' serie' : ' series'));
+  if(e.reps)   p.push(e.reps);
+  if(e.carga && e.carga !== '—') p.push(e.carga);
+  return p.join(' · ');
 }
 function programaDe(L){
   var p = BASE.programas[L.id];

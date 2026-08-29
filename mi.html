@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="mi">
 
@@ -74,9 +74,11 @@ function pintar(){
               + '<input type="checkbox" style="width:19px;height:19px;accent-color:var(--azul);margin-top:3px" '
               + 'onclick="event.stopPropagation();marcar(' + i + ')">'
               + '<span class="cu"><b>' + e.n + '</b>'
-              + '<small class="mono" style="color:var(--azul)">' + e.d + '</small>'
+              + '<small class="mono" style="color:var(--acc-texto)">' + dosis(e) + '</small>'
               + '<small>' + e.nota + '</small></span>'
-              + '<span class="pin gris" onclick="event.stopPropagation();alert(\'Acá abre el video filmado en el estudio.\')">Ver video</span>'
+              + '<span class="pin ' + (e.video ? 'reservado' : 'gris') + '" '
+              + 'onclick="event.stopPropagation();verEjercicio(' + i + ')">'
+              + (e.video ? 'Ver video' : 'Sin video') + '</span>'
               + '</div>';
           }).join('')
         : '<div class="vacio"><b>Todavía no hay programa</b>Vero lo carga después de tu próximo turno.</div>')
@@ -110,6 +112,10 @@ function pintar(){
   actualizarCuenta();
 }
 
+function verEjercicio(i){
+  var e = programaDe(L)[i];
+  abrirVideo(e.n, e.video, dosis(e) + ' — ' + e.nota);
+}
 function marcar(i){
   hechos[i] = !hechos[i];
   var f = document.getElementById('ej' + i);

@@ -12,13 +12,19 @@ var MENU = {
     {id:'agenda',     t:'Agenda',      ic:'▦', a:'agenda.html'},
     {id:'ficha',      t:'Lesiones',    ic:'✚', a:'lesiones.html'},
     {id:'pacientes',  t:'Pacientes',   ic:'◫', a:'pacientes.html'},
+    {id:'historia',   t:'Historias',   ic:'▤', a:'historia.html'},
+    {id:'programa',   t:'Programas',   ic:'≡', a:'programa.html'},
+    {id:'caja',       t:'Caja',        ic:'◧', a:'caja.html'},
+    {id:'perfil',     t:'Mi perfil',   ic:'◉', a:'perfil.html'},
+    {id:'cartel',     t:'Cartel',      ic:'▧', a:'cartel.html'},
     {id:'pizarron',   t:'Pizarrón',    ic:'◈', a:'pizarron.html'},
     {id:'ejercicios', t:'Ejercicios',  ic:'☰', a:'ejercicios.html'}
   ],
   jugador: [
     {id:'mi',         t:'Mi recuperación', ic:'▤', a:'mi.html'},
     {id:'turnos',     t:'Mis turnos',      ic:'▦', a:'agenda.html'},
-    {id:'diario',     t:'Cómo estoy',      ic:'◉', a:'diario.html'}
+    {id:'diario',     t:'Cómo estoy',      ic:'◉', a:'diario.html'},
+    {id:'historia',   t:'Mi historia',     ic:'▤', a:'historia.html'}
   ]
 };
 

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Historia clínica · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script>
+<script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script>
+<script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<style>
+  /* En pantalla se ve con los colores del portal. Impresa sale en blanco
+     y negro: es un documento legal, no una captura de pantalla. */
+  .asiento{border-left:2px solid var(--linea2);padding:0 0 18px 16px;position:relative;margin-left:8px}
+  .asiento::before{content:'';position:absolute;left:-6px;top:4px;width:10px;height:10px;
+    border-radius:50%;background:var(--acc);border:2px solid var(--fondo)}
+  .asiento.rect::before{background:var(--ambar)}
+  .asiento-cab{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:5px}
+  .folio{font-family:var(--dat);font-size:12px;font-weight:600;color:var(--acc-texto);
+    border:1px solid var(--acc-borde);background:var(--acc-suave);border-radius:4px;padding:1px 7px}
+  .asiento b{font-size:15px}
+  .asiento .cuando{font-family:var(--dat);font-size:11.5px;color:var(--tinta3);margin-left:auto}
+  .asiento .cuerpo{font-size:14.5px;color:var(--tinta2);margin-top:3px}
+  .asiento .huella{font-family:var(--dat);font-size:10px;color:var(--tinta3);margin-top:6px;
+    overflow-wrap:anywhere}
+  @media print{
+    body{background:#fff;color:#000;background-image:none;padding:0}
+    .no-imprimir{display:none!important}
+    .tarjeta{border:none;box-shadow:none;padding:0;margin-bottom:18px}
+    .asiento{border-left:1px solid #999;break-inside:avoid;page-break-inside:avoid}
+    .asiento::before{background:#000}
+    .folio{border-color:#999;background:#eee;color:#000}
+    .asiento .cuando,.asiento .cuerpo,.asiento .huella{color:#333}
+    .hoja{max-width:none;padding:0}
+    h1.tit{font-size:24px}
+  }
+</style>
+</head>
+<body data-pag="historia">
+
+<div class="hoja angosta" id="todo"></div>
+
+<script>
+var pid = new URLSearchParams(location.search).get('p') || (rol() === 'kine' ? null : miPid());
+
+/* Mirar una historia clínica ya es un acceso, y queda registrado. */
+if(pid) registrarAcceso(pid, 'lectura de historia clínica');
+
+function pintar(){
+  var caja = document.getElementById('todo');
+
+  if(!pid){
+    caja.innerHTML = '<h1 class="tit">Historia clínica</h1>'
+      + '<p class="bajada">Elegí un paciente para ver su historia completa.</p>'
+      + '<div class="tarjeta">' + BASE.pacientes.map(function(p){
+          return '<button class="fila" onclick="irA(\'historia.html?p=' + p.id + '\')">'
+            + '<span class="hh">' + (p.dorsal ? '#' + p.dorsal : 'P') + '</span>'
+            + '<span class="cu"><b>' + p.nombre + '</b><small>'
+            + historiaDe(p.id).length + ' asientos</small></span></button>';
+        }).join('') + '</div>';
+    return;
+  }
+
+  var p = paciente(pid);
+  if(!p){ caja.innerHTML = '<div class="vacio"><b>No existe ese paciente</b></div>'; return; }
+
+  var h = historiaDe(pid);
+  var v = verificarHistoria(pid);
+  var acc = accesosDe(pid);
+  var esKine = rol() === 'kine';
+
+  caja.innerHTML =
+
+    '<h1 class="tit">Historia clínica</h1>'
+    + '<p class="bajada">' + p.nombre + ' · documento ' + p.doc
+    + ' · nacido el ' + fechaLarga(p.nacimiento) + '</p>'
+
+    + '<div class="no-imprimir" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">'
+    + '<button class="bt" onclick="window.print()">Descargar en PDF</button>'
+    + (esKine ? '<button class="bt hueco" onclick="agregarNota()">Agregar una nota</button>' : '')
+    + (esKine ? '<button class="bt neutro" onclick="irA(\'historia.html\')">Otro paciente</button>' : '')
+    + '</div>'
+
+    /* La verificación de integridad es lo que convierte esto en un
+       documento defendible y no en una lista de textos. */
+    + (v.ok
+        ? '<div class="nota bien"><b>Historia íntegra.</b> ' + v.asientos + ' asientos correlativos, '
+          + 'encadenados y sin modificaciones. Cada uno guarda la huella del anterior.</div>'
+        : '<div class="nota reserva"><b>Atención:</b> ' + v.motivo
+          + ' Esta historia fue alterada después de escrita.</div>')
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Datos del paciente</h2></div>'
+    + '<div class="rejilla c2">'
+    + dato('Documento', p.doc)
+    + dato('Fecha de nacimiento', fechaLarga(p.nacimiento) + ' (' + edad(p.nacimiento) + ' años)')
+    + dato('Teléfono', p.tel)
+    + dato('Correo', p.email || '—')
+    + dato('Condición', p.tipo === 'plantel' ? 'Plantel del club, camiseta ' + (p.dorsal || '?')
+                                             : (p.obra_social || 'Particular'))
+    + dato('En el padrón desde', fechaLarga(p.alta))
+    + '</div>'
+    + '</div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Admisión</h2></div>'
+    + '<div class="rejilla c2">'
+    + dato('Ocupación', p.ocupacion || '—')
+    + dato('Deporte', (p.deporte || '—') + (p.frecuencia ? ' · ' + p.frecuencia : ''))
+    + '</div>'
+    + '<label class="campo"><span class="eti">Motivo de consulta</span>'
+    + '<p style="color:var(--tinta2)">' + (p.motivo || '—') + '</p></label>'
+    + '<label class="campo"><span class="eti">Antecedentes: cirugías y lesiones previas</span>'
+    + '<p style="color:var(--tinta2)">' + (p.antecedentes || 'No declaró.') + '</p></label>'
+    + '<label class="campo" style="margin-bottom:0"><span class="eti">Objetivo del paciente</span>'
+    + '<p style="color:var(--tinta2)">' + (p.objetivos || '—') + '</p></label>'
+    + '</div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Plan y sesiones</h2></div>'
+    + '<div class="rejilla c2">'
+    + dato('Plan', planDe(p).nombre)
+    + dato('Sesiones que le quedan', (p.creditos || 0) + '')
+    + '</div>'
+    + (p.tutor ? '<div class="nota info">Menor de edad. Autoriza ' + p.tutor.nombre
+        + ' (' + p.tutor.vinculo + '), teléfono ' + p.tutor.tel + '.</div>' : '')
+    + (p.consentimiento && p.consentimiento.aceptado
+        ? '<div class="nota bien" style="margin-bottom:0">Consentimiento otorgado el '
+          + fechaCorta(p.consentimiento.fecha) + '.'
+          + (esKine ? '' : ' <a href="#" onclick="revocar();return false" style="color:inherit;'
+            + 'text-decoration:underline">Revocarlo</a>')
+          + '</div>'
+        : '<div class="nota aviso" style="margin-bottom:0">Sin consentimiento vigente. '
+          + 'No se pueden registrar datos clínicos nuevos.</div>')
+    + '</div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Evolución</h2>'
+    + '<span class="eti">' + h.length + ' asientos</span></div>'
+    + (h.length
+        ? h.slice().reverse().map(asientoHTML).join('')
+        : '<div class="vacio"><b>Sin asientos</b>Todavía no se registró ninguna actuación.</div>')
+    + '</div>'
+
+    + (esKine
+        ? '<div class="tarjeta no-imprimir">'
+          + '<div class="tarjeta-cab"><h2 class="sub">Quién vio esta historia</h2>'
+          + '<span class="eti">' + acc.length + ' accesos</span></div>'
+          + (acc.length
+              ? acc.slice().reverse().slice(0, 20).map(function(a){
+                  return '<div class="fila" style="cursor:default"><span class="hh">'
+                    + a.sello.slice(11,16) + '</span>'
+                    + '<span class="cu"><b>' + a.quien + '</b><small>' + a.que + '</small></span>'
+                    + '<span class="pin gris">' + fechaCorta(a.sello.slice(0,10)) + '</span></div>';
+                }).join('')
+              : '<div class="vacio">Sin accesos registrados.</div>')
+          + '</div>'
+        : '')
+
+    + '<p style="font-size:12px;color:var(--tinta3);margin-top:20px;text-align:center">'
+    + 'Documento emitido el ' + fechaLarga(HOY) + '. El paciente es el titular de su historia '
+    + 'clínica y puede pedir copia en cualquier momento (Ley 26.529, artículo 14).</p>';
+}
+
+function asientoHTML(a){
+  return '<div class="asiento' + (a.rectifica ? ' rect' : '') + '">'
+    + '<div class="asiento-cab"><span class="folio">' + a.n + '</span>'
+    + '<b>' + tituloAsiento(a) + '</b>'
+    + '<span class="cuando">' + fechaLarga(a.fecha) + ' · ' + a.hora + ' · ' + a.autor + '</span></div>'
+    + (a.rectifica ? '<div class="nota aviso" style="margin:4px 0 6px;padding:7px 11px;font-size:13px">'
+        + 'Rectifica el asiento ' + a.rectifica + '. El original no se borra.</div>' : '')
+    + '<div class="cuerpo">' + a.contenido + '</div>'
+    + '<div class="huella">huella ' + a.huella.slice(0, 32) + '…</div>'
+    + '</div>';
+}
+
+function dato(l, v){
+  return '<div style="margin-bottom:12px"><span class="eti">' + l + '</span>'
+       + '<div class="mono" style="font-size:15px;margin-top:3px">' + v + '</div></div>';
+}
+
+function agregarNota(){
+  var t = prompt('¿Qué querés dejar asentado?');
+  if(!t || !t.trim()) return;
+  asentar(pid, 'nota', t.trim());
+  pintar();
+}
+
+/* El consentimiento es revocable por ley. Revocarlo no borra la historia
+   (que hay que conservar), pero corta el registro de datos nuevos. */
+function revocar(){
+  if(!confirm('Al revocar el consentimiento el estudio deja de registrar datos nuevos '
+    + 'sobre tu tratamiento. La historia ya escrita se conserva, porque la ley obliga a '
+    + 'guardarla. ¿Confirmás?')) return;
+  var p = paciente(pid);
+  p.consentimiento = {aceptado:false, fecha:HOY, revocado:HOY};
+  guardar('kine/pacientes/' + pid + '/consentimiento', p.consentimiento);
+  asentar(pid, 'revocacion', 'El paciente revocó el consentimiento para el tratamiento de sus datos.');
+  pintar();
+}
+
+pintar();
+</script>
+</body></html>

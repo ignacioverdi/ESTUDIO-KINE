@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mi perfil · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script>
+<script src="js/qr.js"></script><script src="js/historia.js"></script>
+<script src="js/dinero.js"></script><script src="js/atender.js"></script>
+<script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<style>
+  .retrato{width:120px;height:120px;border-radius:50%;object-fit:cover;
+    border:2px solid var(--linea2);background:var(--sup2);display:block}
+  .retrato-vacio{width:120px;height:120px;border-radius:50%;border:2px dashed var(--linea2);
+    background:var(--sup2);display:flex;align-items:center;justify-content:center;
+    color:var(--tinta3);font-family:var(--dat);font-size:11px;text-align:center;padding:10px}
+  .logo-prev{max-width:170px;max-height:70px;object-fit:contain;display:block}
+</style>
+</head>
+<body data-pag="perfil">
+
+<div class="hoja angosta" id="todo"></div>
+
+<script>
+/* El perfil vive en config.json en producción. Acá se guarda igual que
+   todo lo demás, para poder editarlo desde la app sin tocar archivos. */
+function perfil(){
+  if(!BASE.perfil) BASE.perfil = {
+    nombre: 'Verónica Ramírez',
+    matricula: 'MP 12345 — Kinesióloga Fisiatra',
+    estudio: 'Estudio de kinesiología',
+    club: 'Club Atlético',
+    tel: '11 5555 0000',
+    email: 'vero@estudiokine.com',
+    direccion: 'Av. Siempreviva 742',
+    presentacion: 'Kinesióloga con quince años de trabajo en deporte. Me formé en '
+      + 'readaptación de lesiones deportivas y trabajo con el plantel del club desde 2019. '
+      + 'Atiendo también consultas particulares, con o sin lesión deportiva.',
+    foto: null, logo: null
+  };
+  return BASE.perfil;
+}
+
+function pintar(){
+  var P = perfil();
+  document.getElementById('todo').innerHTML =
+
+    '<h1 class="tit">Mi perfil</h1>'
+    + '<p class="bajada">Esto es lo que ve el paciente cuando entra al portal, y lo que sale '
+    + 'impreso en el cartel y en la historia clínica.</p>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Tu foto</h2>'
+    + '<span class="eti">Se ve en el cartel y en el inicio</span></div>'
+    + '<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">'
+    + (P.foto ? '<img class="retrato" src="' + P.foto + '" alt="Tu foto">'
+              : '<div class="retrato-vacio">Sin foto</div>')
+    + '<div style="flex:1;min-width:200px">'
+    + '<input type="file" id="fFoto" accept="image/*" style="display:none" '
+    + 'onchange="subirImagen(this,\'foto\',400)">'
+    + '<button class="bt hueco" onclick="document.getElementById(\'fFoto\').click()">'
+    + (P.foto ? 'Cambiar la foto' : 'Elegir una foto') + '</button>'
+    + (P.foto ? ' <button class="bt neutro" onclick="borrar(\'foto\')">Quitar</button>' : '')
+    + '<p style="font-size:13px;color:var(--tinta3);margin-top:10px">Se achica sola a 400 '
+    + 'píxeles antes de guardarse, así no pesa.</p></div></div></div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">El logo del estudio</h2></div>'
+    + '<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">'
+    + (P.logo ? '<img class="logo-prev" src="' + P.logo + '" alt="Logo">'
+              : '<div class="retrato-vacio" style="border-radius:var(--r);width:170px;height:70px">Sin logo</div>')
+    + '<div style="flex:1;min-width:200px">'
+    + '<input type="file" id="fLogo" accept="image/*" style="display:none" '
+    + 'onchange="subirImagen(this,\'logo\',600)">'
+    + '<button class="bt hueco" onclick="document.getElementById(\'fLogo\').click()">'
+    + (P.logo ? 'Cambiar el logo' : 'Elegir un logo') + '</button>'
+    + (P.logo ? ' <button class="bt neutro" onclick="borrar(\'logo\')">Quitar</button>' : '')
+    + '</div></div></div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Tus datos</h2></div>'
+    + campo('nombre', 'Nombre y apellido')
+    + campo('matricula', 'Matrícula y título')
+    + '<div class="rejilla c2">' + campo('estudio', 'Nombre del estudio') + campo('club', 'Club') + '</div>'
+    + '<div class="rejilla c2">' + campo('tel', 'Teléfono') + campo('email', 'Correo') + '</div>'
+    + campo('direccion', 'Dirección')
+    + '</div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Quién sos</h2>'
+    + '<span class="eti">Lo lee el paciente nuevo</span></div>'
+    + '<textarea id="c_presentacion" style="min-height:120px" '
+    + 'oninput="tocar(\'presentacion\',this.value)">' + (P.presentacion || '') + '</textarea>'
+    + '<p style="font-size:13px;color:var(--tinta3);margin-top:8px">Escribilo como se lo '
+    + 'contarías a alguien en la sala de espera, no como un currículum.</p></div>'
+
+    + '<div id="aviso"></div>'
+    + '<button class="bt ancho" onclick="guardarPerfil()">Guardar</button>';
+}
+
+function campo(k, l){
+  var P = perfil();
+  return '<label class="campo"><span class="eti">' + l + '</span>'
+    + '<input type="text" id="c_' + k + '" value="' + (P[k] || '').replace(/"/g,'&quot;') + '" '
+    + 'oninput="tocar(\'' + k + '\',this.value)"></label>';
+}
+
+function tocar(k, v){ perfil()[k] = v; }
+
+/* Las imágenes se achican antes de guardarse. Una foto de celular pesa
+   cuatro megas: guardada tal cual, la app tarda una eternidad en abrir
+   y Firebase la rechaza. Reducida a 400 píxeles pesa cuarenta kilos. */
+function subirImagen(input, destino, lado){
+  var f = input.files && input.files[0];
+  if(!f) return;
+  var lector = new FileReader();
+  lector.onload = function(ev){
+    var img = new Image();
+    img.onload = function(){
+      var esc = Math.min(1, lado / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width * esc);
+      c.height = Math.round(img.height * esc);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      perfil()[destino] = c.toDataURL('image/jpeg', 0.82);
+      pintar();
+    };
+    img.src = ev.target.result;
+  };
+  lector.readAsDataURL(f);
+}
+
+function borrar(k){ perfil()[k] = null; pintar(); }
+
+function guardarPerfil(){
+  guardar('kine/perfil', perfil());
+  document.getElementById('aviso').innerHTML =
+    '<div class="nota bien">Guardado. Ya se ve en el portal y en el cartel.</div>';
+}
+
+pintar();
+</script>
+</body></html>

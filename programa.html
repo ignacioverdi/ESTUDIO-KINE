@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Programa · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script>
+<script src="js/qr.js"></script><script src="js/historia.js"></script>
+<script src="js/dinero.js"></script><script src="js/atender.js"></script>
+<script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<style>
+  .ejer{border:1px solid var(--linea);border-radius:var(--r);background:var(--sup2);
+    padding:14px;margin-bottom:10px}
+  .ejer-cab{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ejer-cab .orden{font-family:var(--dat);font-size:12px;font-weight:600;color:var(--acc-texto);
+    border:1px solid var(--acc-borde);background:var(--acc-suave);border-radius:50%;
+    width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .ejer-cab input.nom{flex:1;font-weight:600}
+  .ejer-cab .quitar{background:transparent;border:none;color:var(--tinta3);font-size:22px;
+    cursor:pointer;line-height:1;padding:2px 6px}
+  .ejer-cab .quitar:hover{color:var(--rojo)}
+  .tres{display:grid;grid-template-columns:90px 1fr 1fr;gap:8px;margin-bottom:8px}
+  .mover{display:flex;gap:4px}
+  .mover button{background:transparent;border:1px solid var(--linea2);border-radius:6px;
+    color:var(--tinta3);cursor:pointer;width:26px;height:26px;font-size:12px;padding:0}
+  .mover button:hover{border-color:var(--acc);color:var(--acc)}
+  @media(max-width:640px){ .tres{grid-template-columns:1fr 1fr} }
+</style>
+</head>
+<body data-pag="programa">
+
+<div class="hoja angosta" id="todo"></div>
+
+<script>
+var pid = PARAMOK('p'), fase = null, prog = [], L = null, cargado = null;
+
+/* En el kit real esto es URLSearchParams. Se envuelve para que el
+   archivo único también lo entienda. */
+function PARAMOK(k){
+  if(typeof PARAM === 'function') return PARAM(k);
+  return new URLSearchParams(location.search).get(k);
+}
+
+/* Solo relee el programa guardado cuando cambia el paciente o la fase.
+   Antes lo releía en cada redibujado, y eso descartaba en silencio lo que
+   el kinesiólogo estaba escribiendo: sumabas un ejercicio y desaparecía. */
+function cargar(){
+  if(!pid) return;
+  L = null;
+  BASE.lesiones.forEach(function(x){
+    if(x.pid === pid && x.estado === 'activa') L = x;
+  });
+  if(!L) return;
+  if(fase === null) fase = L.fase;
+  var clave = pid + '|' + fase;
+  if(cargado === clave) return;              /* ya está en pantalla, no pisar */
+  cargado = clave;
+  var g = BASE.programas[L.id] && BASE.programas[L.id][fase];
+  prog = g ? JSON.parse(JSON.stringify(g)) : [];
+}
+
+function pintar(){
+  var caja = document.getElementById('todo');
+
+  if(!pid){
+    caja.innerHTML = '<h1 class="tit">Programa de ejercicios</h1>'
+      + '<p class="bajada">Elegí a quién le vas a cargar el programa. Después lo ve en su '
+      + 'celular con el video de cada ejercicio.</p>'
+      + '<div class="tarjeta">' + BASE.pacientes.map(function(p){
+          var l = null;
+          BASE.lesiones.forEach(function(x){ if(x.pid === p.id && x.estado === 'activa') l = x; });
+          return '<button class="fila" onclick="elegir(\'' + p.id + '\')"'
+            + (l ? '' : ' disabled style="opacity:.4"') + '>'
+            + '<span class="hh">' + (p.dorsal ? '#' + p.dorsal : 'P') + '</span>'
+            + '<span class="cu"><b>' + p.nombre + '</b><small>'
+            + (l ? l.zona.toLowerCase() + ' · fase ' + l.fase : 'sin lesión abierta')
+            + '</small></span>'
+            + (l ? '<span class="pin reservado">Cargar</span>' : '<span class="pin gris">—</span>')
+            + '</button>';
+        }).join('') + '</div>';
+    return;
+  }
+
+  cargar();
+  var p = paciente(pid);
+  if(!L){
+    caja.innerHTML = '<div class="tarjeta"><div class="vacio"><b>' + p.nombre + ' no tiene lesión abierta</b>'
+      + 'Abrile una desde su ficha y después volvé.</div>'
+      + '<a class="bt ancho" href="pacientes.html" style="text-decoration:none;text-align:center">Ir al padrón</a></div>';
+    return;
+  }
+
+  caja.innerHTML =
+    '<button class="bt neutro chico" style="margin-bottom:14px" onclick="elegir(null)">← Otro paciente</button>'
+    + '<h1 class="tit">' + p.nombre + '</h1>'
+    + '<p class="bajada">' + L.diagnostico + ' · ' + L.zona.toLowerCase() + ' ' + L.lado + '</p>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">¿Para qué fase?</h2>'
+    + '<span class="eti">Hoy está en la ' + L.fase + '</span></div>'
+    + '<div class="pestanias" id="selFase" style="margin-bottom:0">'
+    + [1,2,3,4].map(function(f){
+        var tiene = BASE.programas[L.id] && BASE.programas[L.id][f];
+        return '<button class="pest' + (f === fase ? ' on' : '') + '" data-f="' + f + '">'
+          + 'Fase ' + f + (tiene ? ' ·' + tiene.length : '') + '</button>';
+      }).join('') + '</div>'
+    + '<p style="font-size:14px;color:var(--tinta2);margin-top:12px">'
+    + FASES[fase-1].t + '. ' + FASES[fase-1].d + '</p></div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Los ejercicios</h2>'
+    + '<span class="eti">' + prog.length + ' cargados</span></div>'
+    + (prog.length ? prog.map(ejercicioHTML).join('')
+        : '<div class="vacio"><b>Todavía no hay nada</b>Sumá el primero desde la biblioteca '
+          + 'o creá uno a mano.</div>')
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'
+    + '<button class="bt hueco" onclick="abrirBiblioteca()">Sumar de la biblioteca</button>'
+    + '<button class="bt neutro" onclick="sumarVacio()">Crear uno nuevo</button>'
+    + '</div></div>'
+
+    + '<div id="aviso"></div>'
+    + '<button class="bt ancho" onclick="guardarProg()">Guardar el programa</button>'
+    + '<p style="text-align:center;color:var(--tinta3);font-size:13px;margin-top:12px">'
+    + 'En cuanto lo guardes, ' + p.nombre.split(' ')[0] + ' lo ve en su celular.</p>';
+
+  document.querySelectorAll('#selFase .pest').forEach(function(b){
+    b.onclick = function(){ fase = +b.dataset.f; cargado = null; pintar(); };
+  });
+}
+
+function ejercicioHTML(e, i){
+  return '<div class="ejer">'
+    + '<div class="ejer-cab"><span class="orden">' + (i+1) + '</span>'
+    + '<input class="nom" type="text" value="' + (e.n || '').replace(/"/g,'&quot;') + '" '
+    + 'placeholder="Nombre del ejercicio" oninput="campo(' + i + ',\'n\',this.value)">'
+    + '<span class="mover">'
+    + '<button onclick="mover(' + i + ',-1)" title="Subir">▲</button>'
+    + '<button onclick="mover(' + i + ',1)" title="Bajar">▼</button></span>'
+    + '<button class="quitar" onclick="quitar(' + i + ')" title="Quitar">&times;</button></div>'
+
+    + '<div class="tres">'
+    + '<label><span class="eti">Series</span>'
+    + '<input type="number" inputmode="numeric" value="' + (e.series || '') + '" '
+    + 'oninput="campo(' + i + ',\'series\',+this.value)"></label>'
+    + '<label><span class="eti">Repeticiones</span>'
+    + '<input type="text" value="' + (e.reps || '').replace(/"/g,'&quot;') + '" '
+    + 'placeholder="12, o 30 seg" oninput="campo(' + i + ',\'reps\',this.value)"></label>'
+    + '<label><span class="eti">Carga</span>'
+    + '<input type="text" value="' + (e.carga || '').replace(/"/g,'&quot;') + '" '
+    + 'placeholder="Banda verde, 5 kg" oninput="campo(' + i + ',\'carga\',this.value)"></label>'
+    + '</div>'
+
+    + '<label class="campo" style="margin-bottom:8px"><span class="eti">Cómo hacerlo</span>'
+    + '<input type="text" value="' + (e.nota || '').replace(/"/g,'&quot;') + '" '
+    + 'placeholder="Rodilla adelante sin despegar el talón" oninput="campo(' + i + ',\'nota\',this.value)"></label>'
+
+    + '<label class="campo" style="margin-bottom:0"><span class="eti">Enlace del video</span>'
+    + '<div style="display:flex;gap:8px">'
+    + '<input type="text" value="' + (e.video || '').replace(/"/g,'&quot;') + '" '
+    + 'placeholder="Pegá el enlace de YouTube o Vimeo" oninput="campo(' + i + ',\'video\',this.value)">'
+    + (e.video ? '<button class="bt hueco chico" onclick="verlo(' + i + ')">Ver</button>' : '')
+    + '</div></label>'
+    + '</div>';
+}
+
+function campo(i, k, v){ prog[i][k] = v; }
+function quitar(i){ prog.splice(i, 1); pintar(); }
+function mover(i, d){
+  var j = i + d;
+  if(j < 0 || j >= prog.length) return;
+  var t = prog[i]; prog[i] = prog[j]; prog[j] = t;
+  pintar();
+}
+function sumarVacio(){
+  prog.push({n:'', series:3, reps:'12', carga:'', nota:'', video:''});
+  pintar();
+}
+function verlo(i){ abrirVideo(prog[i].n || 'Ejercicio', prog[i].video, dosis(prog[i])); }
+function elegir(id){
+  pid = id; fase = null; cargado = null;
+  if(typeof PARAMSET === 'function') PARAMSET('p', id);
+  pintar(); scrollTo(0, 0);
+}
+
+/* Sumar desde la biblioteca es lo que hace que cargar un programa sea
+   cuestión de segundos y no de tipear todo cada vez. */
+var BIBLIOTECA = [
+  {n:'Movilidad de tobillo con banda', z:'Tobillo', series:3, reps:'15', carga:'Banda verde', nota:'Rodilla adelante sin despegar el talón.'},
+  {n:'Eversión con banda',             z:'Tobillo', series:3, reps:'12', carga:'Banda roja', nota:'Volvé lento. Sin dolor.'},
+  {n:'Elevación de talones sentado',   z:'Tobillo', series:3, reps:'20', carga:'5 kg', nota:'Subí en 2 segundos, bajá en 4.'},
+  {n:'Apoyo en un pie',                z:'Tobillo', series:4, reps:'30 seg', carga:'Sin peso', nota:'Si te sale fácil, cerrá los ojos.'},
+  {n:'Elevación de talones de pie',    z:'Tobillo', series:4, reps:'12', carga:'20 kg', nota:'Apoyo completo.'},
+  {n:'Sentadilla búlgara',             z:'Rodilla', series:3, reps:'10 por pierna', carga:'8 kg', nota:'Rodilla alineada con el pie.'},
+  {n:'Nórdico de isquiotibiales',      z:'Rodilla', series:3, reps:'6', carga:'Peso corporal', nota:'Bajá lo más lento que puedas.'},
+  {n:'Saltos con aterrizaje',          z:'Rodilla', series:3, reps:'8', carga:'Peso corporal', nota:'Aterrizaje silencioso, rodilla no se mete adentro.'},
+  {n:'Rotación externa con banda',     z:'Hombro',  series:4, reps:'12', carga:'Banda azul', nota:'Codo pegado al cuerpo.'},
+  {n:'Remo con banda',                 z:'Hombro',  series:3, reps:'15', carga:'Banda verde', nota:'Junto los omóplatos.'},
+  {n:'Elevación en Y boca abajo',      z:'Hombro',  series:3, reps:'10', carga:'1 kg', nota:'Sin subir el hombro a la oreja.'},
+  {n:'Puente de glúteo',               z:'Lumbar',  series:3, reps:'15', carga:'Peso corporal', nota:'Apretar arriba 2 segundos.'},
+  {n:'Plancha lateral',                z:'Lumbar',  series:3, reps:'30 seg', carga:'—', nota:'Cadera alineada.'},
+  {n:'Bird dog',                       z:'Lumbar',  series:3, reps:'10 por lado', carga:'—', nota:'Sin mover la pelvis.'}
+];
+
+function abrirBiblioteca(){
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo'; caja.id = 'cajaBib';
+  var zona = L ? L.zona : 'Tobillo';
+  var suge = BIBLIOTECA.filter(function(e){ return e.z === zona; });
+  var resto = BIBLIOTECA.filter(function(e){ return e.z !== zona; });
+
+  caja.innerHTML = '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarBib()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Biblioteca</span><h2>Sumar ejercicios</h2>'
+    + '<p>Tocá los que quieras. Se agregan con la dosis sugerida y después la ajustás.</p>'
+    + (suge.length
+        ? '<span class="eti" style="display:block;margin-bottom:8px">Para ' + zona.toLowerCase() + '</span>'
+          + suge.map(fila).join('')
+        : '')
+    + '<span class="eti" style="display:block;margin:16px 0 8px">Todos los demás</span>'
+    + resto.map(fila).join('')
+    + '<button class="bt ancho" style="margin-top:14px" onclick="cerrarBib()">Listo</button></div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarBib(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+}
+function fila(e){
+  var i = BIBLIOTECA.indexOf(e);
+  return '<button class="fila" onclick="sumarDeBib(' + i + ')">'
+    + '<span class="cu"><b>' + e.n + '</b><small>' + e.series + ' series · ' + e.reps
+    + (e.carga && e.carga !== '—' ? ' · ' + e.carga : '') + '</small></span>'
+    + '<span class="pin reservado">+</span></button>';
+}
+function sumarDeBib(i){
+  var e = BIBLIOTECA[i];
+  prog.push({n:e.n, series:e.series, reps:e.reps, carga:e.carga, nota:e.nota, video:''});
+  cerrarBib(); pintar();
+}
+function cerrarBib(){
+  var c = document.getElementById('cajaBib');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
+function guardarProg(){
+  var vacios = prog.filter(function(e){ return !(e.n || '').trim(); });
+  if(vacios.length){
+    document.getElementById('aviso').innerHTML =
+      '<div class="nota aviso">Hay ' + vacios.length + ' ejercicio' + (vacios.length > 1 ? 's' : '')
+      + ' sin nombre. Ponéselo o quitalo.</div>';
+    return;
+  }
+  if(!BASE.programas[L.id]) BASE.programas[L.id] = {};
+  BASE.programas[L.id][fase] = prog;
+  guardar('kine/programas/' + L.id + '/' + fase, prog);
+  cargado = pid + '|' + fase;
+  asentar(pid, 'nota', 'Se le cargó el programa de fase ' + fase + ' con ' + prog.length
+    + ' ejercicios: ' + prog.map(function(e){ return e.n; }).join(', ') + '.');
+  document.getElementById('aviso').innerHTML =
+    '<div class="nota bien">Guardado. ' + paciente(pid).nombre.split(' ')[0]
+    + ' ya lo ve en su celular.</div>';
+  pintar();
+  document.getElementById('aviso').innerHTML =
+    '<div class="nota bien">Guardado. Ya lo ve en su celular.</div>';
+}
+
+pintar();
+</script>
+</body></html>

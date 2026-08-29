@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="panel">
 
@@ -15,8 +15,19 @@
   <h1 class="tit">Viernes 28 de agosto</h1>
   <p class="bajada">Lo que hay que resolver hoy, y cómo está el plantel.</p>
 
-  <div class="rejilla c4" style="margin-bottom:20px">
+  <div class="rejilla c4" style="margin-bottom:14px">
+    <div class="dato"><div class="v" id="kPac">—</div><div class="l">Pacientes</div></div>
+    <div class="dato"><div class="v" id="kMes">—</div><div class="l">Sesiones del mes</div></div>
+    <div class="dato"><div class="v" id="kPend" style="color:var(--ambar)">—</div><div class="l">Pendientes</div></div>
     <div class="dato"><div class="v" id="kTurnos">—</div><div class="l">Turnos hoy</div></div>
+  </div>
+  <div class="rejilla c4" style="margin-bottom:20px">
+    <div class="dato"><div class="v" id="kIng" style="color:var(--verde)">—</div><div class="l">Ingresos del mes</div></div>
+    <div class="dato"><div class="v" id="kEgr" style="color:var(--rojo)">—</div><div class="l">Egresos del mes</div></div>
+    <div class="dato"><div class="v" id="kSal">—</div><div class="l">Saldo</div></div>
+    <div class="dato"><div class="v" id="kAus" style="color:var(--ambar)">—</div><div class="l">Ausencias</div></div>
+  </div>
+  <div class="rejilla c3" style="margin-bottom:20px">
     <div class="dato"><div class="v" id="kOk" style="color:var(--verde)">—</div><div class="l">Disponibles</div></div>
     <div class="dato"><div class="v" id="kLim" style="color:var(--ambar)">—</div><div class="l">Limitados</div></div>
     <div class="dato"><div class="v" id="kBaja" style="color:var(--rojo)">—</div><div class="l">De baja</div></div>
@@ -48,11 +59,23 @@
 </div>
 
 <script>
+function pintar(){
 /* ── contadores ── */
 var c = {ok:0, limitado:0, baja:0};
 BASE.plantel.forEach(function(j){ c[estadoDe(j.d).estado]++; });
 var turnos = BASE.agenda[HOY] || [];
-document.getElementById('kTurnos').textContent = turnos.filter(function(t){ return t.dorsal; }).length;
+document.getElementById('kTurnos').textContent = turnos.filter(function(t){ return t.dorsal || t.pid; }).length;
+
+/* Los indicadores del negocio, no solo los clínicos. */
+var est = estadisticaTurnos(), rc = resumenMes();
+document.getElementById('kPac').textContent  = BASE.pacientes.length;
+document.getElementById('kMes').textContent  = est.atendidos;
+document.getElementById('kPend').textContent = est.pendientes;
+document.getElementById('kIng').textContent  = plata(rc.ingresos);
+document.getElementById('kEgr').textContent  = plata(rc.egresos);
+document.getElementById('kSal').textContent  = plata(rc.saldo);
+document.getElementById('kSal').style.color  = rc.saldo >= 0 ? 'var(--verde)' : 'var(--rojo)';
+document.getElementById('kAus').textContent  = est.porcentajeAusencia + '%';
 document.getElementById('kOk').textContent   = c.ok;
 document.getElementById('kLim').textContent  = c.limitado;
 document.getElementById('kBaja').textContent = c.baja;
@@ -63,18 +86,25 @@ document.getElementById('turnos').innerHTML = turnos.map(function(t){
     return '<div class="fila libre"><span class="hh">' + t.h + '</span>'
          + '<span class="cu"><b>Libre</b></span></div>';
   var L = lesionDe(t.dorsal);
-  return '<button class="fila" onclick="irA(\'lesiones.html?f=' + (L ? L.id : '') + '\')">'
+  var nom = t.pid ? paciente(t.pid).nombre : nombre(t.dorsal);
+  var pendiente = t.estado === 'reservado';
+  return '<button class="fila" onclick="' + (pendiente
+            ? 'atender(HOY,\'' + t.h + '\')'
+            : 'irA(\'lesiones.html?f=' + (L ? L.id : '') + '\')') + '">'
        + '<span class="hh">' + t.h + '</span>'
-       + '<span class="cu"><b>' + nombre(t.dorsal) + '</b>'
-       + '<small>#' + t.dorsal + ' · ' + t.tipo + (L ? ' · ' + L.zona.toLowerCase() : '') + '</small></span>'
-       + '<span class="pin ' + t.estado + '">' + t.estado + '</span></button>';
+       + '<span class="cu"><b>' + nom + '</b>'
+       + '<small>' + (t.dorsal ? '#' + t.dorsal + ' · ' : '') + t.tipo
+       + (L ? ' · ' + L.zona.toLowerCase() : '') + '</small></span>'
+       + '<span class="pin ' + (pendiente ? 'reservado' : t.estado) + '">'
+       + (pendiente ? 'atender' : t.estado) + '</span></button>';
 }).join('');
 
 /* ── lesiones activas ── */
-document.getElementById('activas').innerHTML = BASE.lesiones.map(function(L){
+document.getElementById('activas').innerHTML = BASE.lesiones.filter(function(L){
+  return L.estado === 'activa'; }).map(function(L){
   var listos = criteriosListos(L), tot = L.criterios.length;
   return '<button class="fila" style="align-items:flex-start" onclick="irA(\'lesiones.html?f=' + L.id + '\')">'
-    + '<span class="cu"><b>' + nombre(L.dorsal) + ' · ' + L.zona.toLowerCase() + '</b>'
+    + '<span class="cu"><b>' + nombrePaciente(L) + ' · ' + L.zona.toLowerCase() + '</b>'
     + '<small>' + L.diagnostico + ' — día ' + dias(L.fecha) + '</small>'
     + pista(L.fase, false)
     + '<small class="mono" style="margin-top:6px">FASE ' + L.fase + ' · ' + FASES[L.fase-1].t.toUpperCase()
@@ -90,6 +120,8 @@ document.getElementById('plantel').innerHTML = BASE.plantel.map(function(j){
     + '<span class="d">' + j.d + '</span><div class="n">' + j.n + '</div>'
     + '<div class="e">' + txt + '</div></button>';
 }).join('');
+}
+pintar();
 </script>
 <script>
 /* Registra el sw para que el portal ande sin internet. Falla en silencio

@@ -56,6 +56,10 @@ def todas_cargan_lo_comun():
         for req, porque in [('css/tema.css', 'se ve sin colores'),
                             ('css/estudio.css', 'se ve sin formato'),
                             ('js/datos.js', 'no tiene datos'),
+                            ('js/plantillas.js', 'no sabe los criterios de cada lesión'),
+                            ('js/qr.js', 'no puede dibujar el código QR'),
+                            ('js/historia.js', 'no registra la historia clínica'),
+                            ('js/dinero.js', 'no sabe de planes ni de caja'),
                             ('js/base.js', 'queda sin encabezado ni menú'),
                             ('js/ayuda.js', 'se queda sin el botón ?')]:
             if publica and req == 'js/base.js':
@@ -107,7 +111,7 @@ def sw_al_dia():
     s = leer('sw.js')
     listados = set(re.findall(r"^\s*'([^']+)',?$", s, re.M))
     debe = set(PANTALLAS) | {'css/tema.css', 'css/estudio.css', 'js/datos.js',
-                             'js/base.js', 'js/ayuda.js', 'manifest.json'}
+                             'js/plantillas.js', 'js/qr.js', 'js/historia.js', 'js/dinero.js', 'js/base.js', 'js/ayuda.js', 'manifest.json'}
     faltan = debe - listados
     if faltan:
         ROTO.append('sw.js no guarda: %s' % ', '.join(sorted(faltan)))

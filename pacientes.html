@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="pacientes">
 
@@ -29,9 +29,18 @@
     <p style="color:var(--tinta2);font-size:14px;margin-bottom:12px">
       Mandáselo por WhatsApp al paciente nuevo, o dejalo a la vista en la recepción.
       Se completa en dos minutos desde el celular y queda cargado acá solo.</p>
-    <div class="fila" style="cursor:default">
-      <span class="cu mono" id="enlace" style="overflow-wrap:anywhere;font-size:14px"></span>
-      <button class="bt hueco chico" onclick="copiarEnlace()">Copiar</button>
+    <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+      <div style="width:150px;flex-shrink:0" id="qrChico"></div>
+      <div style="flex:1;min-width:220px">
+        <div class="fila" style="cursor:default">
+          <span class="cu mono" id="enlace" style="overflow-wrap:anywhere;font-size:14px"></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button class="bt hueco chico" onclick="compartirAlta()">Compartir</button>
+          <button class="bt hueco chico" onclick="porWhatsapp()">WhatsApp</button>
+          <a class="bt neutro chico" href="cartel.html" style="text-decoration:none">Ver el cartel</a>
+        </div>
+      </div>
     </div>
     <div class="nota bien" id="copiado" style="display:none">Copiado. Pegalo donde quieras.</div>
   </div>
@@ -60,10 +69,24 @@ function enlaceAlta(){
   var u = location.href.split('?')[0].replace(/[^\/]*$/, 'alta.html');
   return u.indexOf('file:') === 0 ? 'https://estudio-kine.vercel.app/alta.html' : u;
 }
-function copiarEnlace(){
-  var t = enlaceAlta();
-  if(navigator.clipboard) navigator.clipboard.writeText(t);
-  document.getElementById('copiado').style.display = 'block';
+document.getElementById('qrChico').innerHTML =
+  qrSVG(enlaceAlta(), {tinta:'#000000', fondo:'#FFFFFF'});
+
+/* En el celular abre el menú de compartir del sistema. En la computadora
+   ese menú no existe, así que copia el enlace al portapapeles. */
+function compartirAlta(){
+  var u = enlaceAlta();
+  if(navigator.share){
+    navigator.share({title:'Estudio de kinesiología',
+      text:'Cargá tus datos para atenderte en el estudio:', url:u}).catch(function(){});
+  }else if(navigator.clipboard){
+    navigator.clipboard.writeText(u);
+    document.getElementById('copiado').style.display = 'block';
+  }
+}
+function porWhatsapp(){
+  var t = 'Hola. Para atenderte en el estudio, cargá tus datos acá una sola vez: ' + enlaceAlta();
+  window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
 }
 
 document.querySelectorAll('.pest[data-f]').forEach(function(b){
@@ -97,7 +120,10 @@ function pintar(){
                   : (L ? '<span class="pin reservado">en tratamiento</span>'
                        : '<span class="pin gris">al día</span>');
         return '<button class="fila" onclick="abrir(\'' + p.id + '\')">'
-          + '<span class="hh">' + (p.tipo === 'plantel' ? '#' + (p.dorsal || '?') : 'P') + '</span>'
+          + (p.foto
+              ? '<img src="' + p.foto + '" style="width:38px;height:38px;border-radius:50%;'
+                + 'object-fit:cover;flex-shrink:0">'
+              : '<span class="hh">' + (p.tipo === 'plantel' ? '#' + (p.dorsal || '?') : 'P') + '</span>')
           + '<span class="cu"><b>' + p.nombre + '</b><small>'
           + (edad(p.nacimiento) !== null ? edad(p.nacimiento) + ' años · ' : '')
           + (p.tipo === 'plantel' ? 'plantel del club' : (p.obra_social || 'particular'))
@@ -144,12 +170,160 @@ function abrir(id){
 
     + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">'
     + (L ? '<a class="bt" href="lesiones.html?f=' + L.id + '" style="text-decoration:none">Ver su ficha</a>'
-         : '<button class="bt" onclick="alert(\'Acá se abre el alta de lesión para este paciente.\')">Abrir una lesión</button>')
+         : '<button class="bt" onclick="abrirLesion(\'' + p.id + '\')">Abrir una lesión</button>')
     + '<a class="bt neutro" href="agenda.html" style="text-decoration:none">Darle un turno</a>'
     + '<button class="bt neutro" onclick="cerrar()">Cerrar</button>'
     + '</div></div>';
   document.getElementById('detalle').scrollIntoView({behavior:'smooth', block:'start'});
 }
+/* ── ABRIR UNA LESION ──────────────────────────────────────────────
+   Se eligen zona, gravedad y diagnóstico. Todo lo demás lo pone el
+   sistema: los criterios de la fase 1 salen de plantillas.js, la fecha
+   estimada de alta sale de la zona más la gravedad, y la disponibilidad
+   que ve el cuerpo técnico se deduce de la fase.
+
+   El kine no escribe nada de eso, y aun así puede corregirlo después
+   desde la ficha.                                                     */
+var NL = {};
+
+function abrirLesion(pid){
+  var p = paciente(pid);
+  NL = {pid: pid, zona: 'Tobillo', lado: 'derecho', gravedad: 2,
+        diagnostico: '', mecanismo: '', fecha: HOY};
+
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo';
+  caja.id = 'cajaLesion';
+  caja.innerHTML = '<div class="ayuda-caja"><div id="cuerpoLesion"></div></div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarLesion(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+  pintarLesion();
+}
+
+function pintarLesion(){
+  var p = paciente(NL.pid);
+  var pl = PLANTILLAS[NL.zona] || PLANTILLAS.Otra;
+  NL.alta = altaEstimada(NL.zona, NL.gravedad, NL.fecha);
+  var crit = criteriosDe(NL.zona, 1);
+
+  document.getElementById('cuerpoLesion').innerHTML =
+    '<button class="cerrar" onclick="cerrarLesion()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Lesión nueva</span>'
+    + '<h2>' + p.nombre + '</h2>'
+    + '<p>' + (p.tipo === 'plantel' ? 'Plantel · camiseta ' + (p.dorsal || '?') : (p.obra_social || 'Particular'))
+    + ' · ' + edad(p.nacimiento) + ' años</p>'
+
+    + '<label class="campo"><span class="eti">Zona</span>'
+    + '<div class="pestanias" id="lZona" style="margin-bottom:0">'
+    + ZONAS.map(function(z){
+        return '<button class="pest' + (z === NL.zona ? ' on' : '') + '" data-z="' + z + '">' + z + '</button>';
+      }).join('') + '</div></label>'
+
+    + '<label class="campo"><span class="eti">Lado</span>'
+    + '<div class="pestanias" id="lLado" style="margin-bottom:0">'
+    + ['derecho','izquierdo','—'].map(function(x){
+        return '<button class="pest' + (x === NL.lado ? ' on' : '') + '" data-l="' + x + '">' + x + '</button>';
+      }).join('') + '</div></label>'
+
+    + '<label class="campo"><span class="eti">Qué tiene</span>'
+    + '<select id="lDiag">'
+    + pl.diagnosticos.map(function(d){
+        return '<option' + (d === NL.diagnostico ? ' selected' : '') + '>' + d + '</option>';
+      }).join('') + '</select></label>'
+
+    + '<label class="campo"><span class="eti">Gravedad</span>'
+    + '<div class="pestanias" id="lGrav" style="margin-bottom:0">'
+    + GRAVEDAD.map(function(g){
+        return '<button class="pest' + (g.n === NL.gravedad ? ' on' : '') + '" data-g="' + g.n + '">' + g.t + '</button>';
+      }).join('') + '</div>'
+    + '<small style="color:var(--tinta3);font-size:13px">'
+    + GRAVEDAD[NL.gravedad-1].d + '</small></label>'
+
+    + '<label class="campo"><span class="eti">Cómo se lesionó</span>'
+    + '<textarea id="lMec" placeholder="Caída tras disputa aérea, apoyo sobre el pie de un rival...">'
+    + (NL.mecanismo || '') + '</textarea></label>'
+
+    + '<label class="campo"><span class="eti">Cuándo</span>'
+    + '<input type="date" id="lFecha" value="' + NL.fecha + '"></label>'
+
+    /* Lo que el sistema completa solo: se muestra para que el kine lo
+       vea antes de guardar, no para que lo escriba. */
+    + '<div class="nota info"><b>Se va a completar solo:</b><br>'
+    + 'Alta estimada el ' + fechaCorta(NL.alta) + ' (' + faltan(NL.alta) + ' días).<br>'
+    + 'Arranca en fase 1 con ' + crit.length + ' criterios de ' + NL.zona.toLowerCase() + '.<br>'
+    + 'El parte médico lo va a mostrar como <b>de baja</b>.</div>'
+
+    + '<button class="bt ancho" onclick="guardarLesion()">Abrir la lesión</button>';
+
+  document.querySelectorAll('#lZona .pest').forEach(function(b){
+    b.onclick = function(){ NL.zona = b.dataset.z; NL.diagnostico = ''; pintarLesion(); };
+  });
+  document.querySelectorAll('#lLado .pest').forEach(function(b){
+    b.onclick = function(){ NL.lado = b.dataset.l; pintarLesion(); };
+  });
+  document.querySelectorAll('#lGrav .pest').forEach(function(b){
+    b.onclick = function(){ NL.gravedad = +b.dataset.g; pintarLesion(); };
+  });
+  ['lDiag','lMec','lFecha'].forEach(function(id){
+    var e = document.getElementById(id);
+    e.onchange = e.oninput = function(){
+      if(id === 'lDiag')  NL.diagnostico = e.value;
+      if(id === 'lMec')   NL.mecanismo = e.value;
+      if(id === 'lFecha'){ NL.fecha = e.value; pintarLesion(); }
+    };
+  });
+}
+
+function cerrarLesion(){
+  var c = document.getElementById('cajaLesion');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
+function guardarLesion(){
+  var p = paciente(NL.pid);
+  var diag = document.getElementById('lDiag').value;
+  var mec  = (document.getElementById('lMec').value || '').trim();
+  var fec  = document.getElementById('lFecha').value || HOY;
+
+  var id = 'L' + (BASE.lesiones.length + 1) + Date.now().toString().slice(-4);
+  var L = {
+    id: id, pid: NL.pid, dorsal: p.dorsal || null,
+    zona: NL.zona, lado: NL.lado,
+    diagnostico: diag, mecanismo: mec || '—',
+    fecha: fec, gravedad: NL.gravedad,
+    fase: 1, estado: 'activa',
+    alta: altaEstimada(NL.zona, NL.gravedad, fec),
+    kine: 'Vero',
+    criterios: criteriosDe(NL.zona, 1),
+    sesiones: []
+  };
+  BASE.lesiones.push(L);
+  guardar('kine/lesiones/' + id, L);
+  asentar(NL.pid, 'lesion_abierta',
+    L.diagnostico + '. ' + L.zona + ' ' + L.lado + ', gravedad ' + L.gravedad + ' de 4. '
+    + 'Mecanismo: ' + L.mecanismo + ' Se inicia en fase 1 con ' + L.criterios.length
+    + ' criterios de pase. Alta estimada para el ' + fechaCorta(L.alta) + '.');
+
+  /* El parte médico se actualiza solo. Es la parte que más se olvida
+     cuando se carga a mano, y la que más le importa al entrenador. */
+  if(p.dorsal){
+    BASE.disponibilidad[p.dorsal] = {
+      estado: estadoPorFase(1), motivo: NL.zona.toLowerCase(),
+      desde: fec, hasta: L.alta
+    };
+    guardar('kine/disponibilidad/' + p.dorsal, BASE.disponibilidad[p.dorsal]);
+  }
+  if(p.estado === 'pendiente'){
+    p.estado = 'activo';
+    guardar('kine/pacientes/' + p.id + '/estado', 'activo');
+  }
+
+  cerrarLesion();
+  irA('lesiones.html?f=' + id);
+}
+
 function campo(l, v){
   return '<div style="margin-bottom:12px"><span class="eti">' + l + '</span>'
        + '<div class="mono" style="font-size:15px;margin-top:3px">' + v + '</div></div>';

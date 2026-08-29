@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 <style>
   .ejs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
   .ej{border:1px solid var(--linea);border-radius:var(--r);background:var(--hoja);overflow:hidden;
@@ -76,13 +76,23 @@ document.querySelectorAll('.pest[data-f]').forEach(function(b){
 });
 
 function tarjeta(e){
-  return '<button class="ej" onclick="alert(\'Acá se abre el ejercicio: video, dosis y a qué programa sumarlo.\')">'
+  return '<button class="ej" onclick="verSuelto(\'' + e.n.replace(/'/g,"") + '\')">'
     + '<div class="mini ' + (e.lugar === 'gym' ? 'gym' : '') + '">'
     + '<span>' + (e.video ? 'Con video' : 'Sin video') + '</span></div>'
     + '<div class="cu"><b>' + e.n + '</b>'
     + '<small class="mono">' + e.z.toUpperCase() + ' · DESDE FASE ' + e.f + '</small></div></button>';
 }
 
+/* Un video de ejemplo para los que lo tienen cargado. En producción
+   el enlace sale de kine/ejercicios/<id>/video. */
+var VIDEO_DEMO = 'https://www.youtube.com/watch?v=IODxDxX7oi4';
+function verSuelto(nom){
+  var e = null;
+  SUELTOS.forEach(function(x){ if(x.n.replace(/'/g,"") === nom) e = x; });
+  if(!e) return;
+  abrirVideo(e.n, e.video ? VIDEO_DEMO : null,
+             e.z + ' · desde fase ' + e.f + '. Se suma al programa desde la ficha del paciente.');
+}
 function pintar(){
   var c = BASE.ejercicios.filter(function(e){ return filtro === 'todos' || e.zona === filtro; });
   document.getElementById('circuitos').innerHTML = c.length

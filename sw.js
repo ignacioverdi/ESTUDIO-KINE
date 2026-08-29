@@ -14,7 +14,7 @@
    volverte loco preguntándote por qué no se ve el cambio.
    ══════════════════════════════════════════════════════════════════════ */
 
-var VERSION = 'estudio-v16';
+var VERSION = 'estudio-v33';
 
 var ARCHIVOS = [
   'index.html',
@@ -27,9 +27,19 @@ var ARCHIVOS = [
   'diario.html',
   'pacientes.html',
   'alta.html',
+  'cartel.html',
+  'historia.html',
+  'caja.html',
+  'programa.html',
+  'perfil.html',
   'css/tema.css',
   'css/estudio.css',
   'js/datos.js',
+  'js/plantillas.js',
+  'js/qr.js',
+  'js/historia.js',
+  'js/dinero.js',
+  'js/atender.js',
   'js/base.js',
   'js/ayuda.js',
   'manifest.json',
@@ -77,4 +87,4 @@ self.addEventListener('fetch', function(e){
   );
 });
 
-/* huella: 6b1338347e1d */
+/* huella: 4aa9a3383e36 */

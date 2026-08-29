@@ -44,6 +44,7 @@ var AYUDA = {
       ['Abrí una ficha', 'De la lista, o tocando a alguien en el panel.'],
       ['Mirá la pista de fases', 'Cinco tramos. Los verdes ya pasaron, el marcado es donde está hoy.'],
       ['Tildá los criterios', 'A medida que se cumplen. El botón de avanzar se enciende solo cuando están todos.'],
+      ['Al avanzar no escribís nada', 'Los criterios de la fase nueva aparecen solos, y el parte médico que ve el entrenador cambia con la fase.'],
       ['Cargá la sesión del día', 'Botón al final de la ficha. Elegís el tipo, tocás el dolor al llegar y al terminar, y la nota es opcional.']
     ],
     ojo: 'Los dos valores de dolor son obligatorios y la nota no: la diferencia entre el dolor al llegar y al terminar es el dato que muestra si la sesión sirvió. Al pasar de fase, los criterios se vacían y aparecen los de la fase nueva. Es a propósito: cada fase se gana de nuevo.'
@@ -118,9 +119,71 @@ var AYUDA = {
       ['Repartí el enlace', 'Mandáselo por WhatsApp al paciente nuevo o dejalo en la recepción. Se completa en dos minutos.'],
       ['Mirá los que dicen "sin atender"', 'Son los que se dieron de alta y todavía no viste. Pasan a activo con la primera sesión.'],
       ['Buscá por nombre o documento', 'Con el buscador de arriba de la lista.'],
-      ['Abrí una ficha', 'Tocá el paciente y desde ahí le abrís una lesión o le das turno.']
+      ['Abrí una ficha', 'Tocá el paciente y desde ahí le abrís una lesión o le das turno.'],
+      ['Abrir una lesión', 'Elegís zona, lado y gravedad. Los criterios de cada fase y la fecha estimada de alta se completan solos.']
     ],
     ojo: 'Vos no cargás datos a mano: los carga el paciente. Eso evita los errores de tipeo y te ahorra el trabajo administrativo, que es donde se va el tiempo del estudio.'
+  },
+
+  programa: {
+    titulo: 'Cargar el programa',
+    que_es: 'Los ejercicios que el paciente hace en casa, con series, repeticiones, carga y video.',
+    pasos: [
+      ['Elegí al paciente', 'Los que no tienen lesión abierta aparecen apagados: primero hay que abrirles una.'],
+      ['Elegí la fase', 'Cada fase tiene su programa. Podés dejar armada la próxima antes de que llegue.'],
+      ['Sumá de la biblioteca', 'Vienen con la dosis sugerida ya puesta. Los de la zona lesionada salen primero.'],
+      ['Ajustá series, repeticiones y carga', 'Y pegá el enlace del video si lo tenés filmado.'],
+      ['Guardá', 'En ese momento el paciente lo ve en el celular. No hay que avisarle nada.']
+    ],
+    ojo: 'Las repeticiones son texto libre a propósito: sirve tanto "12" como "30 seg" o "10 por lado". Forzar un número obligaría a inventar equivalencias falsas.'
+  },
+
+  perfil: {
+    titulo: 'Tu perfil',
+    que_es: 'Tu foto, el logo del estudio, tu matrícula y cómo te presentás. Es lo que ve el paciente.',
+    pasos: [
+      ['Subí tu foto', 'Se achica sola antes de guardarse, así no pesa.'],
+      ['Subí el logo', 'Sale en el cartel del QR y en el encabezado.'],
+      ['Completá la matrícula', 'Va impresa en la historia clínica: es un documento profesional.'],
+      ['Contá quién sos', 'Escribilo como se lo contarías a alguien en la sala de espera, no como un currículum.']
+    ],
+    ojo: 'El teléfono que cargues acá es al que llegan los avisos de turno por WhatsApp. Si lo dejás vacío, ese botón no funciona.'
+  },
+
+  caja: {
+    titulo: 'La caja del estudio',
+    que_es: 'Lo que entra y lo que sale, los planes de cada paciente y el porcentaje de ausencias.',
+    pasos: [
+      ['Los cobros se anotan solos', 'Al asignar un plan y al marcar una sesión como atendida. Vos solo cargás los gastos.'],
+      ['Asigná el plan', 'Sesión a sesión, plan de diez, mensual libre, asesoría online o premium. El de diez descuenta un crédito por sesión.'],
+      ['Mirá quién se está quedando sin sesiones', 'Los que tienen dos o menos salen marcados en ámbar.'],
+      ['El porcentaje de ausencias', 'Es el indicador que más plata mueve: cada hueco es una hora que no se recupera.']
+    ],
+    ojo: 'El crédito se descuenta cuando la sesión se marca como atendida, no cuando se reserva el turno. Si se descontara al reservar, una cancelación a tiempo le comería una sesión al paciente y terminarías discutiendo por WhatsApp.'
+  },
+
+  historia: {
+    titulo: 'La historia clínica',
+    que_es: 'El registro completo de todo lo que se hizo, en orden, numerado y firmado. Es un documento legal.',
+    pasos: [
+      ['Cada actuación es un asiento', 'Con número correlativo, fecha, hora y quién lo hizo. No se puede editar el pasado: corregir es agregar una rectificación.'],
+      ['Verificá la integridad', 'El cartel de arriba dice si alguien tocó algo. Cada asiento guarda la huella del anterior, así que alterar uno se nota.'],
+      ['Descargala en PDF', 'El paciente es el titular de su historia y puede pedir copia cuando quiera. Por ley hay 48 horas para dársela.'],
+      ['Mirá quién la vio', 'Abajo está la lista de accesos. Restringir sin registrar deja la mitad del trabajo hecho.']
+    ],
+    ojo: 'La Ley 26.529 pide integridad, autenticidad, inalterabilidad, perdurabilidad y recuperabilidad. Un sistema que sobrescribe registros no cumple ninguna de las cinco. Por eso acá nunca se borra nada.'
+  },
+
+  cartel: {
+    titulo: 'El cartel del estudio',
+    que_es: 'Un cartel con código QR para pegar en la recepción. El paciente lo escanea y se carga solo.',
+    pasos: [
+      ['Imprimilo', 'Sale en blanco y negro, listo para una hoja A4. Pegalo donde entra la gente.'],
+      ['O mandá el enlace', 'Con "compartir" en el celular, o directo por WhatsApp.'],
+      ['Bajá el QR suelto', 'Si querés meterlo en un folleto o en una publicación.'],
+      ['Después no hacés nada', 'El que se carga aparece en tu padrón marcado como "sin atender".']
+    ],
+    ojo: 'El código se genera dentro del portal, no en un sitio de afuera. Los generadores de QR de internet reciben la dirección que uno codifica: mandarles la del estudio es filtrar algo que no hace falta.'
   },
 
   ejercicios: {

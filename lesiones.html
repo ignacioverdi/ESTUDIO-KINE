@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="ficha">
 
@@ -21,6 +21,7 @@
 
 <script>
 var abierta = new URLSearchParams(location.search).get('f');
+var ALTA_DADA = null;
 
 function pintar(){
   var lista = document.getElementById('lista'), ficha = document.getElementById('ficha');
@@ -30,11 +31,16 @@ function pintar(){
     document.getElementById('bajada').textContent =
       'Tres en tratamiento. Cada ficha avanza por criterios cumplidos, no por días transcurridos.';
     ficha.innerHTML = '';
-    lista.innerHTML = '<div class="tarjeta">' + BASE.lesiones.map(function(L){
+    var activas = BASE.lesiones.filter(function(L){ return L.estado === 'activa'; });
+    lista.innerHTML = (ALTA_DADA
+        ? '<div class="nota bien"><b>' + ALTA_DADA + '</b> recibió el alta. '
+          + 'Ya figura disponible en el parte médico y su ficha pasó al historial.</div>'
+        : '')
+      + '<div class="tarjeta">' + activas.map(function(L){
       var listos = criteriosListos(L);
       return '<button class="fila" style="align-items:flex-start" onclick="abrir(\'' + L.id + '\')">'
-        + '<span class="hh">#' + L.dorsal + '</span>'
-        + '<span class="cu"><b>' + nombre(L.dorsal) + ' — ' + L.zona + ' ' + L.lado + '</b>'
+        + '<span class="hh">' + (L.dorsal ? '#' + L.dorsal : 'P') + '</span>'
+        + '<span class="cu"><b>' + nombrePaciente(L) + ' — ' + L.zona + ' ' + L.lado + '</b>'
         + '<small>' + L.diagnostico + '</small>' + pista(L.fase, false) + '</span>'
         + '<span class="pin reservado">' + listos + '/' + L.criterios.length + '</span></button>';
     }).join('') + '</div>';
@@ -45,7 +51,7 @@ function pintar(){
   if(!L){ abierta = null; return pintar(); }
   lista.innerHTML = '<button class="bt neutro chico" style="margin-bottom:16px" onclick="abrir(null)">← Todas las lesiones</button>';
 
-  document.getElementById('titulo').textContent = nombre(L.dorsal) + ' · ' + L.zona.toLowerCase() + ' ' + L.lado;
+  document.getElementById('titulo').textContent = nombrePaciente(L) + ' · ' + L.zona.toLowerCase() + ' ' + L.lado;
   document.getElementById('bajada').textContent = L.diagnostico + '. Lesionado el ' + fechaCorta(L.fecha) + '.';
 
   var sigue  = Math.min(L.fase + 1, 5);
@@ -78,7 +84,7 @@ function pintar(){
       }).join('')
     + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">'
     + '<button class="bt" ' + (faltanC ? 'disabled' : '') + ' onclick="avanzar()">Pasar a fase ' + sigue + '</button>'
-    + '<button class="bt neutro" onclick="window.print()">Imprimir ficha</button>'
+    + '<a class="bt neutro" href="historia.html?p=' + L.pid + '" style="text-decoration:none">Historia clínica</a>'
     + '</div></div>'
 
     /* mecanismo */
@@ -91,7 +97,7 @@ function pintar(){
     + (programaDe(L).length
         ? programaDe(L).map(function(e){
             return '<div class="fila" style="cursor:default"><span class="cu"><b>' + e.n + '</b>'
-              + '<small>' + e.d + ' — ' + e.nota + '</small></span></div>';
+              + '<small>' + dosis(e) + ' — ' + e.nota + '</small></span></div>';
           }).join('')
         : '<div class="vacio"><b>Sin programa cargado para la fase ' + L.fase + '</b>'
           + 'Armalo desde la biblioteca o dibujá un circuito en el pizarrón.</div>')
@@ -133,7 +139,7 @@ function abrirSesion(){
     '<div class="ayuda-caja">'
     + '<button class="cerrar" onclick="cerrarSesion()" aria-label="Cerrar">&times;</button>'
     + '<span class="eti">Sesión de hoy</span>'
-    + '<h2>' + nombre(L.dorsal) + ' · ' + L.zona.toLowerCase() + '</h2>'
+    + '<h2>' + nombrePaciente(L) + ' · ' + L.zona.toLowerCase() + '</h2>'
     + '<p>Día ' + dias(L.fecha) + ' · fase ' + L.fase + ', ' + FASES[L.fase-1].t.toLowerCase() + '</p>'
 
     + '<label class="campo"><span class="eti">Qué tipo de sesión</span>'
@@ -185,11 +191,19 @@ function guardarSesion(){
 
   L.sesiones.unshift({f:HOY, t:sesionNueva.tipo, pre:sesionNueva.pre,
                       post:sesionNueva.post, nota:sesionNueva.nota});
+  asentar(L.pid, 'sesion',
+    sesionNueva.tipo + '. Dolor al llegar ' + sesionNueva.pre + '/10, al terminar '
+    + sesionNueva.post + '/10. Fase ' + L.fase + '. ' + sesionNueva.nota);
   guardar('kine/sesiones/' + L.id + '/' + HOY, {
     dorsal:L.dorsal, fecha:HOY, tipo:sesionNueva.tipo,
     dolor_pre:sesionNueva.pre, dolor_post:sesionNueva.post,
     notas:sesionNueva.nota, fase:L.fase
   });
+  var pac = L.pid ? paciente(L.pid) : null;
+  if(pac && pac.estado === 'pendiente'){
+    pac.estado = 'activo';
+    guardar('kine/pacientes/' + pac.id + '/estado', 'activo');
+  }
   cerrarSesion();
   pintar();
 }
@@ -203,14 +217,58 @@ function tildar(i, v){
   var L = lesionPorId(abierta);
   L.criterios[i].ok = v;
   guardar('kine/lesiones/' + L.id + '/criterios/' + i + '/ok', v);
+  asentar(L.pid, 'criterio',
+    (v ? 'Cumple' : 'Deja de cumplir') + ' el criterio de fase ' + L.fase
+    + ': ' + L.criterios[i].t + '.');
   pintar();
 }
 function avanzar(){
   var L = lesionPorId(abierta);
   if(L.fase >= 5) return;
   L.fase++;
-  L.criterios.forEach(function(c){ c.ok = false; });
-  guardar('kine/lesiones/' + L.id + '/fase', L.fase);
+
+  /* Los criterios de la fase nueva salen de la plantilla de esa zona.
+     El kine no los escribe: aparecen. */
+  L.criterios = (L.fase <= 4) ? criteriosDe(L.zona, L.fase) : [];
+
+  /* El parte médico se mueve solo con la fase. De baja hasta la 3,
+     limitado en la 4, disponible al llegar a la 5. Nadie lo carga a
+     mano, así que no se puede quedar viejo. */
+  var d = L.dorsal;
+  if(d){
+    if(L.fase >= 5){
+      delete BASE.disponibilidad[d];
+      guardar('kine/disponibilidad/' + d, null);
+    }else{
+      BASE.disponibilidad[d] = {
+        estado: estadoPorFase(L.fase), motivo: L.zona.toLowerCase(),
+        desde: L.fecha, hasta: L.alta
+      };
+      guardar('kine/disponibilidad/' + d, BASE.disponibilidad[d]);
+    }
+  }
+
+  /* Fase 5 es el alta. La lesión se cierra y deja de figurar entre las
+     activas, pero queda en el historial del paciente. */
+  if(L.fase >= 5){
+    L.estado = 'alta';
+    L.alta_real = HOY;
+    guardar('kine/lesiones/' + L.id, L);
+    asentar(L.pid, 'alta_medica',
+      'Alta. ' + L.diagnostico + ', ' + dias(L.fecha) + ' días de tratamiento y '
+      + L.sesiones.length + ' sesiones. Completó las cinco fases cumpliendo los criterios '
+      + 'de cada una. Queda disponible sin restricciones.');
+    ALTA_DADA = nombrePaciente(L);
+    abrir(null);
+    return;
+  }
+
+  asentar(L.pid, 'cambio_fase',
+    'Pasa a fase ' + L.fase + ', ' + FASES[L.fase-1].t.toLowerCase()
+    + ', tras cumplir todos los criterios de la anterior. '
+    + 'Se cargan ' + L.criterios.length + ' criterios nuevos. '
+    + 'Disponibilidad: ' + estadoPorFase(L.fase) + '.');
+  guardar('kine/lesiones/' + L.id, L);
   pintar();
 }
 pintar();

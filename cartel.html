@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cartel · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script>
+<script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script>
+<script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<style>
+  /* El cartel se ve en pantalla con los colores del portal, pero se
+     IMPRIME en blanco y negro sobre papel: un QR celeste sobre fondo
+     casi negro gasta un cartucho entero y muchas cámaras no lo leen. */
+  .cartel{background:#fff;color:#000;border-radius:var(--r2);padding:44px 38px;text-align:center;
+    max-width:640px;margin:0 auto}
+  .cartel h2{font-family:var(--tit);font-size:40px;font-weight:var(--tit-peso);
+    letter-spacing:var(--tit-track);text-transform:var(--tit-caja);line-height:1.05;margin-bottom:10px}
+  .cartel .lema{font-size:19px;color:#333;margin-bottom:28px;line-height:1.4}
+  .cartel .qr{width:290px;margin:0 auto 24px}
+  .cartel .dir{font-family:var(--dat);font-size:13px;color:#555;overflow-wrap:anywhere;margin-bottom:22px}
+  .cartel .pasos{text-align:left;max-width:400px;margin:0 auto;border-top:1px solid #ddd;padding-top:18px}
+  .cartel .pasos div{display:flex;gap:11px;padding:7px 0;font-size:15px;color:#222}
+  .cartel .pasos b{font-family:var(--dat);color:#000;flex-shrink:0}
+  .cartel .pie{margin-top:24px;font-size:13px;color:#666;border-top:1px solid #ddd;padding-top:16px}
+  @media print{
+    body{background:#fff;padding:0;background-image:none}
+    .hoja{padding:0;max-width:none}
+    .no-imprimir{display:none!important}
+    .cartel{border-radius:0;box-shadow:none;padding:60px 40px;max-width:none}
+    .cartel .qr{width:340px}
+  }
+</style>
+</head>
+<body data-pag="cartel">
+
+<div class="hoja angosta">
+  <div class="no-imprimir">
+    <h1 class="tit">El cartel del estudio</h1>
+    <p class="bajada">Imprimilo y pegalo en la recepción, o mandá el enlace por WhatsApp.
+    El paciente escanea, se carga solo, y aparece en tu padrón.</p>
+
+    <div class="tarjeta">
+      <div class="tarjeta-cab"><h2 class="sub">Repartir</h2></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="bt" onclick="window.print()">Imprimir el cartel</button>
+        <button class="bt hueco" onclick="compartir()">Compartir el enlace</button>
+        <button class="bt hueco" onclick="porWhatsapp()">Mandar por WhatsApp</button>
+        <button class="bt neutro" onclick="bajarQR()">Bajar el QR</button>
+      </div>
+      <div class="nota bien" id="hecho" style="display:none;margin-top:12px"></div>
+    </div>
+  </div>
+
+  <div class="cartel" id="cartel"></div>
+
+  <p class="no-imprimir" style="text-align:center;color:var(--tinta3);font-size:13px;margin-top:16px">
+    El código se genera acá adentro, sin mandarle la dirección a ningún servicio de afuera.
+  </p>
+</div>
+
+<script>
+function enlaceAlta(){
+  var u = location.href.split('?')[0].replace(/[^\/]*$/, 'alta.html');
+  return u.indexOf('file:') === 0 ? 'https://estudio-kine.vercel.app/alta.html' : u;
+}
+var URL_ALTA = enlaceAlta();
+
+document.getElementById('cartel').innerHTML =
+  '<h2>' + (BASE.club || 'Estudio de kinesiología') + '</h2>'
+  + '<p class="lema">Si venís a tratarte, cargá tus datos una sola vez desde el celular.</p>'
+  + '<div class="qr">' + qrSVG(URL_ALTA, {tinta:'#000000', fondo:'#FFFFFF'}) + '</div>'
+  + '<p class="dir">' + URL_ALTA + '</p>'
+  + '<div class="pasos">'
+  + '<div><b>1.</b><span>Apuntá la cámara del celular al código.</span></div>'
+  + '<div><b>2.</b><span>Completá tus datos. Son dos minutos, una sola vez.</span></div>'
+  + '<div><b>3.</b><span>Listo: pedís turno y ves tus ejercicios desde el celular.</span></div>'
+  + '</div>'
+  + '<p class="pie">Tus datos son información de salud. Los ve el kinesiólogo que te atiende '
+  + 'y los ves vos. Nadie más.</p>';
+
+function avisar(t){
+  var e = document.getElementById('hecho');
+  e.textContent = t; e.style.display = 'block';
+}
+
+/* En el celular abre el menú de compartir del sistema; en la computadora
+   no existe, así que copia al portapapeles. */
+function compartir(){
+  var datos = {title:'Estudio de kinesiología',
+               text:'Cargá tus datos para atenderte en el estudio:', url:URL_ALTA};
+  if(navigator.share){
+    navigator.share(datos).catch(function(){});
+  }else if(navigator.clipboard){
+    navigator.clipboard.writeText(URL_ALTA);
+    avisar('Enlace copiado. Pegalo donde quieras.');
+  }else{
+    avisar(URL_ALTA);
+  }
+}
+
+function porWhatsapp(){
+  var t = 'Hola. Para atenderte en el estudio, cargá tus datos acá una sola vez: ' + URL_ALTA;
+  window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
+}
+
+/* Baja el QR como imagen suelta, para meterlo en un folleto o un flyer. */
+function bajarQR(){
+  var svg = document.querySelector('#cartel .qr svg').cloneNode(true);
+  svg.setAttribute('width', 1000); svg.setAttribute('height', 1000);
+  var img = new Image();
+  img.onload = function(){
+    var c = document.createElement('canvas');
+    c.width = 1000; c.height = 1000;
+    var x = c.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, 1000, 1000);
+    x.drawImage(img, 0, 0);
+    var a = document.createElement('a');
+    a.href = c.toDataURL('image/png');
+    a.download = 'qr-alta-estudio.png';
+    a.click();
+    avisar('Bajado como qr-alta-estudio.png');
+  };
+  img.src = 'data:image/svg+xml;base64,'
+          + btoa(unescape(encodeURIComponent(new XMLSerializer().serializeToString(svg))));
+}
+</script>
+</body></html>

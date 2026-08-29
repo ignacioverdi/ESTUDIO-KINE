@@ -38,7 +38,9 @@ def partir(html):
 
 def adaptar(js):
     """Reemplaza lo que depende de tener una URL de verdad."""
-    js = js.replace("new URLSearchParams(location.search).get('f')", "PARAM('f')")
+    # cualquier parametro, no solo el 'f': escrito a mano se olvida uno
+    js = re.sub(r"new URLSearchParams\(location\.search\)\.get\('(\w+)'\)",
+                r"PARAM('\1')", js)
     js = re.sub(r"history\.replaceState\([^;]*\);", "PARAMSET('f', id);", js)
     js = re.sub(r"location\.href\s*=\s*'([a-z_]+\.html)'\s*;", r"irA('\1');", js)
     return js
@@ -58,8 +60,18 @@ _fuentes = re.findall(r"@import url\('([^']+)'\)", leer('css/tema.css'))
 # los estilos propios de cada pantalla van AL FINAL, para que puedan
 # pisar a los componentes cuando haga falta
 css  = tema + '\n' + leer('css/estudio.css') + '\n' + '\n'.join(estilos_extra)
+# Los archivos de js NO se nombran a mano: se leen todos los que haya.
+# Escritos a mano, uno nuevo se olvida y el archivo unico queda roto sin
+# que nada avise. Ya paso una vez con plantillas.js.
+# El orden importa: datos define BASE y HOY, y el resto los usa.
+ORDEN = ['datos.js', 'plantillas.js', 'base.js', 'ayuda.js']
+_todos = sorted(os.path.basename(f) for f in _glob.glob(os.path.join(KIT, 'js', '*.js')))
+_todos = [f for f in _todos if f != 'firebase.js']       # se copia del club, no va aca
+_lista = [f for f in ORDEN if f in _todos] + [f for f in _todos if f not in ORDEN]
+
 datos = leer('js/datos.js')
-base  = leer('js/base.js') + '\n' + leer('js/ayuda.js')
+base  = '\n'.join(leer('js/' + f) for f in _lista if f != 'datos.js')
+print('  js incluidos: ' + ', '.join(_lista))
 
 # de base.js sacamos solo lo compartido; la cabecera la maneja el armazon
 base = re.sub(r'function armarCabecera\(\)\{.*?\n\}\n', '', base, flags=re.S)
