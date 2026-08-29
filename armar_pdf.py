@@ -44,6 +44,26 @@ def aviso(txt, color=ROJO, fondo='#FBEDEB'):
     return t
 
 
+def recuadro_direccion():
+    """La direccion del portal, imposible de no ver."""
+    dentro = [Paragraph('LA DIRECCION DEL PORTAL', ParagraphStyle('t',
+                fontName='Helvetica-Bold', fontSize=9, textColor=colors.white,
+                alignment=1, spaceAfter=6)),
+              Paragraph(DIRECCION, ParagraphStyle('d', fontName='Courier-Bold',
+                fontSize=19, leading=26, textColor=colors.white, alignment=1,
+                spaceAfter=9)),
+              Paragraph('Escribila en la barra de arriba del navegador, tal cual, '
+                        'sin www y sin nada mas.', ParagraphStyle('p',
+                fontName='Helvetica', fontSize=9.5, leading=13,
+                textColor=colors.HexColor('#BFE4EA'), alignment=1))]
+    t = Table([[dentro]], colWidths=[165 * mm])
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), AZUL),
+        ('LEFTPADDING', (0, 0), (-1, -1), 14), ('RIGHTPADDING', (0, 0), (-1, -1), 14),
+        ('TOPPADDING', (0, 0), (-1, -1), 13),  ('BOTTOMPADDING', (0, 0), (-1, -1), 13)]))
+    return t
+
+
 def paso(n, titulo, cuerpo, extra=None):
     izq = Table([[Paragraph(str(n), ParagraphStyle('n', fontName='Helvetica-Bold',
                  fontSize=17, textColor=colors.white, alignment=1))]],
@@ -71,6 +91,17 @@ def pie(canvas, doc):
     canvas.restoreState()
 
 
+# ══════════════════════════════════════════════════════════════════════
+# LA DIRECCION DEL PORTAL
+# Es el dato mas importante de toda la guia: sin esto no puede ni entrar.
+# Si el portal se publica en otra direccion, se cambia aca y se vuelve a
+# generar el PDF con:   python armar_pdf.py
+# ══════════════════════════════════════════════════════════════════════
+DIRECCION = 'estudio-kine.vercel.app'
+
+GRANDE = ParagraphStyle('GRANDE', fontName='Courier-Bold', fontSize=17, leading=25,
+                        textColor=AZUL, spaceAfter=8, spaceBefore=4)
+
 d = []
 
 d.append(Paragraph('Instalar el portal en tu computadora', H1))
@@ -85,12 +116,16 @@ d.append(aviso('<b>Antes de empezar, lo mas importante.</b><br/><br/>'
                'Todo lo que sigue es para <b>MODIFICAR</b> el portal: cambiar textos, '
                'agregar cosas, publicar cambios.', AZUL, '#E9F4F6'))
 
+d.append(Spacer(1, 5 * mm))
+d.append(recuadro_direccion())
+d.append(Spacer(1, 4 * mm))
 d.append(Paragraph('Antes que nada: el atajo', H2))
 d.append(Paragraph('Si lo unico que queres es entrar al portal todos los dias, '
                    'segui estos tres pasos y saltea el resto de la guia.', P))
 d.append(paso(1, 'Abri el navegador',
-              'Chrome, Edge o el que uses. Escribi la direccion del portal en la barra '
-              'de arriba y apreta Enter.'))
+              'Chrome, Edge o el que uses. Arriba de todo hay una barra ancha y vacia. '
+              'Hace clic ahi, escribi esto tal cual y apreta la tecla Enter:',
+              Paragraph(DIRECCION, GRANDE)))
 d.append(paso(2, 'Instalalo como aplicacion',
               'En la computadora: en Chrome, arriba a la derecha hay tres puntitos. '
               'Tocalos y buscá <b>Instalar</b>.<br/>'
@@ -162,10 +197,18 @@ d.append(paso(1, 'Crea la carpeta',
               'Te tiene que quedar asi:',
               Paragraph('C:\\Proyectos\\ESTUDIO', MONO)))
 d.append(paso(2, 'Descomprimi el kit ahi',
-              'Abri el archivo comprimido que te pasaron. Adentro hay una carpeta llamada '
-              '<b>kit</b>. Entra a esa carpeta, selecciona todo lo que hay adentro con '
-              '<b>Ctrl+A</b>, copialo con <b>Ctrl+C</b>, y pegalo dentro de '
-              'C:\\Proyectos\\ESTUDIO con <b>Ctrl+V</b>.'))
+              'El archivo que te pasaron termina en <b>.zip</b>. Hacele clic con el boton '
+              '<b>derecho</b> del mouse y elegi <b>Extraer todo</b>, y despues '
+              '<b>Extraer</b>.<br/><br/>'
+              'Se abre una carpeta. Adentro hay otra carpeta llamada '
+              '<b>kit</b>. Hacele doble clic para entrar.<br/><br/>'
+              'Adentro vas a ver muchos archivos. Para copiarlos todos de una:<br/>'
+              '&nbsp;&nbsp;&bull; Manten apretada la tecla <b>Ctrl</b> y toca la letra '
+              '<b>A</b>. Se marcan todos de color.<br/>'
+              '&nbsp;&nbsp;&bull; Con <b>Ctrl</b> apretada, toca la letra <b>C</b>. Eso copia.<br/>'
+              '&nbsp;&nbsp;&bull; Anda a la carpeta ESTUDIO que creaste, y con <b>Ctrl</b> '
+              'apretada toca la letra <b>V</b>. Eso pega.<br/><br/>'
+              'La tecla Ctrl esta abajo a la izquierda del teclado.'))
 d.append(aviso('<b>Cuidado con esto.</b> Los archivos van dentro de ESTUDIO, sueltos. '
                'Si te queda una carpeta llamada "kit" adentro de ESTUDIO, entraste mal: '
                'sacale los archivos de adentro y borra la carpeta vacia.<br/><br/>'
@@ -246,6 +289,41 @@ d.append(Spacer(1, 10 * mm))
 d.append(Paragraph('Si algo no sale como dice la guia, no sigas adelante probando cosas: '
                    'sacale una foto a la pantalla y preguntá. Es mas rapido y no se rompe nada.',
                    CHICO))
+
+d.append(PageBreak())
+
+d.append(Paragraph('Para pegar en la pared', H1))
+d.append(Paragraph('Lo unico que necesitas recordar todos los dias.', SUB))
+d.append(Spacer(1, 6 * mm))
+d.append(recuadro_direccion())
+d.append(Spacer(1, 10 * mm))
+
+d.append(Paragraph('Para atender pacientes', H2))
+d.append(Paragraph('Toca el icono del portal. Nada mas. No hace falta abrir ningun otro '
+                   'programa ni ninguna ventana negra.', P))
+d.append(Spacer(1, 6 * mm))
+
+d.append(Paragraph('Para atender a alguien que llega', H2))
+d.append(Paragraph('Entra a <b>Panel</b>, toca el turno de esa persona, y se abre todo en '
+                   'una sola pantalla: si vino, cuanto le dolia al llegar y al terminar, '
+                   'que se hizo, y el proximo turno. Un solo boton al final hace todo junto.', P))
+d.append(Spacer(1, 6 * mm))
+
+d.append(Paragraph('Para sumar un paciente nuevo', H2))
+d.append(Paragraph('No lo cargues vos. Entra a <b>Cartel</b>, imprimilo y pegalo en la '
+                   'recepcion. El paciente le saca una foto al codigo con la camara del '
+                   'celular, completa sus datos en dos minutos, y aparece solo en tu lista.', P))
+d.append(Spacer(1, 6 * mm))
+
+d.append(Paragraph('Si no entendes algo dentro del portal', H2))
+d.append(Paragraph('Arriba a la derecha de cada pantalla hay un boton con un signo de '
+                   'pregunta. Tocalo y te explica esa pantalla: para que sirve, como se usa '
+                   'paso a paso, y donde suele estar la trampa.', P))
+
+d.append(Spacer(1, 10 * mm))
+d.append(aviso('<b>Lo unico que no hay que olvidarse:</b> antes de cargar tu primer paciente '
+               'de verdad, entra a <b>Mi perfil</b>, anda hasta abajo de todo y usa el boton '
+               'de vaciar. Borra los pacientes inventados que trae el portal de ejemplo.'))
 
 doc = SimpleDocTemplate('INSTALAR_DESDE_CERO.pdf', pagesize=A4,
                         leftMargin=22 * mm, rightMargin=22 * mm,
