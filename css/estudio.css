@@ -13,11 +13,20 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 *{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--fondo)}      /* el color llega hasta los bordes */
 html{-webkit-text-size-adjust:100%}
+/* ── EL IPHONE Y SU MUESCA ──────────────────────────────────────
+   Instalada como app, la barra de la hora y la bateria se superpone
+   al contenido, y abajo esta la barra de gestos. Sin esto, el
+   encabezado queda tapado por el reloj.                            */
 body{
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:calc(30px + env(safe-area-inset-bottom));
+  padding-left:env(safe-area-inset-left);
+  padding-right:env(safe-area-inset-right);
   background:var(--fondo); color:var(--tinta);
   font-family:var(--txt); font-size:15px; line-height:1.5;
-  min-height:100vh; padding-bottom:30px;
+  min-height:100vh;
   background-image:var(--trama); background-attachment:fixed;
 }
 
@@ -294,6 +303,8 @@ label.campo>.eti{display:block;margin-bottom:5px}
   p a{display:inline-block;padding:11px 4px}
   .crit{padding:14px 0}
   .crit input{width:22px;height:22px}
+  /* 16px no es capricho: por debajo de eso iOS hace zoom solo al tocar
+     un campo, y despues la pantalla queda corrida. */
   input,select,textarea{min-height:44px;font-size:16px}
   .quien .av{width:34px;height:34px}
   button.fila,.at{min-height:52px}

@@ -1,31 +1,34 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Agenda · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="agenda">
-
 <div class="hoja">
   <h1 class="tit" id="tit">Agenda</h1>
   <p class="bajada" id="baj"></p>
-
   <div class="pestanias">
     <button class="pest on" data-d="2026-08-28">Viernes 28</button>
     <button class="pest" data-d="2026-08-31">Lunes 31</button>
   </div>
-
   <div class="tarjeta">
     <div class="tarjeta-cab"><h2 class="sub" id="subDia"></h2>
       <span class="eti" id="cuenta"></span></div>
     <div id="grilla"></div>
   </div>
-
   <div class="tarjeta" id="cajaCfg">
     <div class="tarjeta-cab"><h2 class="sub">Horario del estudio</h2>
       <span class="eti">Se aplica a toda la semana</span></div>
@@ -37,22 +40,18 @@
     <button class="bt hueco" onclick="alert('Guardado. La grilla se rearma con estos horarios.')">Guardar horario</button>
   </div>
 </div>
-
 <script>
 var dia = HOY, esKine = rol() === 'kine';
-
 if(!esKine){
   document.getElementById('cajaCfg').style.display = 'none';
   document.getElementById('tit').textContent = 'Mis turnos';
 }
-
 document.querySelectorAll('.pest[data-d]').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('.pest[data-d]').forEach(function(x){ x.classList.remove('on'); });
     b.classList.add('on'); dia = b.dataset.d; pintar();
   };
 });
-
 function pintar(){
   var lista = BASE.agenda[dia] || [];
   var tomados = lista.filter(function(t){ return t.dorsal; }).length;
@@ -62,7 +61,6 @@ function pintar(){
   document.getElementById('baj').textContent = esKine
     ? 'Tocá un turno ocupado para abrir la ficha, o uno libre para asignarlo.'
     : 'Tocá un horario libre para reservarlo. Te llega un aviso una hora antes.';
-
   document.getElementById('grilla').innerHTML = lista.map(function(t, i){
     if(!t.dorsal){
       return '<button class="fila libre" onclick="reservar(' + i + ')">'
@@ -87,16 +85,13 @@ function pintar(){
       + '</button>';
   }).join('');
 }
-
 /* Antes esto pedía el dorsal con una ventanita del navegador. No servía:
    los pacientes particulares no tienen dorsal, y había que acordarse el
    número de memoria. Ahora se elige del padrón. */
 var TURNO = null;
-
 function reservar(i){
   var t = (BASE.agenda[dia] || [])[i];
   if(!t) return;
-
   if(!esKine){
     var p = pacientePorDorsal(miDorsal());
     t.pid = p ? p.id : null;
@@ -108,7 +103,6 @@ function reservar(i){
     pintar();
     return;
   }
-
   TURNO = {i: i, hora: t.h, pid: null, tipo: 'Tratamiento'};
   var caja = document.createElement('div');
   caja.className = 'ayuda-fondo';
@@ -119,7 +113,6 @@ function reservar(i){
     + '<span class="eti">Turno nuevo</span>'
     + '<h2>' + t.h + '</h2>'
     + '<p>' + (dia === HOY ? 'Viernes 28 de agosto' : 'Lunes 31 de agosto') + '</p>'
-
     + '<label class="campo"><span class="eti">Quién viene</span>'
     + '<select id="tPac"><option value="">Elegí un paciente</option>'
     + BASE.pacientes.map(function(p){
@@ -128,20 +121,17 @@ function reservar(i){
              + (p.dorsal ? ' (#' + p.dorsal + ')' : '')
              + (l ? ' — ' + l.zona.toLowerCase() : '') + '</option>';
       }).join('') + '</select></label>'
-
     + '<label class="campo"><span class="eti">Qué tipo de sesión</span>'
     + '<div class="pestanias" id="tTipo" style="margin-bottom:0">'
     + ['Evaluación','Tratamiento','Gimnasio','Campo'].map(function(x){
         return '<button class="pest' + (x === 'Tratamiento' ? ' on' : '') + '" data-t="' + x + '">' + x + '</button>';
       }).join('') + '</div></label>'
-
     + '<div id="avisoTurno"></div>'
     + '<button class="bt ancho" onclick="guardarTurno()">Dar el turno</button>'
     + '</div>';
   caja.addEventListener('click', function(e){ if(e.target === caja) cerrarTurno(); });
   document.body.appendChild(caja);
   document.body.style.overflow = 'hidden';
-
   document.querySelectorAll('#tTipo .pest').forEach(function(b){
     b.onclick = function(){
       document.querySelectorAll('#tTipo .pest').forEach(function(x){ x.classList.remove('on'); });
@@ -149,7 +139,6 @@ function reservar(i){
     };
   });
 }
-
 /* Cuando un paciente reserva, el kinesiólogo se tiene que enterar.
    Hasta que estén los avisos push, se le arma el mensaje de WhatsApp y
    se le ofrece mandarlo: un toque, sin copiar y pegar nada. */
@@ -179,19 +168,16 @@ function cerrarAviso(){
   if(c) c.remove();
   document.body.style.overflow = '';
 }
-
 function lesionDePaciente(pid){
   for(var i=0;i<BASE.lesiones.length;i++)
     if(BASE.lesiones[i].pid === pid && BASE.lesiones[i].estado === 'activa') return BASE.lesiones[i];
   return null;
 }
-
 function cerrarTurno(){
   var c = document.getElementById('cajaTurno');
   if(c) c.remove();
   document.body.style.overflow = '';
 }
-
 /* Marcar atendido descuenta el crédito y anota el cobro si paga por
    sesión. Es el único momento en que se toca la plata: si se cobrara al
    reservar, una cancelación a tiempo generaría una discusión. */
@@ -215,7 +201,6 @@ function marcarAusente(i){
   guardar('kine/agenda/turnos/' + dia + '/' + t.h + '/estado', 'ausente');
   pintar();
 }
-
 function guardarTurno(){
   var pid = document.getElementById('tPac').value;
   if(!pid){
@@ -234,15 +219,12 @@ pintar();
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

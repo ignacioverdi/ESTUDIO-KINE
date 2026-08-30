@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Historia clínica · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
@@ -39,18 +46,13 @@
 </style>
 </head>
 <body data-pag="historia">
-
 <div class="hoja angosta" id="todo"></div>
-
 <script>
 var pid = new URLSearchParams(location.search).get('p') || (rol() === 'kine' ? null : miPid());
-
 /* Mirar una historia clínica ya es un acceso, y queda registrado. */
 if(pid) registrarAcceso(pid, 'lectura de historia clínica');
-
 function pintar(){
   var caja = document.getElementById('todo');
-
   if(!pid){
     caja.innerHTML = '<h1 class="tit">Historia clínica</h1>'
       + '<p class="bajada">Elegí un paciente para ver su historia completa.</p>'
@@ -62,27 +64,21 @@ function pintar(){
         }).join('') + '</div>';
     return;
   }
-
   var p = paciente(pid);
   if(!p){ caja.innerHTML = '<div class="vacio"><b>No existe ese paciente</b></div>'; return; }
-
   var h = historiaDe(pid);
   var v = verificarHistoria(pid);
   var acc = accesosDe(pid);
   var esKine = rol() === 'kine';
-
   caja.innerHTML =
-
     '<h1 class="tit">Historia clínica</h1>'
     + '<p class="bajada">' + p.nombre + ' · documento ' + p.doc
     + ' · nacido el ' + fechaLarga(p.nacimiento) + '</p>'
-
     + '<div class="no-imprimir" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">'
     + '<button class="bt" onclick="window.print()">Descargar en PDF</button>'
     + (esKine ? '<button class="bt hueco" onclick="agregarNota()">Agregar una nota</button>' : '')
     + (esKine ? '<button class="bt neutro" onclick="irA(\'historia.html\')">Otro paciente</button>' : '')
     + '</div>'
-
     /* La verificación de integridad es lo que convierte esto en un
        documento defendible y no en una lista de textos. */
     + (v.ok
@@ -90,7 +86,6 @@ function pintar(){
           + 'encadenados y sin modificaciones. Cada uno guarda la huella del anterior.</div>'
         : '<div class="nota reserva"><b>Atención:</b> ' + v.motivo
           + ' Esta historia fue alterada después de escrita.</div>')
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Datos del paciente</h2></div>'
     + '<div class="rejilla c2">'
@@ -103,7 +98,6 @@ function pintar(){
     + dato('En el padrón desde', fechaLarga(p.alta))
     + '</div>'
     + '</div>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Admisión</h2></div>'
     + '<div class="rejilla c2">'
@@ -117,7 +111,6 @@ function pintar(){
     + '<label class="campo" style="margin-bottom:0"><span class="eti">Objetivo del paciente</span>'
     + '<p style="color:var(--tinta2)">' + (p.objetivos || '—') + '</p></label>'
     + '</div>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Plan y sesiones</h2></div>'
     + '<div class="rejilla c2">'
@@ -135,7 +128,6 @@ function pintar(){
         : '<div class="nota aviso" style="margin-bottom:0">Sin consentimiento vigente. '
           + 'No se pueden registrar datos clínicos nuevos.</div>')
     + '</div>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Evolución</h2>'
     + '<span class="eti">' + h.length + ' asientos</span></div>'
@@ -143,7 +135,6 @@ function pintar(){
         ? h.slice().reverse().map(asientoHTML).join('')
         : '<div class="vacio"><b>Sin asientos</b>Todavía no se registró ninguna actuación.</div>')
     + '</div>'
-
     + (esKine
         ? '<div class="tarjeta no-imprimir">'
           + '<div class="tarjeta-cab"><h2 class="sub">Quién vio esta historia</h2>'
@@ -158,12 +149,10 @@ function pintar(){
               : '<div class="vacio">Sin accesos registrados.</div>')
           + '</div>'
         : '')
-
     + '<p style="font-size:12px;color:var(--tinta3);margin-top:20px;text-align:center">'
     + 'Documento emitido el ' + fechaLarga(HOY) + '. El paciente es el titular de su historia '
     + 'clínica y puede pedir copia en cualquier momento (Ley 26.529, artículo 14).</p>';
 }
-
 function asientoHTML(a){
   return '<div class="asiento' + (a.rectifica ? ' rect' : '') + '">'
     + '<div class="asiento-cab"><span class="folio">' + a.n + '</span>'
@@ -175,19 +164,16 @@ function asientoHTML(a){
     + '<div class="huella">huella ' + a.huella.slice(0, 32) + '…</div>'
     + '</div>';
 }
-
 function dato(l, v){
   return '<div style="margin-bottom:12px"><span class="eti">' + l + '</span>'
        + '<div class="mono" style="font-size:15px;margin-top:3px">' + v + '</div></div>';
 }
-
 function agregarNota(){
   var t = prompt('¿Qué querés dejar asentado?');
   if(!t || !t.trim()) return;
   asentar(pid, 'nota', t.trim());
   pintar();
 }
-
 /* El consentimiento es revocable por ley. Revocarlo no borra la historia
    (que hay que conservar), pero corta el registro de datos nuevos. */
 function revocar(){
@@ -200,20 +186,16 @@ function revocar(){
   asentar(pid, 'revocacion', 'El paciente revocó el consentimiento para el tratamiento de sus datos.');
   pintar();
 }
-
 pintar();
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

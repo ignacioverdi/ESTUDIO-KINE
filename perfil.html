@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mi perfil · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
@@ -21,9 +28,7 @@
 </style>
 </head>
 <body data-pag="perfil">
-
 <div class="hoja angosta" id="todo"></div>
-
 <script>
 /* El perfil vive en config.json en producción. Acá se guarda igual que
    todo lo demás, para poder editarlo desde la app sin tocar archivos. */
@@ -43,15 +48,12 @@ function perfil(){
   };
   return BASE.perfil;
 }
-
 function pintar(){
   var P = perfil();
   document.getElementById('todo').innerHTML =
-
     '<h1 class="tit">Mi perfil</h1>'
     + '<p class="bajada">Esto es lo que ve el paciente cuando entra al portal, y lo que sale '
     + 'impreso en el cartel y en la historia clínica.</p>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Tu foto</h2>'
     + '<span class="eti">Se ve en el cartel y en el inicio</span></div>'
@@ -66,7 +68,6 @@ function pintar(){
     + (P.foto ? ' <button class="bt neutro" onclick="borrar(\'foto\')">Quitar</button>' : '')
     + '<p style="font-size:13px;color:var(--tinta3);margin-top:10px">Se achica sola a 400 '
     + 'píxeles antes de guardarse, así no pesa.</p></div></div></div>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">El logo del estudio</h2></div>'
     + '<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">'
@@ -79,7 +80,6 @@ function pintar(){
     + (P.logo ? 'Cambiar el logo' : 'Elegir un logo') + '</button>'
     + (P.logo ? ' <button class="bt neutro" onclick="borrar(\'logo\')">Quitar</button>' : '')
     + '</div></div></div>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Tus datos</h2></div>'
     + campo('nombre', 'Nombre y apellido')
@@ -88,7 +88,6 @@ function pintar(){
     + '<div class="rejilla c2">' + campo('tel', 'Teléfono') + campo('email', 'Correo') + '</div>'
     + campo('direccion', 'Dirección')
     + '</div>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Quién sos</h2>'
     + '<span class="eti">Lo lee el paciente nuevo</span></div>'
@@ -96,10 +95,8 @@ function pintar(){
     + 'oninput="tocar(\'presentacion\',this.value)">' + (P.presentacion || '') + '</textarea>'
     + '<p style="font-size:13px;color:var(--tinta3);margin-top:8px">Escribilo como se lo '
     + 'contarías a alguien en la sala de espera, no como un currículum.</p></div>'
-
     + '<div id="aviso"></div>'
     + '<button class="bt ancho" onclick="guardarPerfil()">Guardar</button>'
-
     /* Vaciar es lo último de la pantalla y no se puede deshacer. Va
        separado, explicado, y pide escribir una palabra: un botón suelto
        que borra todo se toca sin querer. */
@@ -124,16 +121,13 @@ function pintar(){
         : '<div class="nota bien" style="margin-top:26px">El portal está limpio. Los datos de '
           + 'demostración se borraron y no vuelven.</div>');
 }
-
 function campo(k, l){
   var P = perfil();
   return '<label class="campo"><span class="eti">' + l + '</span>'
     + '<input type="text" id="c_' + k + '" value="' + (P[k] || '').replace(/"/g,'&quot;') + '" '
     + 'oninput="tocar(\'' + k + '\',this.value)"></label>';
 }
-
 function tocar(k, v){ perfil()[k] = v; }
-
 /* Las imágenes se achican antes de guardarse. Una foto de celular pesa
    cuatro megas: guardada tal cual, la app tarda una eternidad en abrir
    y Firebase la rechaza. Reducida a 400 píxeles pesa cuarenta kilos. */
@@ -156,9 +150,7 @@ function subirImagen(input, destino, lado){
   };
   lector.readAsDataURL(f);
 }
-
 function borrar(k){ perfil()[k] = null; pintar(); }
-
 function confirmarVaciado(){
   var t = (document.getElementById('cVaciar').value || '').trim().toUpperCase();
   if(t !== 'VACIAR'){
@@ -183,26 +175,21 @@ function confirmarVaciado(){
   if(c) c.remove();
   scrollTo(0, 0);
 }
-
 function guardarPerfil(){
   guardar('kine/perfil', perfil());
   document.getElementById('aviso').innerHTML =
     '<div class="nota bien">Guardado. Ya se ve en el portal y en el cartel.</div>';
 }
-
 pintar();
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

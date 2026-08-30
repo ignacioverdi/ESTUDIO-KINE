@@ -1,28 +1,32 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pacientes · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="pacientes">
-
 <div class="hoja">
   <h1 class="tit">Pacientes</h1>
   <p class="bajada">Todos los que pasaron por el estudio. Se dan de alta solos desde el
   enlace de abajo: vos no cargás datos a mano, solo atendés.</p>
-
   <div class="rejilla c4" style="margin-bottom:20px">
     <div class="dato"><div class="v" id="kTotal">—</div><div class="l">En el padrón</div></div>
     <div class="dato"><div class="v" id="kPlantel">—</div><div class="l">Del plantel</div></div>
     <div class="dato"><div class="v" id="kPart">—</div><div class="l">Particulares</div></div>
     <div class="dato"><div class="v" id="kPend" style="color:var(--ambar)">—</div><div class="l">Sin atender</div></div>
   </div>
-
   <div class="tarjeta">
     <div class="tarjeta-cab"><h2 class="sub">El enlace para darse de alta</h2>
       <span class="eti">Pegalo en la puerta del estudio</span></div>
@@ -44,26 +48,21 @@
     </div>
     <div class="nota bien" id="copiado" style="display:none">Copiado. Pegalo donde quieras.</div>
   </div>
-
   <div class="pestanias">
     <button class="pest on" data-f="todos">Todos</button>
     <button class="pest" data-f="pendiente">Sin atender</button>
     <button class="pest" data-f="plantel">Plantel</button>
     <button class="pest" data-f="particular">Particulares</button>
   </div>
-
   <div class="tarjeta">
     <label class="campo"><span class="eti">Buscar</span>
       <input type="text" id="buscar" placeholder="Nombre o documento"></label>
     <div id="lista"></div>
   </div>
-
   <div id="detalle"></div>
 </div>
-
 <script>
 var filtro = 'todos', abierto = null;
-
 document.getElementById('enlace').textContent = enlaceAlta();
 function enlaceAlta(){
   var u = location.href.split('?')[0].replace(/[^\/]*$/, 'alta.html');
@@ -71,7 +70,6 @@ function enlaceAlta(){
 }
 document.getElementById('qrChico').innerHTML =
   qrSVG(enlaceAlta(), {tinta:'#000000', fondo:'#FFFFFF'});
-
 /* En el celular abre el menú de compartir del sistema. En la computadora
    ese menú no existe, así que copia el enlace al portapapeles. */
 function compartirAlta(){
@@ -88,7 +86,6 @@ function porWhatsapp(){
   var t = 'Hola. Para atenderte en el estudio, cargá tus datos acá una sola vez: ' + enlaceAlta();
   window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
 }
-
 document.querySelectorAll('.pest[data-f]').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('.pest[data-f]').forEach(function(x){ x.classList.remove('on'); });
@@ -96,23 +93,19 @@ document.querySelectorAll('.pest[data-f]').forEach(function(b){
   };
 });
 document.getElementById('buscar').oninput = pintar;
-
 function pintar(){
   var q = (document.getElementById('buscar').value || '').toLowerCase().trim();
   var todos = BASE.pacientes;
-
   document.getElementById('kTotal').textContent   = todos.length;
   document.getElementById('kPlantel').textContent = todos.filter(function(p){ return p.tipo === 'plantel'; }).length;
   document.getElementById('kPart').textContent    = todos.filter(function(p){ return p.tipo === 'particular'; }).length;
   document.getElementById('kPend').textContent    = todos.filter(function(p){ return p.estado === 'pendiente'; }).length;
-
   var l = todos.filter(function(p){
     if(filtro === 'pendiente' && p.estado !== 'pendiente') return false;
     if((filtro === 'plantel' || filtro === 'particular') && p.tipo !== filtro) return false;
     if(q && (p.nombre + ' ' + p.doc).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
-
   document.getElementById('lista').innerHTML = l.length
     ? l.map(function(p){
         var L = lesionesDe(p);
@@ -131,23 +124,19 @@ function pintar(){
       }).join('')
     : '<div class="vacio"><b>Nadie con ese filtro</b>Probá con otro, o borrá la búsqueda.</div>';
 }
-
 function lesionesDe(p){
   for(var i=0;i<BASE.lesiones.length;i++)
     if(BASE.lesiones[i].pid === p.id && BASE.lesiones[i].estado === 'activa') return BASE.lesiones[i];
   return null;
 }
-
 function abrir(id){
   abierto = id;
   var p = paciente(id), L = lesionesDe(p);
   var menor = esMenor(p.nacimiento);
-
   document.getElementById('detalle').innerHTML =
     '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">' + p.nombre + '</h2>'
     + '<span class="eti">' + p.id + '</span></div>'
-
     + (p.estado === 'pendiente'
         ? '<div class="nota aviso">Se dio de alta solo el ' + fechaCorta(p.alta)
           + ' y todavía no lo atendiste. Cuando le cargues la primera sesión pasa a activo.</div>'
@@ -156,7 +145,6 @@ function abrir(id){
         ? '<div class="nota info">Es menor de edad. Autoriza <b>' + (p.tutor ? p.tutor.nombre : '—')
           + '</b> (' + (p.tutor ? p.tutor.vinculo : '—') + '), tel ' + (p.tutor ? p.tutor.tel : '—') + '.</div>'
         : '')
-
     + '<div class="rejilla c2">'
     + campo('Documento', p.doc) + campo('Edad', edad(p.nacimiento) + ' años')
     + campo('Teléfono', p.tel) + campo('Correo', p.email || '—')
@@ -164,10 +152,8 @@ function abrir(id){
             p.tipo === 'plantel' ? '#' + (p.dorsal || '?') : (p.obra_social || 'Particular'))
     + campo('En el padrón desde', fechaCorta(p.alta))
     + '</div>'
-
     + (p.motivo ? '<label class="campo"><span class="eti">Por qué vino, en sus palabras</span>'
         + '<p style="color:var(--tinta2)">' + p.motivo + '</p></label>' : '')
-
     + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">'
     + (L ? '<a class="bt" href="lesiones.html?f=' + L.id + '" style="text-decoration:none">Ver su ficha</a>'
          : '<button class="bt" onclick="abrirLesion(\'' + p.id + '\')">Abrir una lesión</button>')
@@ -181,16 +167,13 @@ function abrir(id){
    sistema: los criterios de la fase 1 salen de plantillas.js, la fecha
    estimada de alta sale de la zona más la gravedad, y la disponibilidad
    que ve el cuerpo técnico se deduce de la fase.
-
    El kine no escribe nada de eso, y aun así puede corregirlo después
    desde la ficha.                                                     */
 var NL = {};
-
 function abrirLesion(pid){
   var p = paciente(pid);
   NL = {pid: pid, zona: 'Tobillo', lado: 'derecho', gravedad: 2,
         diagnostico: '', mecanismo: '', fecha: HOY};
-
   var caja = document.createElement('div');
   caja.className = 'ayuda-fondo';
   caja.id = 'cajaLesion';
@@ -200,38 +183,32 @@ function abrirLesion(pid){
   document.body.style.overflow = 'hidden';
   pintarLesion();
 }
-
 function pintarLesion(){
   var p = paciente(NL.pid);
   var pl = PLANTILLAS[NL.zona] || PLANTILLAS.Otra;
   NL.alta = altaEstimada(NL.zona, NL.gravedad, NL.fecha);
   var crit = criteriosDe(NL.zona, 1);
-
   document.getElementById('cuerpoLesion').innerHTML =
     '<button class="cerrar" onclick="cerrarLesion()" aria-label="Cerrar">&times;</button>'
     + '<span class="eti">Lesión nueva</span>'
     + '<h2>' + p.nombre + '</h2>'
     + '<p>' + (p.tipo === 'plantel' ? 'Plantel · camiseta ' + (p.dorsal || '?') : (p.obra_social || 'Particular'))
     + ' · ' + edad(p.nacimiento) + ' años</p>'
-
     + '<label class="campo"><span class="eti">Zona</span>'
     + '<div class="pestanias" id="lZona" style="margin-bottom:0">'
     + ZONAS.map(function(z){
         return '<button class="pest' + (z === NL.zona ? ' on' : '') + '" data-z="' + z + '">' + z + '</button>';
       }).join('') + '</div></label>'
-
     + '<label class="campo"><span class="eti">Lado</span>'
     + '<div class="pestanias" id="lLado" style="margin-bottom:0">'
     + ['derecho','izquierdo','—'].map(function(x){
         return '<button class="pest' + (x === NL.lado ? ' on' : '') + '" data-l="' + x + '">' + x + '</button>';
       }).join('') + '</div></label>'
-
     + '<label class="campo"><span class="eti">Qué tiene</span>'
     + '<select id="lDiag">'
     + pl.diagnosticos.map(function(d){
         return '<option' + (d === NL.diagnostico ? ' selected' : '') + '>' + d + '</option>';
       }).join('') + '</select></label>'
-
     + '<label class="campo"><span class="eti">Gravedad</span>'
     + '<div class="pestanias" id="lGrav" style="margin-bottom:0">'
     + GRAVEDAD.map(function(g){
@@ -239,23 +216,18 @@ function pintarLesion(){
       }).join('') + '</div>'
     + '<small style="color:var(--tinta3);font-size:13px">'
     + GRAVEDAD[NL.gravedad-1].d + '</small></label>'
-
     + '<label class="campo"><span class="eti">Cómo se lesionó</span>'
     + '<textarea id="lMec" placeholder="Caída tras disputa aérea, apoyo sobre el pie de un rival...">'
     + (NL.mecanismo || '') + '</textarea></label>'
-
     + '<label class="campo"><span class="eti">Cuándo</span>'
     + '<input type="date" id="lFecha" value="' + NL.fecha + '"></label>'
-
     /* Lo que el sistema completa solo: se muestra para que el kine lo
        vea antes de guardar, no para que lo escriba. */
     + '<div class="nota info"><b>Se va a completar solo:</b><br>'
     + 'Alta estimada el ' + fechaCorta(NL.alta) + ' (' + faltan(NL.alta) + ' días).<br>'
     + 'Arranca en fase 1 con ' + crit.length + ' criterios de ' + NL.zona.toLowerCase() + '.<br>'
     + 'El parte médico lo va a mostrar como <b>de baja</b>.</div>'
-
     + '<button class="bt ancho" onclick="guardarLesion()">Abrir la lesión</button>';
-
   document.querySelectorAll('#lZona .pest').forEach(function(b){
     b.onclick = function(){ NL.zona = b.dataset.z; NL.diagnostico = ''; pintarLesion(); };
   });
@@ -274,19 +246,16 @@ function pintarLesion(){
     };
   });
 }
-
 function cerrarLesion(){
   var c = document.getElementById('cajaLesion');
   if(c) c.remove();
   document.body.style.overflow = '';
 }
-
 function guardarLesion(){
   var p = paciente(NL.pid);
   var diag = document.getElementById('lDiag').value;
   var mec  = (document.getElementById('lMec').value || '').trim();
   var fec  = document.getElementById('lFecha').value || HOY;
-
   var id = 'L' + (BASE.lesiones.length + 1) + Date.now().toString().slice(-4);
   var L = {
     id: id, pid: NL.pid, dorsal: p.dorsal || null,
@@ -305,7 +274,6 @@ function guardarLesion(){
     L.diagnostico + '. ' + L.zona + ' ' + L.lado + ', gravedad ' + L.gravedad + ' de 4. '
     + 'Mecanismo: ' + L.mecanismo + ' Se inicia en fase 1 con ' + L.criterios.length
     + ' criterios de pase. Alta estimada para el ' + fechaCorta(L.alta) + '.');
-
   /* El parte médico se actualiza solo. Es la parte que más se olvida
      cuando se carga a mano, y la que más le importa al entrenador. */
   if(p.dorsal){
@@ -319,30 +287,24 @@ function guardarLesion(){
     p.estado = 'activo';
     guardar('kine/pacientes/' + p.id + '/estado', 'activo');
   }
-
   cerrarLesion();
   irA('lesiones.html?f=' + id);
 }
-
 function campo(l, v){
   return '<div style="margin-bottom:12px"><span class="eti">' + l + '</span>'
        + '<div class="mono" style="font-size:15px;margin-top:3px">' + v + '</div></div>';
 }
 function cerrar(){ abierto = null; document.getElementById('detalle').innerHTML = ''; }
-
 pintar();
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

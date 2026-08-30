@@ -117,6 +117,30 @@ def main():
             problemas.append('el menu del celular no abre la lista')
         pg.close()
 
+        print('\n  1c. CONFIGURACION DE IPHONE')
+        import json as _json
+        m = _json.loads(open('manifest.json', encoding='utf-8').read())
+        tema = open('css/tema.css', encoding='utf-8').read()
+        fondo = re.search(r'--fondo:\s*(#[0-9A-Fa-f]{6})', tema)
+        fondo = fondo.group(1).upper() if fondo else '?'
+        faltantes = []
+        for p2 in PANTALLAS:
+            h = open(p2, encoding='utf-8').read()
+            for etiqueta in ['apple-touch-icon', 'apple-mobile-web-app-capable',
+                             'apple-mobile-web-app-title', 'viewport-fit=cover']:
+                if etiqueta not in h:
+                    faltantes.append('%s: falta %s' % (p2, etiqueta))
+        print('     etiquetas de iOS          :', 'todas' if not faltantes else '%d faltan' % len(faltantes))
+        # Si el manifiesto no coincide con el tema, al abrir la app instalada
+        # parpadea una pantalla de otro color antes de cargar.
+        coincide = m.get('background_color', '').upper() == fondo
+        print('     el color de arranque      :', 'coincide con el tema' if coincide else 'NO coincide')
+        if faltantes:
+            problemas += faltantes[:3]
+        if not coincide:
+            problemas.append('manifest.json arranca en %s pero el tema es %s'
+                             % (m.get('background_color'), fondo))
+
         print('\n  2. CODIGOS QR')
         try:
             import cv2

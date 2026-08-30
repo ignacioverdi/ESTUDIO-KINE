@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Ejercicios · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
@@ -23,12 +30,10 @@
 </style>
 </head>
 <body data-pag="ejercicios">
-
 <div class="hoja">
   <h1 class="tit">Biblioteca del estudio</h1>
   <p class="bajada">Los circuitos que se dibujan en el pizarrón y los ejercicios sueltos con su
   video. Se filma una vez y se reusa en cada programa.</p>
-
   <div class="pestanias">
     <button class="pest on" data-f="todos">Todos</button>
     <button class="pest" data-f="Tobillo">Tobillo</button>
@@ -36,20 +41,17 @@
     <button class="pest" data-f="Hombro">Hombro</button>
     <button class="pest" data-f="Lumbar">Lumbar</button>
   </div>
-
   <div class="tarjeta">
     <div class="tarjeta-cab"><h2 class="sub">Circuitos en cancha</h2>
       <a class="eti" href="pizarron.html" style="text-decoration:none">Dibujar uno nuevo →</a></div>
     <div class="ejs" id="circuitos"></div>
   </div>
-
   <div class="tarjeta">
     <div class="tarjeta-cab"><h2 class="sub">Ejercicios sueltos</h2>
       <span class="eti" id="cuenta"></span></div>
     <div class="ejs" id="sueltos"></div>
   </div>
 </div>
-
 <script>
 var SUELTOS = [
   {n:'Movilidad de tobillo con banda', z:'Tobillo', f:2, lugar:'gym', video:true},
@@ -67,14 +69,12 @@ var SUELTOS = [
   {n:'Bird dog',                       z:'Lumbar',  f:2, lugar:'gym', video:true}
 ];
 var filtro = 'todos';
-
 document.querySelectorAll('.pest[data-f]').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('.pest[data-f]').forEach(function(x){ x.classList.remove('on'); });
     b.classList.add('on'); filtro = b.dataset.f; pintar();
   };
 });
-
 function tarjeta(e){
   return '<button class="ej" onclick="verSuelto(\'' + e.n.replace(/'/g,"") + '\')">'
     + '<div class="mini ' + (e.lugar === 'gym' ? 'gym' : '') + '">'
@@ -82,7 +82,6 @@ function tarjeta(e){
     + '<div class="cu"><b>' + e.n + '</b>'
     + '<small class="mono">' + e.z.toUpperCase() + ' · DESDE FASE ' + e.f + '</small></div></button>';
 }
-
 /* Un video de ejemplo para los que lo tienen cargado. En producción
    el enlace sale de kine/ejercicios/<id>/video. */
 var VIDEO_DEMO = 'https://www.youtube.com/watch?v=IODxDxX7oi4';
@@ -104,7 +103,6 @@ function pintar(){
       }).join('')
     : '<div class="vacio" style="grid-column:1/-1"><b>Sin circuitos para esa zona</b>'
       + 'Dibujá uno en el pizarrón y queda guardado acá.</div>';
-
   var s = SUELTOS.filter(function(e){ return filtro === 'todos' || e.z === filtro; });
   document.getElementById('sueltos').innerHTML = s.map(tarjeta).join('');
   document.getElementById('cuenta').textContent = s.length + ' ejercicios · '
@@ -114,15 +112,12 @@ pintar();
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

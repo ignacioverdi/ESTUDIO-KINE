@@ -1,65 +1,61 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Estudio · Kinesiología del club</title>
 <link rel="icon" href="img/icono-192.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1D3E6E">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="inicio">
-
 <div class="hoja angosta">
-
   <h1 class="tit">El estudio, en un solo lugar</h1>
   <p class="bajada">Turnos, fichas de lesión, circuitos de readaptación y el programa de cada
   jugador. El kinesiólogo carga una vez; el jugador ve lo suyo desde el celular.</p>
-
   <div class="rejilla c3" style="margin-bottom:26px">
     <div class="dato"><div class="v" id="dOk">—</div><div class="l">Disponibles</div></div>
     <div class="dato"><div class="v" id="dLim" style="color:var(--ambar)">—</div><div class="l">Limitados</div></div>
     <div class="dato"><div class="v" id="dBaja" style="color:var(--rojo)">—</div><div class="l">De baja</div></div>
   </div>
-
   <div class="tarjeta">
     <div class="tarjeta-cab"><h2 class="sub">Entrar</h2>
       <span class="eti">Elegí cómo mirar</span></div>
-
     <button class="fila" onclick="entrar('kine')">
       <span class="hh">▤</span>
       <span class="cu"><b>Soy el kinesiólogo</b>
         <small>Agenda del día, fichas, pizarrón de circuitos y biblioteca.</small></span>
       <span class="pin reservado">Panel</span>
     </button>
-
     <button class="fila" onclick="entrar('jugador')">
       <span class="hh">◉</span>
       <span class="cu"><b>Estoy lesionado</b>
         <small>Mi fase, mi turno, mis ejercicios de hoy y cómo me siento.</small></span>
       <span class="pin gris">Mi vista</span>
     </button>
-
     <a class="fila" href="alta.html" style="text-decoration:none;color:inherit">
       <span class="hh">+</span>
       <span class="cu"><b>Es mi primera vez</b>
         <small>Darme de alta. Dos minutos, una sola vez.</small></span>
       <span class="pin limitado">Alta</span>
     </a>
-
     <label class="campo" style="margin-top:16px">
       <span class="eti">Si entrás como jugador, ¿cuál sos?</span>
       <select id="quien"></select>
     </label>
-
     <p style="font-size:13px;color:var(--tinta2)">
       Esta pantalla existe para probar las dos vistas sin crear cuentas. En el portal
       publicado el rol viene de la cuenta y no se puede elegir.
     </p>
   </div>
-
   <div class="tarjeta">
     <div class="tarjeta-cab"><h2 class="sub">Quién ve qué</h2></div>
     <p style="font-size:14px;color:var(--tinta2);margin-bottom:14px">
@@ -72,9 +68,7 @@
     <div class="fila" style="cursor:default">
       <span class="cu"><b>Cuerpo técnico</b><small>Solo el semáforo de disponibilidad y la fecha estimada.</small></span></div>
   </div>
-
 </div>
-
 <script>
 /* contadores */
 var c = {ok:0, limitado:0, baja:0};
@@ -82,7 +76,6 @@ BASE.plantel.forEach(function(j){ c[estadoDe(j.d).estado]++; });
 document.getElementById('dOk').textContent   = c.ok;
 document.getElementById('dLim').textContent  = c.limitado;
 document.getElementById('dBaja').textContent = c.baja;
-
 /* quién */
 document.getElementById('quien').innerHTML = BASE.plantel.map(function(j){
   var e = estadoDe(j.d);
@@ -90,7 +83,6 @@ document.getElementById('quien').innerHTML = BASE.plantel.map(function(j){
   return '<option value="' + j.d + '"' + (j.d === miDorsal() ? ' selected' : '') + '>'
        + j.d + ' · ' + j.n + ' — ' + t + '</option>';
 }).join('');
-
 function entrar(r){
   ponerRol(r);
   if(r === 'jugador'){
@@ -103,15 +95,12 @@ function entrar(r){
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

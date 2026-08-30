@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Darse de alta · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script>
 </head>
 <body data-pag="alta">
-
 <!-- PANTALLA PUBLICA — no lleva base.js a propósito: es pública. El que entra
      todavía no es paciente y no tiene rol, así que no hay menú ni sesión.
      Se llega por un enlace o un código QR pegado en el estudio. -->
-
 <div class="top"><div class="top-in">
   <a class="marca" href="index.html"><span class="sig"></span>
   <span><b>ESTUDIO</b><span>Kinesiología del club</span></span></a>
@@ -22,30 +27,22 @@
     <button class="ayuda-bt" onclick="abrirAyuda('alta')" title="Cómo funciona">?</button>
   </div>
 </div></div>
-
 <div class="hoja angosta" id="todo"></div>
-
 <script>
 var F = {};
-
 function pintar(){
   document.getElementById('todo').innerHTML =
-
     '<h1 class="tit">Darse de alta</h1>'
     + '<p class="bajada">Completá esto una sola vez. Después vas a poder pedir turno, '
     + 'ver tus ejercicios y seguir tu recuperación desde el celular.</p>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Quién sos</h2></div>'
-
     + '<label class="campo"><span class="eti">¿Sos del plantel del club?</span>'
     + '<div class="pestanias" id="tipo" style="margin-bottom:0">'
     + '<button class="pest" data-t="plantel">Sí, juego en el club</button>'
     + '<button class="pest" data-t="particular">No, vengo por mi cuenta</button>'
     + '</div></label>'
-
     + '<div id="camposTipo"></div>'
-
     + '<div style="display:flex;gap:16px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'
     + (F.foto ? '<img src="' + F.foto + '" style="width:86px;height:86px;border-radius:50%;'
         + 'object-fit:cover;border:2px solid var(--acc)">'
@@ -59,20 +56,16 @@ function pintar(){
     + (F.foto ? 'Cambiar la foto' : 'Sacate una foto') + '</button>'
     + '<p style="font-size:12.5px;color:var(--tinta3);margin-top:8px">Es optativa. Sirve para '
     + 'que el kinesiólogo te reconozca cuando llegás.</p></div></div>'
-
     + '<label class="campo"><span class="eti">Nombre y apellido</span>'
     + '<input type="text" id="f_nombre" placeholder="Como figura en tu documento"></label>'
-
     + '<div class="rejilla c2">'
     + '<label class="campo"><span class="eti">Documento</span>'
     + '<input type="text" id="f_doc" inputmode="numeric" placeholder="Sin puntos"></label>'
     + '<label class="campo"><span class="eti">Fecha de nacimiento</span>'
     + '<input type="date" id="f_nac" onchange="revisarEdad()"></label>'
     + '</div>'
-
     + '<div id="cajaTutor"></div>'
     + '</div>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Cómo te ubicamos</h2>'
     + '<span class="eti">Para el aviso del turno</span></div>'
@@ -85,7 +78,6 @@ function pintar(){
     + '<label class="campo"><span class="eti">¿Por qué venís? (en tus palabras)</span>'
     + '<textarea id="f_motivo" placeholder="Me duele el hombro cuando levanto el brazo, hace tres semanas..."></textarea></label>'
     + '</div>'
-
     /* Admisión. Estos datos cambian el tratamiento: no es lo mismo un
        dolor lumbar en alguien que pasa ocho horas sentado que en un
        jugador de hockey. Y los antecedentes quirúrgicos pueden
@@ -111,7 +103,6 @@ function pintar(){
     + '<div class="nota info" style="margin-bottom:0">Esta última es la más importante. '
     + 'Es contra lo que se va a medir si el tratamiento sirvió.</div>'
     + '</div>'
-
     /* El consentimiento no es un trámite: son datos de salud y sin esto
        no se pueden guardar. Va explicado en castellano, no en jurídico. */
     + '<div class="tarjeta">'
@@ -124,12 +115,10 @@ function pintar(){
     + '<label class="crit"><input type="checkbox" id="f_ok">'
     + '<span>Entiendo y autorizo al estudio a guardar mis datos para mi tratamiento.</span></label>'
     + '</div>'
-
     + '<div id="aviso"></div>'
     + '<button class="bt ancho" onclick="enviar()">Darme de alta</button>'
     + '<p style="text-align:center;color:var(--tinta3);font-size:13px;margin-top:14px">'
     + '¿Ya te diste de alta antes? <a href="index.html" style="color:var(--acc-texto)">Entrá por acá</a></p>';
-
   document.querySelectorAll('#frec .pest').forEach(function(b){
     if(F.frecuencia === b.dataset.f) b.classList.add('on');
     b.onclick = function(){
@@ -155,7 +144,6 @@ function pintar(){
   });
   if(F.nac) revisarEdad();
 }
-
 function pintarTipo(){
   var c = document.getElementById('camposTipo');
   if(F.tipo === 'plantel'){
@@ -174,7 +162,6 @@ function pintarTipo(){
     c.innerHTML = '';
   }
 }
-
 /* Si el paciente es menor, hacen falta los datos de quien lo autoriza.
    No es opcional: un menor no puede consentir su propio tratamiento. */
 function revisarEdad(){
@@ -202,13 +189,11 @@ function revisarEdad(){
     caja.innerHTML = '';
   }
 }
-
 /* Al enviar, TODO se lee del formulario y nada de la memoria.
    Guardar en memoria depende de que el usuario tipee, y el celular
    muchas veces autocompleta sin disparar ese aviso: el campo se ve
    lleno en pantalla y el sistema lo cree vacío. */
 function leer(id){ var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
-
 /* La foto se achica a 300 píxeles antes de guardarse. Una foto de
    celular pesa cuatro megas; así pesa treinta kilos. */
 function subirFoto(input){
@@ -230,7 +215,6 @@ function subirFoto(input){
   };
   lector.readAsDataURL(f);
 }
-
 function enviar(){
   var av = document.getElementById('aviso'), falta = [];
   F.nombre   = leer('f_nombre');
@@ -247,7 +231,6 @@ function enviar(){
   F.deporte      = leer('f_deporte');
   F.antecedentes = leer('f_antecedentes');
   F.objetivos    = leer('f_objetivos');
-
   if(!F.tipo)             falta.push('si sos del plantel o venís por tu cuenta');
   if(F.nombre.length < 4) falta.push('tu nombre y apellido');
   if(F.doc.length < 6)    falta.push('tu documento');
@@ -257,13 +240,11 @@ function enviar(){
     falta.push('el nombre del adulto responsable');
   if(!document.getElementById('f_ok').checked)
     falta.push('tu autorización para guardar los datos');
-
   if(falta.length){
     av.innerHTML = '<div class="nota aviso">Falta ' + falta.join(', ') + '.</div>';
     av.scrollIntoView({block:'center'});
     return;
   }
-
   /* Mismo documento = misma persona. Evita que alguien se cargue dos veces
      y termine con dos historias clínicas partidas al medio. */
   var repetido = null;
@@ -275,7 +256,6 @@ function enviar(){
     av.scrollIntoView({block:'center'});
     return;
   }
-
   var nuevo = {
     id: nuevoIdPaciente(),
     tipo: F.tipo,
@@ -299,10 +279,8 @@ function enviar(){
   if(F.tipo === 'plantel' && F.dorsal) nuevo.dorsal = +F.dorsal;
   if(F.tipo === 'particular') nuevo.obra_social = F.obra || 'Particular';
   if(esMenor(F.nac)) nuevo.tutor = {nombre:F.tutor, tel:F.tutortel || F.tel, vinculo:F.vinculo || '—'};
-
   BASE.pacientes.push(nuevo);
   guardar('kine/pacientes/' + nuevo.id, nuevo);
-
   /* Primeros dos asientos de la historia: el alta y el consentimiento.
      El consentimiento es un asiento propio porque la ley pide que conste
      de forma expresa y destacada, con fecha. */
@@ -318,7 +296,6 @@ function enviar(){
           + (esMenor(nuevo.nac || F.nac) && nuevo.tutor
              ? ', con autorización de ' + nuevo.tutor.nombre + ' (' + nuevo.tutor.vinculo + ')' : '')
           + '.');
-
   document.getElementById('todo').innerHTML =
     '<div class="tarjeta" style="margin-top:30px">'
     + '<div class="vacio"><b>Listo, ' + F.nombre.split(' ')[0] + '</b>'
@@ -329,20 +306,16 @@ function enviar(){
     + '</div>';
   scrollTo(0, 0);
 }
-
 pintar();
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

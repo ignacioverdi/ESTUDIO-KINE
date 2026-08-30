@@ -1,35 +1,37 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cómo estoy · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="diario">
-
 <div class="hoja angosta">
   <h1 class="tit">Cómo estás hoy</h1>
   <p class="bajada">Cinco preguntas, medio minuto. Se completa <b>después</b> de entrenar,
   no antes. Es la señal más temprana que tiene el kinesiólogo: si el dolor sube tres días
   seguidos lo ve antes de que se lo cuentes.</p>
-
   <div class="tarjeta" id="preguntas"></div>
-
   <button class="bt ancho" onclick="enviar()">Guardar</button>
   <div class="nota bien" id="listo" style="display:none;margin-top:12px">
     Guardado. Gracias — con esto se ajusta tu carga de mañana.</div>
-
   <div class="tarjeta" style="margin-top:20px">
     <div class="tarjeta-cab"><h2 class="sub">Tus últimos días</h2>
       <span class="eti">1 mal · 5 muy bien</span></div>
     <div id="historial"></div>
   </div>
 </div>
-
 <script>
 /* Las cinco métricas son las del índice de Hooper, las mismas que ya usa la app
    del club. Si los dos sistemas usan las mismas cinco, el día que se quieran
@@ -46,7 +48,6 @@ var HISTORIAL = [
   {f:'2026-08-24', v:3.0}, {f:'2026-08-23', v:3.8}
 ];
 var resp = {};
-
 document.getElementById('preguntas').innerHTML = PREGUNTAS.map(function(p){
   return '<label class="campo"><span class="eti">' + p.t + '</span>'
     + '<div class="escala palabras" id="e_' + p.id + '">'
@@ -56,7 +57,6 @@ document.getElementById('preguntas').innerHTML = PREGUNTAS.map(function(p){
       }).join('')
     + '</div></label>';
 }).join('');
-
 PREGUNTAS.forEach(function(p){
   var caja = document.getElementById('e_' + p.id);
   caja.querySelectorAll('button').forEach(function(b){
@@ -66,14 +66,12 @@ PREGUNTAS.forEach(function(p){
     };
   });
 });
-
 document.getElementById('historial').innerHTML = HISTORIAL.map(function(h){
   var col = h.v >= 3.5 ? 'atendido' : (h.v >= 3 ? 'reservado' : 'ausente');
   return '<div class="fila" style="cursor:default"><span class="hh">' + fechaCorta(h.f) + '</span>'
     + '<span class="cu"><b>' + (h.v >= 3.5 ? 'Bien' : h.v >= 3 ? 'Normal' : 'Flojo') + '</b></span>'
     + '<span class="pin ' + col + '">' + h.v.toFixed(1) + '</span></div>';
 }).join('');
-
 function enviar(){
   if(Object.keys(resp).length < 5){ alert('Contestá las cinco antes de guardar.'); return; }
   guardar('kine/wellness/' + miDorsal() + '/' + HOY, resp);
@@ -82,15 +80,12 @@ function enviar(){
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

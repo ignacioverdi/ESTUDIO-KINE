@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Panel · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="panel">
-
 <div class="hoja">
   <h1 class="tit">Viernes 28 de agosto</h1>
   <p class="bajada">Lo que hay que resolver hoy, y cómo está el plantel.</p>
-
   <div class="rejilla c4" style="margin-bottom:14px">
     <div class="dato"><div class="v" id="kPac">—</div><div class="l">Pacientes</div></div>
     <div class="dato"><div class="v" id="kMes">—</div><div class="l">Sesiones del mes</div></div>
@@ -32,7 +37,6 @@
     <div class="dato"><div class="v" id="kLim" style="color:var(--ambar)">—</div><div class="l">Limitados</div></div>
     <div class="dato"><div class="v" id="kBaja" style="color:var(--rojo)">—</div><div class="l">De baja</div></div>
   </div>
-
   <div class="rejilla c2">
     <div>
       <div class="tarjeta">
@@ -41,7 +45,6 @@
         <div id="turnos"></div>
       </div>
     </div>
-
     <div>
       <div class="tarjeta">
         <div class="tarjeta-cab"><h2 class="sub">En tratamiento</h2>
@@ -50,14 +53,12 @@
       </div>
     </div>
   </div>
-
   <div class="tarjeta">
     <div class="tarjeta-cab"><h2 class="sub">Parte médico</h2>
       <span class="eti">Lo único que ve el cuerpo técnico</span></div>
     <div class="plantel" id="plantel"></div>
   </div>
 </div>
-
 <script>
 function pintar(){
 /* ── contadores ── */
@@ -65,7 +66,6 @@ var c = {ok:0, limitado:0, baja:0};
 BASE.plantel.forEach(function(j){ c[estadoDe(j.d).estado]++; });
 var turnos = BASE.agenda[HOY] || [];
 document.getElementById('kTurnos').textContent = turnos.filter(function(t){ return t.dorsal || t.pid; }).length;
-
 /* Los indicadores del negocio, no solo los clínicos. */
 var est = estadisticaTurnos(), rc = resumenMes();
 document.getElementById('kPac').textContent  = BASE.pacientes.length;
@@ -79,7 +79,6 @@ document.getElementById('kAus').textContent  = est.porcentajeAusencia + '%';
 document.getElementById('kOk').textContent   = c.ok;
 document.getElementById('kLim').textContent  = c.limitado;
 document.getElementById('kBaja').textContent = c.baja;
-
 /* ── turnos ── */
 document.getElementById('turnos').innerHTML = turnos.map(function(t){
   if(!t.dorsal)
@@ -98,7 +97,6 @@ document.getElementById('turnos').innerHTML = turnos.map(function(t){
        + '<span class="pin ' + (pendiente ? 'reservado' : t.estado) + '">'
        + (pendiente ? 'atender' : t.estado) + '</span></button>';
 }).join('');
-
 /* ── lesiones activas ── */
 document.getElementById('activas').innerHTML = BASE.lesiones.filter(function(L){
   return L.estado === 'activa'; }).map(function(L){
@@ -110,7 +108,6 @@ document.getElementById('activas').innerHTML = BASE.lesiones.filter(function(L){
     + '<small class="mono" style="margin-top:6px">FASE ' + L.fase + ' · ' + FASES[L.fase-1].t.toUpperCase()
     + ' · ' + listos + '/' + tot + ' CRITERIOS</small></span></button>';
 }).join('');
-
 /* ── semáforo ── */
 document.getElementById('plantel').innerHTML = BASE.plantel.map(function(j){
   var e = estadoDe(j.d), L = lesionDe(j.d);
@@ -125,15 +122,12 @@ pintar();
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

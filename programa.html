@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Programa · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
@@ -31,19 +38,15 @@
 </style>
 </head>
 <body data-pag="programa">
-
 <div class="hoja angosta" id="todo"></div>
-
 <script>
 var pid = PARAMOK('p'), fase = null, prog = [], L = null, cargado = null;
-
 /* En el kit real esto es URLSearchParams. Se envuelve para que el
    archivo único también lo entienda. */
 function PARAMOK(k){
   if(typeof PARAM === 'function') return PARAM(k);
   return new URLSearchParams(location.search).get(k);
 }
-
 /* Solo relee el programa guardado cuando cambia el paciente o la fase.
    Antes lo releía en cada redibujado, y eso descartaba en silencio lo que
    el kinesiólogo estaba escribiendo: sumabas un ejercicio y desaparecía. */
@@ -61,10 +64,8 @@ function cargar(){
   var g = BASE.programas[L.id] && BASE.programas[L.id][fase];
   prog = g ? JSON.parse(JSON.stringify(g)) : [];
 }
-
 function pintar(){
   var caja = document.getElementById('todo');
-
   if(!pid){
     caja.innerHTML = '<h1 class="tit">Programa de ejercicios</h1>'
       + '<p class="bajada">Elegí a quién le vas a cargar el programa. Después lo ve en su '
@@ -83,7 +84,6 @@ function pintar(){
         }).join('') + '</div>';
     return;
   }
-
   cargar();
   var p = paciente(pid);
   if(!L){
@@ -92,12 +92,10 @@ function pintar(){
       + '<a class="bt ancho" href="pacientes.html" style="text-decoration:none;text-align:center">Ir al padrón</a></div>';
     return;
   }
-
   caja.innerHTML =
     '<button class="bt neutro chico" style="margin-bottom:14px" onclick="elegir(null)">← Otro paciente</button>'
     + '<h1 class="tit">' + p.nombre + '</h1>'
     + '<p class="bajada">' + L.diagnostico + ' · ' + L.zona.toLowerCase() + ' ' + L.lado + '</p>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">¿Para qué fase?</h2>'
     + '<span class="eti">Hoy está en la ' + L.fase + '</span></div>'
@@ -109,7 +107,6 @@ function pintar(){
       }).join('') + '</div>'
     + '<p style="font-size:14px;color:var(--tinta2);margin-top:12px">'
     + FASES[fase-1].t + '. ' + FASES[fase-1].d + '</p></div>'
-
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Los ejercicios</h2>'
     + '<span class="eti">' + prog.length + ' cargados</span></div>'
@@ -120,17 +117,14 @@ function pintar(){
     + '<button class="bt hueco" onclick="abrirBiblioteca()">Sumar de la biblioteca</button>'
     + '<button class="bt neutro" onclick="sumarVacio()">Crear uno nuevo</button>'
     + '</div></div>'
-
     + '<div id="aviso"></div>'
     + '<button class="bt ancho" onclick="guardarProg()">Guardar el programa</button>'
     + '<p style="text-align:center;color:var(--tinta3);font-size:13px;margin-top:12px">'
     + 'En cuanto lo guardes, ' + p.nombre.split(' ')[0] + ' lo ve en su celular.</p>';
-
   document.querySelectorAll('#selFase .pest').forEach(function(b){
     b.onclick = function(){ fase = +b.dataset.f; cargado = null; pintar(); };
   });
 }
-
 function ejercicioHTML(e, i){
   return '<div class="ejer">'
     + '<div class="ejer-cab"><span class="orden">' + (i+1) + '</span>'
@@ -140,7 +134,6 @@ function ejercicioHTML(e, i){
     + '<button onclick="mover(' + i + ',-1)" title="Subir">▲</button>'
     + '<button onclick="mover(' + i + ',1)" title="Bajar">▼</button></span>'
     + '<button class="quitar" onclick="quitar(' + i + ')" title="Quitar">&times;</button></div>'
-
     + '<div class="tres">'
     + '<label><span class="eti">Series</span>'
     + '<input type="number" inputmode="numeric" value="' + (e.series || '') + '" '
@@ -152,11 +145,9 @@ function ejercicioHTML(e, i){
     + '<input type="text" value="' + (e.carga || '').replace(/"/g,'&quot;') + '" '
     + 'placeholder="Banda verde, 5 kg" oninput="campo(' + i + ',\'carga\',this.value)"></label>'
     + '</div>'
-
     + '<label class="campo" style="margin-bottom:8px"><span class="eti">Cómo hacerlo</span>'
     + '<input type="text" value="' + (e.nota || '').replace(/"/g,'&quot;') + '" '
     + 'placeholder="Rodilla adelante sin despegar el talón" oninput="campo(' + i + ',\'nota\',this.value)"></label>'
-
     + '<label class="campo" style="margin-bottom:0"><span class="eti">Enlace del video</span>'
     + '<div style="display:flex;gap:8px">'
     + '<input type="text" value="' + (e.video || '').replace(/"/g,'&quot;') + '" '
@@ -165,7 +156,6 @@ function ejercicioHTML(e, i){
     + '</div></label>'
     + '</div>';
 }
-
 function campo(i, k, v){ prog[i][k] = v; }
 function quitar(i){ prog.splice(i, 1); pintar(); }
 function mover(i, d){
@@ -184,7 +174,6 @@ function elegir(id){
   if(typeof PARAMSET === 'function') PARAMSET('p', id);
   pintar(); scrollTo(0, 0);
 }
-
 /* Sumar desde la biblioteca es lo que hace que cargar un programa sea
    cuestión de segundos y no de tipear todo cada vez. */
 var BIBLIOTECA = [
@@ -203,14 +192,12 @@ var BIBLIOTECA = [
   {n:'Plancha lateral',                z:'Lumbar',  series:3, reps:'30 seg', carga:'—', nota:'Cadera alineada.'},
   {n:'Bird dog',                       z:'Lumbar',  series:3, reps:'10 por lado', carga:'—', nota:'Sin mover la pelvis.'}
 ];
-
 function abrirBiblioteca(){
   var caja = document.createElement('div');
   caja.className = 'ayuda-fondo'; caja.id = 'cajaBib';
   var zona = L ? L.zona : 'Tobillo';
   var suge = BIBLIOTECA.filter(function(e){ return e.z === zona; });
   var resto = BIBLIOTECA.filter(function(e){ return e.z !== zona; });
-
   caja.innerHTML = '<div class="ayuda-caja">'
     + '<button class="cerrar" onclick="cerrarBib()" aria-label="Cerrar">&times;</button>'
     + '<span class="eti">Biblioteca</span><h2>Sumar ejercicios</h2>'
@@ -243,7 +230,6 @@ function cerrarBib(){
   if(c) c.remove();
   document.body.style.overflow = '';
 }
-
 function guardarProg(){
   var vacios = prog.filter(function(e){ return !(e.n || '').trim(); });
   if(vacios.length){
@@ -265,20 +251,16 @@ function guardarProg(){
   document.getElementById('aviso').innerHTML =
     '<div class="nota bien">Guardado. Ya lo ve en su celular.</div>';
 }
-
 pintar();
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

@@ -1,31 +1,33 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Lesiones · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="ficha">
-
 <div class="hoja">
   <h1 class="tit" id="titulo">Lesiones</h1>
   <p class="bajada" id="bajada">Cada ficha avanza por criterios, no por calendario.</p>
-
   <div id="lista"></div>
   <div id="ficha"></div>
 </div>
-
 <script>
 var abierta = new URLSearchParams(location.search).get('f');
 var ALTA_DADA = null;
-
 function pintar(){
   var lista = document.getElementById('lista'), ficha = document.getElementById('ficha');
-
   if(!abierta){
     document.getElementById('titulo').textContent = 'Lesiones';
     document.getElementById('bajada').textContent =
@@ -46,19 +48,14 @@ function pintar(){
     }).join('') + '</div>';
     return;
   }
-
   var L = lesionPorId(abierta);
   if(!L){ abierta = null; return pintar(); }
   lista.innerHTML = '<button class="bt neutro chico" style="margin-bottom:16px" onclick="abrir(null)">← Todas las lesiones</button>';
-
   document.getElementById('titulo').textContent = nombrePaciente(L) + ' · ' + L.zona.toLowerCase() + ' ' + L.lado;
   document.getElementById('bajada').textContent = L.diagnostico + '. Lesionado el ' + fechaCorta(L.fecha) + '.';
-
   var sigue  = Math.min(L.fase + 1, 5);
   var faltanC = L.criterios.length - criteriosListos(L);
-
   ficha.innerHTML =
-
     /* estado */
     '<div class="tarjeta">'
     + '<div class="rejilla c4" style="margin-bottom:18px">'
@@ -70,7 +67,6 @@ function pintar(){
     + pista(L.fase)
     + '<p style="font-size:14px;color:var(--tinta2);margin-top:14px">' + FASES[L.fase-1].d + '</p>'
     + '</div>'
-
     /* criterios */
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Para pasar a fase ' + sigue + ' — ' + FASES[sigue-1].t + '</h2></div>'
@@ -86,11 +82,9 @@ function pintar(){
     + '<button class="bt" ' + (faltanC ? 'disabled' : '') + ' onclick="avanzar()">Pasar a fase ' + sigue + '</button>'
     + '<a class="bt neutro" href="historia.html?p=' + L.pid + '" style="text-decoration:none">Historia clínica</a>'
     + '</div></div>'
-
     /* mecanismo */
     + '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">Cómo se lesionó</h2></div>'
     + '<p style="color:var(--tinta2)">' + L.mecanismo + '</p></div>'
-
     /* programa */
     + '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">Programa de esta fase</h2>'
     + '<a class="eti" href="ejercicios.html" style="text-decoration:none">Biblioteca →</a></div>'
@@ -102,7 +96,6 @@ function pintar(){
         : '<div class="vacio"><b>Sin programa cargado para la fase ' + L.fase + '</b>'
           + 'Armalo desde la biblioteca o dibujá un circuito en el pizarrón.</div>')
     + '</div>'
-
     /* sesiones */
     + '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">Sesiones</h2>'
     + '<span class="eti">Dolor antes → después</span></div>'
@@ -116,22 +109,18 @@ function pintar(){
     + '<button class="bt hueco ancho" style="margin-top:12px" onclick="abrirSesion()">Cargar sesión de hoy</button>'
     + '</div>';
 }
-
 /* ── Cargar la sesión del día ──────────────────────────────────────
    Es la pantalla que el kinesiólogo usa quince veces por día, así que
    tiene que ser rápida: el tipo y las dos escalas de dolor se tocan,
    no se escriben. Solo la nota se tipea, y es opcional.
-
    El dolor antes y después es el dato que importa: la diferencia entre
    los dos es lo que muestra si la sesión sirvió. Por eso los dos son
    obligatorios y la nota no.                                          */
 var sesionNueva = null;
-
 function abrirSesion(){
   var L = lesionPorId(abierta);
   if(!L) return;
   sesionNueva = {tipo:'Tratamiento', pre:null, post:null, nota:''};
-
   var caja = document.createElement('div');
   caja.className = 'ayuda-fondo';
   caja.id = 'cajaSesion';
@@ -141,27 +130,22 @@ function abrirSesion(){
     + '<span class="eti">Sesión de hoy</span>'
     + '<h2>' + nombrePaciente(L) + ' · ' + L.zona.toLowerCase() + '</h2>'
     + '<p>Día ' + dias(L.fecha) + ' · fase ' + L.fase + ', ' + FASES[L.fase-1].t.toLowerCase() + '</p>'
-
     + '<label class="campo"><span class="eti">Qué tipo de sesión</span>'
     + '<div class="pestanias" id="tipoSes" style="margin-bottom:0">'
     + ['Evaluación','Tratamiento','Gimnasio','Campo'].map(function(t){
         return '<button class="pest' + (t === 'Tratamiento' ? ' on' : '') + '" data-t="' + t + '">' + t + '</button>';
       }).join('')
     + '</div></label>'
-
     + '<label class="campo"><span class="eti">Dolor al llegar</span><div id="esPre"></div></label>'
     + '<label class="campo"><span class="eti">Dolor al terminar</span><div id="esPost"></div></label>'
     + '<label class="campo"><span class="eti">Qué se hizo (opcional)</span>'
     + '<textarea id="notaSes" placeholder="Movilidad articular, isométricos de eversión..."></textarea></label>'
-
     + '<div id="avisoSes"></div>'
     + '<button class="bt ancho" onclick="guardarSesion()">Guardar sesión</button>'
     + '</div>';
-
   caja.addEventListener('click', function(e){ if(e.target === caja) cerrarSesion(); });
   document.body.appendChild(caja);
   document.body.style.overflow = 'hidden';
-
   var tipos = document.getElementById('tipoSes');
   tipos.querySelectorAll('.pest').forEach(function(b){
     b.onclick = function(){
@@ -172,13 +156,11 @@ function abrirSesion(){
   escala(document.getElementById('esPre'),  function(v){ sesionNueva.pre = v; });
   escala(document.getElementById('esPost'), function(v){ sesionNueva.post = v; });
 }
-
 function cerrarSesion(){
   var c = document.getElementById('cajaSesion');
   if(c) c.remove();
   document.body.style.overflow = '';
 }
-
 function guardarSesion(){
   var av = document.getElementById('avisoSes');
   if(sesionNueva.pre === null || sesionNueva.post === null){
@@ -188,7 +170,6 @@ function guardarSesion(){
   }
   var L = lesionPorId(abierta);
   sesionNueva.nota = document.getElementById('notaSes').value.trim() || '—';
-
   L.sesiones.unshift({f:HOY, t:sesionNueva.tipo, pre:sesionNueva.pre,
                       post:sesionNueva.post, nota:sesionNueva.nota});
   asentar(L.pid, 'sesion',
@@ -207,7 +188,6 @@ function guardarSesion(){
   cerrarSesion();
   pintar();
 }
-
 function abrir(id){
   abierta = id;
   history.replaceState(null, '', id ? '?f=' + id : location.pathname);
@@ -226,11 +206,9 @@ function avanzar(){
   var L = lesionPorId(abierta);
   if(L.fase >= 5) return;
   L.fase++;
-
   /* Los criterios de la fase nueva salen de la plantilla de esa zona.
      El kine no los escribe: aparecen. */
   L.criterios = (L.fase <= 4) ? criteriosDe(L.zona, L.fase) : [];
-
   /* El parte médico se mueve solo con la fase. De baja hasta la 3,
      limitado en la 4, disponible al llegar a la 5. Nadie lo carga a
      mano, así que no se puede quedar viejo. */
@@ -247,7 +225,6 @@ function avanzar(){
       guardar('kine/disponibilidad/' + d, BASE.disponibilidad[d]);
     }
   }
-
   /* Fase 5 es el alta. La lesión se cierra y deja de figurar entre las
      activas, pero queda en el historial del paciente. */
   if(L.fase >= 5){
@@ -262,7 +239,6 @@ function avanzar(){
     abrir(null);
     return;
   }
-
   asentar(L.pid, 'cambio_fase',
     'Pasa a fase ' + L.fase + ', ' + FASES[L.fase-1].t.toLowerCase()
     + ', tras cumplir todos los criterios de la anterior. '
@@ -275,15 +251,12 @@ pintar();
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

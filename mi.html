@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mi recuperación · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="mi">
-
 <div class="hoja angosta" id="todo"></div>
-
 <script>
 var L = lesionDe(miDorsal());
 var hechos = {}, dolor = null, esfuerzo = null;
-
 if(!L){
   document.getElementById('todo').innerHTML =
     '<h1 class="tit">Estás al día</h1>'
@@ -26,20 +30,16 @@ if(!L){
 }else{
   pintar();
 }
-
 function pintar(){
   var prog = programaDe(L);
   var prox = null;
   (BASE.agenda[HOY] || []).concat(BASE.agenda['2026-08-31'] || []).forEach(function(t){
     if(!prox && t.dorsal === miDorsal() && t.estado === 'reservado') prox = t;
   });
-
   document.getElementById('todo').innerHTML =
-
     '<h1 class="tit">' + L.zona + ' ' + (L.lado === '—' ? '' : L.lado) + '</h1>'
     + '<p class="bajada">' + L.diagnostico + '. Llevás ' + dias(L.fecha)
     + ' días y faltan ' + faltan(L.alta) + ' para el alta prevista.</p>'
-
     /* dónde estás */
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Dónde estás</h2>'
@@ -50,7 +50,6 @@ function pintar(){
     + 'Para pasar a <b>' + FASES[Math.min(L.fase,4)].t.toLowerCase() + '</b> te falta: '
     + L.criterios.filter(function(c){ return !c.ok; }).map(function(c){ return c.t.toLowerCase(); }).join('; ')
     + '.</div></div>'
-
     /* turno */
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Tu próximo turno</h2>'
@@ -63,7 +62,6 @@ function pintar(){
           + '<span class="pin reservado">reservado</span></div>'
         : '<div class="vacio"><b>No tenés turno reservado</b>Pedilo desde la agenda.</div>')
     + '</div>'
-
     /* programa */
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Tus ejercicios de hoy</h2>'
@@ -82,7 +80,6 @@ function pintar(){
               + '</div>';
           }).join('')
         : '<div class="vacio"><b>Todavía no hay programa</b>Vero lo carga después de tu próximo turno.</div>')
-
     + (prog.length
         ? '<label class="campo" style="margin-top:18px"><span class="eti">Cuánto te dolió mientras los hacías</span>'
           + '<div id="esDolor"></div></label>'
@@ -93,7 +90,6 @@ function pintar(){
           + 'Enviado. Vero lo ve antes de tu próximo turno.</div>'
         : '')
     + '</div>'
-
     /* historial */
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Lo que llevás hecho</h2>'
@@ -104,14 +100,12 @@ function pintar(){
           + '<span class="pin ' + (s.post < s.pre ? 'atendido' : 'gris') + '">dolor ' + s.pre + ' → ' + s.post + '</span></div>';
       }).join('')
     + '</div>';
-
   if(prog.length){
     escala(document.getElementById('esDolor'), function(v){ dolor = v; }, dolor);
     escala(document.getElementById('esEsf'),  function(v){ esfuerzo = v; }, esfuerzo);
   }
   actualizarCuenta();
 }
-
 function verEjercicio(i){
   var e = programaDe(L)[i];
   abrirVideo(e.n, e.video, dosis(e) + ' — ' + e.nota);
@@ -141,15 +135,12 @@ function enviar(){
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

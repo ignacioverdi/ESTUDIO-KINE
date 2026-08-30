@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cartel · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
@@ -35,13 +42,11 @@
 </style>
 </head>
 <body data-pag="cartel">
-
 <div class="hoja angosta">
   <div class="no-imprimir">
     <h1 class="tit">El cartel del estudio</h1>
     <p class="bajada">Imprimilo y pegalo en la recepción, o mandá el enlace por WhatsApp.
     El paciente escanea, se carga solo, y aparece en tu padrón.</p>
-
     <div class="tarjeta">
       <div class="tarjeta-cab"><h2 class="sub">Repartir</h2></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -53,21 +58,17 @@
       <div class="nota bien" id="hecho" style="display:none;margin-top:12px"></div>
     </div>
   </div>
-
   <div class="cartel" id="cartel"></div>
-
   <p class="no-imprimir" style="text-align:center;color:var(--tinta3);font-size:13px;margin-top:16px">
     El código se genera acá adentro, sin mandarle la dirección a ningún servicio de afuera.
   </p>
 </div>
-
 <script>
 function enlaceAlta(){
   var u = location.href.split('?')[0].replace(/[^\/]*$/, 'alta.html');
   return u.indexOf('file:') === 0 ? 'https://estudio-kine.vercel.app/alta.html' : u;
 }
 var URL_ALTA = enlaceAlta();
-
 document.getElementById('cartel').innerHTML =
   '<h2>' + (BASE.club || 'Estudio de kinesiología') + '</h2>'
   + '<p class="lema">Si venís a tratarte, cargá tus datos una sola vez desde el celular.</p>'
@@ -80,12 +81,10 @@ document.getElementById('cartel').innerHTML =
   + '</div>'
   + '<p class="pie">Tus datos son información de salud. Los ve el kinesiólogo que te atiende '
   + 'y los ves vos. Nadie más.</p>';
-
 function avisar(t){
   var e = document.getElementById('hecho');
   e.textContent = t; e.style.display = 'block';
 }
-
 /* En el celular abre el menú de compartir del sistema; en la computadora
    no existe, así que copia al portapapeles. */
 function compartir(){
@@ -100,12 +99,10 @@ function compartir(){
     avisar(URL_ALTA);
   }
 }
-
 function porWhatsapp(){
   var t = 'Hola. Para atenderte en el estudio, cargá tus datos acá una sola vez: ' + URL_ALTA;
   window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
 }
-
 /* Baja el QR como imagen suelta, para meterlo en un folleto o un flyer. */
 function bajarQR(){
   var svg = document.querySelector('#cartel .qr svg').cloneNode(true);
@@ -129,15 +126,12 @@ function bajarQR(){
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){

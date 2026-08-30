@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="es"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Caja · Estudio</title>
 <link rel="icon" href="img/icono-192.png">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1D3E6E">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
@@ -21,19 +28,16 @@
 </style>
 </head>
 <body data-pag="caja">
-
 <div class="hoja">
   <h1 class="tit">Caja</h1>
   <p class="bajada">Lo que entra y lo que sale. Las sesiones y los planes se anotan solos;
   los gastos los cargás vos.</p>
-
   <div class="rejilla c4" style="margin-bottom:20px">
     <div class="dato"><div class="v" id="kIng" style="color:var(--verde)">—</div><div class="l">Ingresos del mes</div></div>
     <div class="dato"><div class="v" id="kEgr" style="color:var(--rojo)">—</div><div class="l">Egresos del mes</div></div>
     <div class="dato"><div class="v" id="kSal">—</div><div class="l">Saldo</div></div>
     <div class="dato"><div class="v" id="kAus" style="color:var(--ambar)">—</div><div class="l">Ausencias</div></div>
   </div>
-
   <div class="rejilla c2">
     <div class="tarjeta">
       <div class="tarjeta-cab"><h2 class="sub">Los últimos seis meses</h2>
@@ -41,7 +45,6 @@
       <div class="barras" id="barras"></div>
       <div class="barras-pie" id="barrasPie"></div>
     </div>
-
     <div class="tarjeta">
       <div class="tarjeta-cab"><h2 class="sub">Anotar un movimiento</h2></div>
       <div class="pestanias" id="tipoMov" style="margin-bottom:12px">
@@ -56,23 +59,19 @@
       <button class="bt ancho" onclick="anotar()">Anotar</button>
     </div>
   </div>
-
   <div class="tarjeta">
     <div class="tarjeta-cab"><h2 class="sub">Planes de cada paciente</h2>
       <span class="eti">El crédito se descuenta al atender, no al reservar</span></div>
     <div id="planes"></div>
   </div>
-
   <div class="tarjeta">
     <div class="tarjeta-cab"><h2 class="sub">Movimientos del mes</h2>
       <span class="eti" id="cuentaMov"></span></div>
     <div id="lista"></div>
   </div>
 </div>
-
 <script>
 var tipoMov = 'egreso';
-
 /* Algunos movimientos de ejemplo, para que la pantalla tenga qué mostrar. */
 if(!movimientos().length){
   [['2026-08-02','egreso','Alquiler del local',420000,'fijos'],
@@ -98,14 +97,12 @@ if(!movimientos().length){
                         concepto:'Cierre de mes', monto:m[2], categoria:'historico'});
   });
 }
-
 document.querySelectorAll('#tipoMov .pest').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('#tipoMov .pest').forEach(function(x){ x.classList.remove('on'); });
     b.classList.add('on'); tipoMov = b.dataset.t;
   };
 });
-
 function anotar(){
   var c = (document.getElementById('mConcepto').value || '').trim();
   var m = +document.getElementById('mMonto').value;
@@ -120,7 +117,6 @@ function anotar(){
   document.getElementById('avisoMov').innerHTML = '';
   pintar();
 }
-
 function pintar(){
   var r = resumenMes(), t = estadisticaTurnos();
   document.getElementById('kIng').textContent = plata(r.ingresos);
@@ -128,7 +124,6 @@ function pintar(){
   document.getElementById('kSal').textContent = plata(r.saldo);
   document.getElementById('kSal').style.color = r.saldo >= 0 ? 'var(--verde)' : 'var(--rojo)';
   document.getElementById('kAus').textContent = t.porcentajeAusencia + '%';
-
   /* gráfico de seis meses */
   var meses = [], d = new Date(HOY);
   for(var i = 5; i >= 0; i--){
@@ -137,7 +132,6 @@ function pintar(){
   }
   var datos = meses.map(function(m){ return resumenMes(m); });
   var tope = Math.max.apply(null, datos.map(function(x){ return Math.max(x.ingresos, x.egresos); })) || 1;
-
   document.getElementById('barras').innerHTML = datos.map(function(x){
     return '<div style="display:flex;gap:3px;align-items:flex-end;height:100%">'
       + '<div class="ing" style="flex:1;height:' + Math.max(2, x.ingresos/tope*100) + '%" '
@@ -149,7 +143,6 @@ function pintar(){
   document.getElementById('barrasPie').innerHTML = meses.map(function(m){
     return '<span>' + M[+m.slice(5) - 1] + '</span>';
   }).join('');
-
   /* planes */
   document.getElementById('planes').innerHTML = BASE.pacientes.map(function(p){
     var pl = planDe(p), av = avisoCreditos(p);
@@ -164,7 +157,6 @@ function pintar(){
       + '<button class="bt hueco chico" onclick="cambiarPlan(\'' + p.id + '\')">Cambiar plan</button>'
       + '</div>';
   }).join('');
-
   /* movimientos */
   var m = delMes().filter(function(x){ return x.categoria !== 'historico'; })
                   .sort(function(a, b){ return a.fecha < b.fecha ? 1 : -1; });
@@ -179,7 +171,6 @@ function pintar(){
       }).join('')
     : '<div class="vacio"><b>Sin movimientos este mes</b>Anotá el primero arriba.</div>';
 }
-
 function cambiarPlan(pid){
   var p = paciente(pid);
   var caja = document.createElement('div');
@@ -211,20 +202,16 @@ function asignar(pid, clave){
   cerrarPlan();
   pintar();
 }
-
 pintar();
 </script>
 <script>
 /* SALIDA DE EMERGENCIA.
-
    Una version anterior guardaba el portal para que anduviera sin internet.
    Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
    quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-
    Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
    habia guardado, y recarga una sola vez para que se vea la version
    nueva. Despues no vuelve a hacer nada.
-
    Se puede sacar dentro de unos meses, cuando ya no queden telefonos
    con la version vieja. */
 if('serviceWorker' in navigator){
