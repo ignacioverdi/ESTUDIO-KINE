@@ -118,21 +118,39 @@ def temas_completos():
                     % ', '.join(sorted(huerfanos)))
 
 
-def sw_al_dia():
-    """El service worker ya no guarda archivos, asi que no hay lista que
-       controlar. Se deja la funcion para no tocar el resto del auditor."""
-    return
+def sobras():
+    """Archivos viejos que quedaron dando vueltas.
+
+    El zip agrega y reemplaza, pero no borra. Si el proyecto tiene
+    archivos que ya no se usan, conviene avisar en vez de dejarlos."""
+    try:
+        import limpiar
+    except Exception:
+        return
+    viejos = [n for n, _, _ in limpiar.SOBRAN if os.path.isfile(n)]
+    if viejos:
+        AVISO.append('sobran %d archivos viejos (%s...). Doble clic en LIMPIAR.bat'
+                     % (len(viejos), ', '.join(viejos[:3])))
 
 
-def inventario_cuadra():
-    s = leer('crear_estudio.py')
-    esp = set(re.findall(r"\('([^']+\.(?:html|css|js|json|png|md|py|txt|bat|pdf))'", s)) | {'.gitignore'}
-    real = {os.path.relpath(os.path.join(r, f), '.').replace('\\', '/')
-            for r, d, fs in os.walk('.') for f in fs if '.git' not in r}
-    for e in sorted(esp - real):
-        ROTO.append('el inventario nombra %s, que no está en la carpeta' % e)
-    for r in sorted(real - esp):
-        AVISO.append('%s está en la carpeta pero no en el inventario' % r)
+def archivos_huerfanos():
+    """Archivos que nadie usa.
+
+    Antes esto se controlaba contra una lista escrita a mano en otro
+    archivo, y mantener esa lista al dia era trabajo puro: cada vez que
+    agregaba una pantalla, el auditor se quejaba de la lista, no del
+    codigo. Ahora se deduce mirando quien referencia a quien.
+    """
+    usados = set()
+    for p in PANTALLAS + glob.glob('js/*.js') + glob.glob('css/*.css') + ['sw.js']:
+        if not os.path.exists(p):
+            continue
+        s2 = leer(p)
+        for a in re.findall(r'["\'(]([\w./-]+\.(?:css|js|png|html|json))["\')]', s2):
+            usados.add(a.lstrip('./'))
+    for f in glob.glob('js/*.js') + glob.glob('css/*.css'):
+        if f not in usados and 'tema-' not in f and 'firebase' not in f:
+            AVISO.append('%s no lo usa ninguna pantalla' % f)
 
 
 def secretos_a_la_vista():
@@ -176,7 +194,7 @@ def lo_que_falta_hacer():
 def main():
     for f in [enlaces_rotos, archivos_que_pide_cada_pantalla, todas_cargan_lo_comun,
               cada_pantalla_tiene_ayuda, componentes_sin_color_propio, temas_completos,
-              sw_al_dia, inventario_cuadra, secretos_a_la_vista, js_balanceado,
+              archivos_huerfanos, sobras, secretos_a_la_vista, js_balanceado,
               lo_que_falta_hacer]:
         f()
 

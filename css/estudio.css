@@ -290,6 +290,8 @@ label.campo>.eti{display:block;margin-bottom:5px}
   .nav a{min-height:44px;display:flex;align-items:center}
   .menu-lista a{min-height:54px}
   .cartel-demo a{min-height:44px;display:flex;align-items:center}
+  /* cualquier enlace suelto dentro de un parrafo, tambien */
+  p a{display:inline-block;padding:11px 4px}
   .crit{padding:14px 0}
   .crit input{width:22px;height:22px}
   input,select,textarea{min-height:44px;font-size:16px}

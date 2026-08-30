@@ -196,29 +196,32 @@ de incógnito para descartar la copia guardada.
 
 ---
 
-## APÉNDICE — POR QUÉ SOLO DOS BOTONES
+## APÉNDICE — POR QUÉ HAY TAN POCAS HERRAMIENTAS
 
-Antes esto eran cinco archivos y varios pasos que había que acordarse de hacer
-en orden. Ahora son dos, y el paso que más se olvidaba se hace solo.
+Empezaron siendo catorce. Quedaron seis, después de una limpieza que salió de
+haber contado nuestros propios errores. Está explicada en `LECCIONES.md`.
 
 ```
-ABRIR.bat     revisa la maquina, prepara, audita y abre el portal
-PUBLICAR.bat    prepara, audita, muestra que sube y publica
+ABRIR.bat       todos los días. Revisa y abre. Se cierra solo.
+PUBLICAR.bat    publica. Frena si hay algo roto.
+LIMPIAR.bat     borra los archivos viejos que quedaron sin uso.
+auditar.py      revisa el proyecto. Lo llaman los dos .bat.
+probar.py       abre el portal en un navegador de verdad y toca botones.
+armar_pdf.py    la guía de instalación en PDF.
+manual_pdf.py   el manual de uso en PDF.
 ```
 
-Adentro los mueve `preparar.py`, que hace tres cosas:
+**Lo que se borró y por qué:** el archivo único (era una segunda aplicación y de
+ahí salieron cinco errores), el guardado sin internet (rompía el iPhone), el
+numerador de versiones (existía solo por culpa del anterior), el inventario a
+mano (se deduce leyendo la carpeta) y tres archivos de pruebas sueltos que ahora
+son uno.
 
-**Sube el número de versión del `sw.js`, pero solo si cambió algo.** Calcula una
-firma de todos los archivos que el portal entrega; si difiere de la anterior,
-sube la versión. Sin esto, el navegador sigue mostrando la copia guardada y uno
-jura que el cambio no se aplicó. Era el error que más tiempo hacía perder y
-ahora no puede pasar.
+**Ya no hay números de versión que subir ni copias viejas que vaciar.** Se sube
+y se ve.
 
-**Regenera `ESTUDIO.html`**, el archivo único que se manda por WhatsApp.
-
-**Corre `auditar.py`**, que revisa enlaces rotos, archivos que faltan, tokens que
-ningún tema define y claves expuestas. Si encuentra algo roto, `PUBLICAR.bat`
-frena antes de subir.
-
-`crear_estudio.py` sigue estando para armar la carpeta desde cero, pero no es de
-uso diario.
+**Sobre `LIMPIAR.bat`:** cuando se reemplaza algo, el archivo viejo sigue en la
+carpeta, porque descomprimir el zip agrega y reemplaza pero no borra. Ese botón
+los saca. Tiene la lista escrita adentro, uno por uno, con el motivo: no adivina
+nada. Te muestra qué va a borrar y espera que escribas SI. Si el auditor detecta
+archivos viejos, te lo avisa solo.

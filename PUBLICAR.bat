@@ -23,7 +23,7 @@ if errorlevel 1 (
 
 echo.
 echo  ── PREPARANDO ─────────────────────────────────────────────
-python preparar.py
+python auditar.py
 if %errorlevel% neq 0 (
   echo.
   echo  ═══════════════════════════════════════════════════════════

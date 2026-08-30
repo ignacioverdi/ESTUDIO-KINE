@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+PROBAR — las tres pruebas que encontraron errores de verdad.
+
+Antes esto eran tres archivos sueltos y uno se olvidaba de correrlos.
+Ahora es uno:
+
+  1. PANTALLAS  abre el portal en celular y monitor. Busca cosas que se
+                salen por el costado y botones de menos de 44px, que es
+                el minimo con el que un dedo acierta.
+  2. QR         genera codigos y los LEE con un lector. Un QR que se ve
+                lindo pero no se lee es peor que no tener QR.
+  3. CLICS      toca botones de verdad, no llama funciones. Asi se
+                descubrio que ningun onclick funcionaba.
+
+    python probar.py
+
+Necesita:  pip install playwright opencv-python-headless
+           playwright install chromium
+"""
+
+import sys as _sys
+for _f in (_sys.stdout, _sys.stderr):
+    try:
+        if _f and getattr(_f, 'encoding', '') and _f.encoding.lower() not in ('utf-8', 'utf8'):
+            _f.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
+import http.server, socketserver, threading, os, pathlib, glob, re
+
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:
+    print('Falta playwright.  pip install playwright && playwright install chromium')
+    _sys.exit(0)
+
+RAIZ = pathlib.Path(__file__).parent.resolve()
+os.chdir(RAIZ)
+
+PANTALLAS = sorted(os.path.basename(f) for f in glob.glob('*.html'))
+VISTAS = [('celular', 390, 844, True), ('monitor', 1400, 900, False)]
+
+MEDIR = """(MIN) => {
+  const r = [], ancho = document.documentElement.clientWidth;
+  document.querySelectorAll('*').forEach(e => {
+    const b = e.getBoundingClientRect();
+    if (b.width > 0 && b.right > ancho + 2)
+      r.push('se sale ' + Math.round(b.right - ancho) + 'px: ' + (e.className || e.tagName));
+  });
+  document.querySelectorAll('button,a,input,select,.pest').forEach(e => {
+    if (e.tagName === 'INPUT' && e.closest('label')) return;
+    const b = e.getBoundingClientRect();
+    if (b.width > 0 && b.height > 0 && b.height < MIN)
+      r.push('chico ' + Math.round(b.height) + 'px: "' + (e.textContent || '').trim().slice(0, 18) + '"');
+  });
+  return r;
+}"""
+
+
+def servidor():
+    """Un servidor local: hace falta para que el navegador cargue los
+       archivos hermanos como lo hace Vercel."""
+    class Silencio(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *a): pass
+    socketserver.TCPServer.allow_reuse_address = True
+    s = socketserver.TCPServer(('127.0.0.1', 0), Silencio)
+    threading.Thread(target=s.serve_forever, daemon=True).start()
+    return s, s.server_address[1]
+
+
+def main():
+    srv, puerto = servidor()
+    base = 'http://127.0.0.1:%d/' % puerto
+    problemas = []
+
+    with sync_playwright() as pw:
+        b = pw.chromium.launch()
+
+        print('\n  1. PANTALLAS')
+        for nom, w, h, tac in VISTAS:
+            pg = b.new_page(viewport={'width': w, 'height': h}, has_touch=tac, is_mobile=tac)
+            errs = []
+            pg.on('pageerror', lambda e: errs.append(str(e)))
+            hallazgos = set()
+            for p in PANTALLAS:
+                pg.goto(base + p)
+                pg.wait_for_timeout(500)
+                for x in pg.evaluate(MEDIR, 44 if tac else 30):
+                    hallazgos.add(p + ' — ' + x)
+            print('     %-8s %d pantallas, %d cosas para mirar, %d errores'
+                  % (nom, len(PANTALLAS), len(hallazgos), len(errs)))
+            for x in sorted(hallazgos)[:6]:
+                print('        ' + x)
+            if errs:
+                problemas += ['%s: %s' % (nom, e) for e in errs[:3]]
+            pg.close()
+
+        print('\n  2. CODIGOS QR')
+        try:
+            import cv2
+            pg = b.new_page(viewport={'width': 900, 'height': 900})
+            pg.goto(base + 'cartel.html')
+            pg.wait_for_timeout(1200)
+            pg.locator('#cartel').screenshot(path='/tmp/_qr.png')
+            leido, _, _ = cv2.QRCodeDetector().detectAndDecode(cv2.imread('/tmp/_qr.png'))
+            esperado = pg.evaluate('URL_ALTA')
+            ok = leido == esperado
+            print('     %s  %s' % ('se lee bien' if ok else 'NO SE LEE', esperado))
+            if not ok:
+                problemas.append('el codigo QR del cartel no se lee')
+            pg.close()
+        except ImportError:
+            print('     (salteado: falta opencv-python-headless)')
+
+        print('\n  3. CLICS DE VERDAD')
+        pg = b.new_page(viewport={'width': 1280, 'height': 1000})
+        errs = []
+        pg.on('pageerror', lambda e: errs.append(str(e)))
+        pg.goto(base + 'index.html')
+        pg.wait_for_timeout(700)
+        pg.evaluate("ponerRol('kine')")
+
+        pg.goto(base + 'panel.html'); pg.wait_for_timeout(700)
+        antes = pg.evaluate('BASE.lesiones[0].sesiones.length')
+        pg.goto(base + 'lesiones.html?f=L1'); pg.wait_for_timeout(700)
+        try:
+            pg.get_by_role('button', name='Cargar sesión de hoy').click()
+            pg.wait_for_timeout(500)
+            abrio = pg.evaluate("!!document.getElementById('cajaSesion')")
+        except Exception:
+            abrio = False
+        print('     el formulario de sesion abre :', abrio)
+        if not abrio:
+            problemas.append('el boton de cargar sesion no abre nada')
+
+        pg.goto(base + 'pacientes.html'); pg.wait_for_timeout(700)
+        try:
+            pg.evaluate("abrir('P31')"); pg.wait_for_timeout(400)
+            pg.get_by_role('button', name='Abrir una lesión').click()
+            pg.wait_for_timeout(500)
+            abrio2 = pg.evaluate("!!document.getElementById('cajaLesion')")
+        except Exception:
+            abrio2 = False
+        print('     el alta de lesion abre       :', abrio2)
+        if not abrio2:
+            problemas.append('el boton de abrir lesion no abre nada')
+
+        if errs:
+            problemas += errs[:3]
+        pg.close()
+        b.close()
+    srv.shutdown()
+
+    print('\n  ' + '=' * 56)
+    if problemas:
+        print('  HAY %d PROBLEMAS:' % len(problemas))
+        for x in problemas:
+            print('    x ' + x)
+    else:
+        print('  Todo bien.')
+    print('')
+    return 1 if problemas else 0
+
+
+if __name__ == '__main__':
+    _sys.exit(main())
