@@ -25,8 +25,10 @@
 | La ruta de firebase apuntaba a otro lado | Nadie lo verificaba |
 | Una pantalla sin encabezado ni menú | Nadie lo verificaba |
 | El auditor avisó 11 veces de mentira | Windows usa `\` y el HTML `/` |
+| El menú del celular estaba al final de la página | Lo probé en el archivo único, no en el real |
+| Tocar el turno no hacía nada, sin avisar | La agenda de ejemplo no tenía el paciente |
 
-**Trece errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Quince errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---
@@ -89,6 +91,16 @@ archivo de demostración: las funciones existían pero el navegador no las
 encontraba.
 
 **Una prueba que no toca un botón no prueba nada.**
+
+Volvió a pasar dos veces más. El menú del celular lo probé en el archivo único
+—que después borré—, nunca en los archivos de verdad: estaba al final de la
+página y había que bajar hasta el fondo. Y tocar un turno para atender no hacía
+absolutamente nada, sin ningún aviso, porque los turnos de ejemplo se habían
+escrito antes de que existiera el padrón. Las dos cosas aparecieron el mismo día,
+tocando la aplicación en un iPhone simulado.
+
+**Fallar en silencio es la peor forma de fallar.** Si algo no puede seguir, tiene
+que decirlo.
 
 ### 6. Antes de reemplazar, verificar que sea único
 

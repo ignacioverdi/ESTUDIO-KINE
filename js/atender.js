@@ -21,7 +21,20 @@ var AT = null;
 function atender(dia, hora){
   var t = null;
   (BASE.agenda[dia] || []).forEach(function(x){ if(x.h === hora) t = x; });
-  if(!t || !t.pid) return;
+  if(!t) return;
+
+  /* Turnos viejos guardados antes de que existiera el padron traen el
+     dorsal pero no el id de paciente. Se busca por dorsal en vez de no
+     hacer nada: el kinesiologo tocaba el turno y no pasaba NADA, sin
+     ningun aviso, que es la peor forma de fallar. */
+  if(!t.pid && t.dorsal){
+    var pd = pacientePorDorsal(t.dorsal);
+    if(pd) t.pid = pd.id;
+  }
+  if(!t.pid){
+    alert('Este turno no tiene paciente asignado. Asignaselo desde la Agenda.');
+    return;
+  }
 
   var p = paciente(t.pid);
   var L = null;

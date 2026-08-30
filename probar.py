@@ -50,9 +50,16 @@ MEDIR = """(MIN) => {
       r.push('se sale ' + Math.round(b.right - ancho) + 'px: ' + (e.className || e.tagName));
   });
   document.querySelectorAll('button,a,input,select,.pest').forEach(e => {
-    if (e.tagName === 'INPUT' && e.closest('label')) return;
+    // Si vive dentro de algo que ya se toca entero (una etiqueta o una
+    // fila con accion), el area real es la del padre, no la suya. Marcarlo
+    // igual es avisar de mentira, y un aviso falso hace que se dejen de leer.
+    if (e.closest('label')) return;
+    const p = e.closest('.fila,.at,.ej,button');
+    if (p && p !== e && p.getBoundingClientRect().height >= MIN) return;
+    const cs = getComputedStyle(e);
+    if (cs.display === 'none' || cs.visibility === 'hidden') return;
     const b = e.getBoundingClientRect();
-    if (b.width > 0 && b.height > 0 && b.height < MIN)
+    if (b.width > 0 && b.height > 0 && b.height < MIN - 1)
       r.push('chico ' + Math.round(b.height) + 'px: "' + (e.textContent || '').trim().slice(0, 18) + '"');
   });
   return r;
@@ -140,6 +147,42 @@ def main():
         if not coincide:
             problemas.append('manifest.json arranca en %s pero el tema es %s'
                              % (m.get('background_color'), fondo))
+
+        print('\n  1d. USARLA CON EL DEDO')
+        # Tocar de verdad, no llamar funciones. Asi se descubrio que el
+        # turno del panel no abria nada y no avisaba: fallaba en silencio.
+        for ap in ['iPhone SE', 'iPhone 14 Pro']:
+            ctx = b.new_context(**pw.devices[ap])
+            pg = ctx.new_page()
+            e2 = []
+            pg.on('pageerror', lambda x: e2.append(str(x)))
+            pg.goto(base + 'index.html'); pg.wait_for_timeout(700)
+            pg.evaluate("ponerRol('kine')")
+            pg.goto(base + 'panel.html'); pg.wait_for_timeout(900)
+
+            pg.tap('.menu-bt'); pg.wait_for_timeout(350)
+            abre = pg.evaluate("!!document.querySelector('#menuLista.abierto')")
+            pg.evaluate("abrirMenu()")
+
+            try:
+                pg.tap('#turnos button.fila[onclick*=atender]'); pg.wait_for_timeout(600)
+                atiende = pg.evaluate("!!document.getElementById('cajaAtender')")
+                entra = pg.evaluate("!document.getElementById('cajaAtender') || "
+                    "document.querySelector('#cajaAtender .ayuda-caja').getBoundingClientRect().width "
+                    "<= window.innerWidth")
+                pg.evaluate("cerrarAtender()")
+            except Exception:
+                atiende, entra = False, False
+
+            sale = pg.evaluate("document.documentElement.scrollWidth > window.innerWidth + 2")
+            print('     %-14s menu:%s  atender:%s  entra:%s  errores:%d'
+                  % (ap, abre, atiende, entra, len(e2)))
+            if not abre:    problemas.append('%s: el menu no abre' % ap)
+            if not atiende: problemas.append('%s: tocar el turno no abre la atencion' % ap)
+            if not entra:   problemas.append('%s: el formulario se sale de la pantalla' % ap)
+            if sale:        problemas.append('%s: la pagina se desborda' % ap)
+            problemas += ['%s: %s' % (ap, x) for x in e2[:2]]
+            ctx.close()
 
         print('\n  2. CODIGOS QR')
         try:

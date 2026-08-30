@@ -184,19 +184,19 @@ var BASE = {
 
   agenda: {
     '2026-08-28':[
-      {h:'08:30', dorsal:7,  tipo:'Tratamiento', estado:'atendido'},
-      {h:'09:00', dorsal:12, tipo:'Gimnasio',    estado:'atendido'},
+      {h:'08:30', pid:'P07', dorsal:7,  tipo:'Tratamiento', estado:'atendido'},
+      {h:'09:00', pid:'P12', dorsal:12, tipo:'Gimnasio',    estado:'atendido'},
       {h:'09:30', dorsal:null},
-      {h:'10:00', dorsal:15, tipo:'Campo',       estado:'reservado'},
+      {h:'10:00', pid:'P15', dorsal:15, tipo:'Campo',       estado:'reservado'},
       {h:'10:30', dorsal:null},
-      {h:'11:00', dorsal:7,  tipo:'Tratamiento', estado:'reservado'},
+      {h:'11:00', pid:'P07', dorsal:7,  tipo:'Tratamiento', estado:'reservado'},
       {h:'11:30', dorsal:null},
       {h:'12:00', dorsal:null}
     ],
     '2026-08-31':[
-      {h:'08:30', dorsal:null}, {h:'09:00', dorsal:12, tipo:'Gimnasio', estado:'reservado'},
+      {h:'08:30', dorsal:null}, {h:'09:00', pid:'P12', dorsal:12, tipo:'Gimnasio', estado:'reservado'},
       {h:'09:30', dorsal:null}, {h:'10:00', dorsal:null},
-      {h:'10:30', dorsal:15, tipo:'Campo', estado:'reservado'},
+      {h:'10:30', pid:'P15', dorsal:15, tipo:'Campo', estado:'reservado'},
       {h:'11:00', dorsal:null}, {h:'11:30', dorsal:null}, {h:'12:00', dorsal:null}
     ]
   },

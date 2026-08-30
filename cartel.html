@@ -23,10 +23,11 @@
      casi negro gasta un cartucho entero y muchas cámaras no lo leen. */
   .cartel{background:#fff;color:#000;border-radius:var(--r2);padding:44px 38px;text-align:center;
     max-width:640px;margin:0 auto}
+  @media(max-width:400px){ .cartel{padding:26px 16px} .cartel h2{font-size:30px} }
   .cartel h2{font-family:var(--tit);font-size:40px;font-weight:var(--tit-peso);
     letter-spacing:var(--tit-track);text-transform:var(--tit-caja);line-height:1.05;margin-bottom:10px}
   .cartel .lema{font-size:19px;color:#333;margin-bottom:28px;line-height:1.4}
-  .cartel .qr{width:290px;margin:0 auto 24px}
+  .cartel .qr{width:290px;max-width:100%;margin:0 auto 24px}
   .cartel .dir{font-family:var(--dat);font-size:13px;color:#555;overflow-wrap:anywhere;margin-bottom:22px}
   .cartel .pasos{text-align:left;max-width:400px;margin:0 auto;border-top:1px solid #ddd;padding-top:18px}
   .cartel .pasos div{display:flex;gap:11px;padding:7px 0;font-size:15px;color:#222}
