@@ -54,7 +54,9 @@ function vaciarTodo(){
   try{
     localStorage.setItem('estudio_vaciado', 'si');
     localStorage.removeItem('estudio_pid');
+    localStorage.removeItem('estudio_datos');
   }catch(e){}
+  if(typeof persistir === 'function') persistir();
   guardar('kine/_vaciado', {fecha: HOY, por: 'el estudio'});
 }
 
@@ -335,10 +337,52 @@ function criteriosListos(L){
   var n = 0; L.criterios.forEach(function(c){ if(c.ok) n++; }); return n;
 }
 
-/* ── Escritura ─────────────────────────────────────────────────────
-   Hoy solo cambia lo que está en memoria. En producción es un fbSet
-   a la ruta que devuelve rutaDe().                                  */
-function guardar(ruta, valor){
-  if(typeof fbSet === 'function'){ try{ fbSet(ruta, valor); }catch(e){} }
-  try{ console.log('[guardar]', ruta, valor); }catch(e){}
+/* ── ESCRITURA Y PERSISTENCIA ───────────────────────────────────────
+
+   Con Firebase conectado, guardar() escribe en la base y listo.
+
+   Sin Firebase, el portal perdia TODO al cambiar de pantalla: cargabas
+   un paciente, tocabas otra seccion y habia desaparecido. Para probarlo
+   de verdad eso no sirve: parece que nada funciona.
+
+   Por eso, mientras no haya Firebase, se guarda en el propio navegador.
+   Es lo mismo que hace una libreta: queda en ese aparato y no se
+   comparte. Alcanza de sobra para evaluar el portal antes de conectarlo.
+   ─────────────────────────────────────────────────────────────────── */
+var CLAVE_LOCAL = 'estudio_datos';
+
+/* Lo que cambia con el uso. El resto (plantillas, planes, textos) es la
+   herramienta y no hace falta guardarlo. */
+var RAMAS = ['pacientes', 'lesiones', 'disponibilidad', 'programas', 'agenda',
+             'historia', 'accesos', 'caja', 'mensajes', 'adherencia', 'perfil',
+             'ejercicios'];
+
+function persistir(){
+  if(typeof fbSet === 'function') return;      /* manda Firebase */
+  try{
+    var d = {};
+    RAMAS.forEach(function(r){ if(BASE[r] !== undefined) d[r] = BASE[r]; });
+    localStorage.setItem(CLAVE_LOCAL, JSON.stringify(d));
+  }catch(e){}
 }
+
+function recuperar(){
+  if(typeof fbSet === 'function') return;
+  try{
+    var t = localStorage.getItem(CLAVE_LOCAL);
+    if(!t) return;
+    var d = JSON.parse(t);
+    RAMAS.forEach(function(r){ if(d[r] !== undefined) BASE[r] = d[r]; });
+  }catch(e){}
+}
+
+function guardar(ruta, valor){
+  if(typeof fbSet === 'function'){
+    try{ fbSet(ruta, valor); }catch(e){}
+    return;
+  }
+  persistir();
+}
+
+/* Se recupera apenas se carga, antes de que ninguna pantalla dibuje. */
+recuperar();

@@ -101,6 +101,10 @@ def main():
     aqui = os.path.dirname(os.path.abspath(__file__))
     os.chdir(aqui)
 
+    # Se busca en la carpeta, no en lo que trajo el zip. Un archivo viejo
+    # que quedo de antes tiene que aparecer igual: paso con vercel.json,
+    # que rompio las publicaciones durante cinco horas y el limpiador no
+    # lo veia porque ya no venia en el paquete.
     hay = [(n, p, r) for n, p, r in SOBRAN
            if os.path.isfile(n) and n not in INTOCABLES]
 

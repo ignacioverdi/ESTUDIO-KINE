@@ -211,6 +211,23 @@ label.campo>.eti{display:block;margin-bottom:5px}
 .vacio b{display:block;font-family:var(--tit);font-size:17px;font-weight:var(--tit-peso);
   color:var(--tinta);margin-bottom:6px}
 
+/* ── MENSAJES ───────────────────────────────────────────────────── */
+.charla{max-height:46vh;overflow-y:auto;border:var(--borde) solid var(--linea);
+  border-radius:var(--r);padding:12px;background:var(--sup2)}
+.msj{margin-bottom:12px;max-width:88%}
+.msj.mio{margin-left:auto}
+.msj p{padding:10px 13px;border-radius:var(--r);font-size:14.5px;line-height:1.45}
+.msj.mio p{background:var(--acc-suave);border:var(--borde) solid var(--acc-borde);color:var(--tinta)}
+.msj.suyo p{background:var(--sup);border:var(--borde) solid var(--linea)}
+.msj .ancla{display:block;font-family:var(--dat);font-size:10px;letter-spacing:.8px;
+  text-transform:uppercase;color:var(--acc-texto);margin-bottom:3px}
+.msj .cuando{display:block;font-family:var(--dat);font-size:10.5px;color:var(--tinta3);margin-top:3px}
+.msj.mio .cuando{text-align:right}
+.globo{position:relative}
+.globo .cuantos{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;
+  border-radius:9px;background:var(--rojo);color:var(--sobre-rojo);font-family:var(--dat);font-size:10px;
+  font-weight:700;display:flex;align-items:center;justify-content:center}
+
 /* ── PANEL DE AYUDA ─────────────────────────────────────────────── */
 .ayuda-fondo{position:fixed;inset:0;background:var(--velo-fondo);z-index:90;
   display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}

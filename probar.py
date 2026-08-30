@@ -186,6 +186,57 @@ def main():
             problemas += ['%s: %s' % (ap, x) for x in e2[:2]]
             ctx.close()
 
+        print('\n  1e. LO NUEVO: MENSAJES, TURNOS Y ALERTAS')
+        ctx = b.new_context(**pw.devices['iPhone 14 Pro'])
+        pg = ctx.new_page()
+        e3 = []
+        pg.on('pageerror', lambda x: e3.append(str(x)))
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+        pg.evaluate("localStorage.clear()")      # arrancar limpio: el portal recuerda
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+        pg.evaluate("ponerRol('jugador'); ponerDorsal(7); localStorage.setItem('estudio_pid','P07')")
+        pg.goto(base + 'mi.html'); pg.wait_for_timeout(1000)
+
+        pg.evaluate("consultar(1)"); pg.wait_for_timeout(500)
+        cuerpo = pg.evaluate("(document.getElementById('cuerpoMsj')||{}).textContent||''")
+        anclado = 'Sobre el ejercicio' in cuerpo
+        guardia = 'no es una guardia' in cuerpo.lower()
+        pg.evaluate("document.getElementById('txtMsj').value='me tira atras'; enviarMensaje('P07')")
+        pg.wait_for_timeout(400)
+        guardo = pg.evaluate("mensajesDe('P07').length") == 1
+        pg.evaluate("cerrarConversacion()")
+
+        pg.evaluate("confirmarTurno()"); pg.wait_for_timeout(400)
+        confirmo = pg.evaluate("(function(){var r=false;Object.keys(BASE.agenda).forEach("
+                               "function(d){BASE.agenda[d].forEach(function(t){"
+                               "if(t.pid===miPid()&&t.confirmado)r=true;});});return r;})()")
+
+        pg.evaluate("ponerRol('kine')")
+        pg.goto(base + 'panel.html'); pg.wait_for_timeout(900)
+        n_al = pg.evaluate("alertas().length")
+        avisa = pg.evaluate("alertas().some(function(a){return a.que.indexOf('no le respondiste')>=0})")
+        con_accion = pg.evaluate("alertas().every(function(a){return !!a.hacer})")
+        # el portal tiene que recordar entre pantallas, si no nada de esto sirve
+        recuerda = pg.evaluate("mensajesDe('P07').length") == 1
+
+        print('     mensaje anclado al ejercicio :', anclado)
+        print('     avisa que no es una guardia   :', guardia)
+        print('     el mensaje se guarda          :', guardo)
+        print('     recuerda al cambiar pantalla  :', recuerda)
+        print('     el turno se puede confirmar   :', confirmo)
+        print('     alertas en el panel           :', n_al, '(avisa del mensaje:', avisa, ')')
+        for cond, txt in [(anclado,'el mensaje no queda anclado al ejercicio'),
+                          (guardia,'falta el aviso de que no es una guardia'),
+                          (guardo,'el mensaje no se guarda'),
+                          (recuerda,'el portal no recuerda al cambiar de pantalla'),
+                          (confirmo,'el turno no se puede confirmar'),
+                          (n_al > 0,'el panel no muestra alertas'),
+                          (avisa,'no avisa de los mensajes sin responder'),
+                          (con_accion,'hay alertas que no dicen que hacer')]:
+            if not cond: problemas.append(txt)
+        problemas += e3[:2]
+        ctx.close()
+
         print('\n  2. CODIGOS QR')
         try:
             import cv2

@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="panel">
 <div class="hoja">
@@ -37,6 +37,12 @@
     <div class="dato"><div class="v" id="kLim" style="color:var(--ambar)">—</div><div class="l">Limitados</div></div>
     <div class="dato"><div class="v" id="kBaja" style="color:var(--rojo)">—</div><div class="l">De baja</div></div>
   </div>
+  <div class="tarjeta" id="cajaAlertas">
+    <div class="tarjeta-cab"><h2 class="sub">Para mirar hoy</h2>
+      <span class="eti" id="cuentaAlertas"></span></div>
+    <div id="alertas"></div>
+  </div>
+
   <div class="rejilla c2">
     <div>
       <div class="tarjeta">
@@ -76,6 +82,14 @@ document.getElementById('kEgr').textContent  = plata(rc.egresos);
 document.getElementById('kSal').textContent  = plata(rc.saldo);
 document.getElementById('kSal').style.color  = rc.saldo >= 0 ? 'var(--verde)' : 'var(--rojo)';
 document.getElementById('kAus').textContent  = est.porcentajeAusencia + '%';
+
+/* Las señales cruzadas: dolor, adherencia y mensajes sin responder.
+   Antes vivían en tres pantallas distintas y había que acordarse. */
+var al = alertas();
+document.getElementById('alertas').innerHTML = alertasHTML();
+document.getElementById('cuentaAlertas').textContent =
+  al.length ? al.filter(function(a){ return a.nivel==='alto'; }).length + ' urgentes de ' + al.length
+            : 'todo en orden';
 document.getElementById('kOk').textContent   = c.ok;
 document.getElementById('kLim').textContent  = c.limitado;
 document.getElementById('kBaja').textContent = c.baja;

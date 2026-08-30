@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="agenda">
 <div class="hoja">
@@ -77,10 +77,14 @@ function pintar(){
       + '<span class="hh">' + t.h + '</span>'
       + '<span class="cu"><b>' + (esKine ? (t.pid ? paciente(t.pid).nombre : nombre(t.dorsal)) : 'Tu turno') + '</b>'
       + '<small>' + t.tipo + (esKine && L ? ' · ' + L.zona.toLowerCase() : ' · con Vero') + '</small></span>'
-      + '<span class="pin ' + (mio && !esKine ? 'reservado' : t.estado) + '">'
-      + (mio && !esKine ? 'tuyo' : t.estado) + '</span>'
+      + '<span class="pin ' + (t.confirmado ? 'atendido' : (mio && !esKine ? 'reservado' : t.estado)) + '">'
+      + (t.confirmado ? 'confirmado' : (mio && !esKine ? 'tuyo' : t.estado)) + '</span>'
       + (esKine && t.estado === 'reservado'
-          ? '<button class="bt hueco chico" onclick="event.stopPropagation();atender(dia,\'' + t.h + '\')">Atender</button>'
+          ? '<span style="display:flex;gap:5px;flex-wrap:wrap">'
+            + '<button class="bt hueco chico" onclick="event.stopPropagation();atender(dia,\'' + t.h + '\')">Atender</button>'
+            + (t.confirmado ? '' : '<button class="bt neutro chico" '
+                + 'onclick="event.stopPropagation();recordar(' + i + ')">Recordar</button>')
+            + '</span>'
           : '')
       + '</button>';
   }).join('');
@@ -168,6 +172,21 @@ function cerrarAviso(){
   if(c) c.remove();
   document.body.style.overflow = '';
 }
+/* El recordatorio del turno. Sin avisos push, lo mas directo que
+   funciona hoy: se arma el mensaje y se manda por WhatsApp de un toque.
+   El ausentismo en kinesiologia va del 8 al 25%, y cada hueco es una
+   hora que no se recupera. */
+function recordar(i){
+  var t = BASE.agenda[dia][i];
+  if(!t || !t.pid) return;
+  var p = paciente(t.pid);
+  var txt = 'Hola ' + p.nombre.split(' ')[0] + '. Te recuerdo tu turno en el estudio: '
+          + fechaLarga(dia) + ' a las ' + t.h + '. Si no vas a poder venir, avisame '
+          + 'con tiempo asi se lo doy a otra persona. Gracias.';
+  window.open('https://wa.me/' + (p.tel || '').replace(/\D/g,'')
+              + '?text=' + encodeURIComponent(txt), '_blank');
+}
+
 function lesionDePaciente(pid){
   for(var i=0;i<BASE.lesiones.length;i++)
     if(BASE.lesiones[i].pid === pid && BASE.lesiones[i].estado === 'activa') return BASE.lesiones[i];

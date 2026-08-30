@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="mi">
 <div class="hoja angosta" id="todo"></div>
@@ -50,6 +50,18 @@ function pintar(){
     + 'Para pasar a <b>' + FASES[Math.min(L.fase,4)].t.toLowerCase() + '</b> te falta: '
     + L.criterios.filter(function(c){ return !c.ok; }).map(function(c){ return c.t.toLowerCase(); }).join('; ')
     + '.</div></div>'
+    /* mensajes */
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Hablar con Vero</h2>'
+    + (sinLeerPaciente(miPid())
+        ? '<span class="pin ausente">' + sinLeerPaciente(miPid()) + ' sin leer</span>'
+        : '<span class="eti">Responde antes de tu turno</span>') + '</div>'
+    + '<p style="color:var(--tinta2);font-size:14px;margin-bottom:12px">'
+    + 'Si algo te duele o no entendés un ejercicio, escribile. También podés consultar '
+    + 'sobre un ejercicio puntual, con el botón que está al lado de cada uno.</p>'
+    + '<button class="bt hueco ancho" onclick="abrirConversacion(miPid())">Escribirle a Vero'
+    + (mensajesDe(miPid()).length ? ' (' + mensajesDe(miPid()).length + ')' : '') + '</button></div>'
+
     /* turno */
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Tu próximo turno</h2>'
@@ -59,7 +71,15 @@ function pintar(){
           + '<span class="hh">' + prox.h + '</span>'
           + '<span class="cu"><b>' + prox.tipo + ' con Vero</b>'
           + '<small>En el estudio. Te avisamos una hora antes.</small></span>'
-          + '<span class="pin reservado">reservado</span></div>'
+          + '<span class="pin ' + (prox.confirmado ? 'atendido' : 'reservado') + '">'
+          + (prox.confirmado ? 'confirmado' : 'reservado') + '</span></div>'
+          + (prox.confirmado
+              ? '<button class="bt neutro ancho" style="margin-top:10px" onclick="cancelarTurno()">No voy a poder ir</button>'
+              : '<div style="display:flex;gap:8px;margin-top:10px">'
+                + '<button class="bt" style="flex:1" onclick="confirmarTurno()">Ahí voy</button>'
+                + '<button class="bt neutro" style="flex:1" onclick="cancelarTurno()">No puedo</button></div>')
+          + '<p style="font-size:13px;color:var(--tinta3);margin-top:8px">'
+          + 'Si no vas a poder, avisá con tiempo: el turno se lo damos a otro.</p>'
         : '<div class="vacio"><b>No tenés turno reservado</b>Pedilo desde la agenda.</div>')
     + '</div>'
     /* programa */
@@ -77,6 +97,8 @@ function pintar(){
               + '<span class="pin ' + (e.video ? 'reservado' : 'gris') + '" '
               + 'onclick="event.stopPropagation();verEjercicio(' + i + ')">'
               + (e.video ? 'Ver video' : 'Sin video') + '</span>'
+              + '<span class="pin gris" style="margin-top:5px;display:inline-block" '
+              + 'onclick="event.stopPropagation();consultar(' + i + ')">Consultar</span>'
               + '</div>';
           }).join('')
         : '<div class="vacio"><b>Todavía no hay programa</b>Vero lo carga después de tu próximo turno.</div>')
@@ -106,6 +128,12 @@ function pintar(){
   }
   actualizarCuenta();
 }
+/* Consultar sobre UN ejercicio, no un chat suelto. "Esto me duele acá"
+   colgado del ejercicio concreto vale diez veces más. */
+function consultar(i){
+  var e = programaDe(L)[i];
+  abrirConversacion(miPid(), {tipo:'ejercicio', detalle:e.n});
+}
 function verEjercicio(i){
   var e = programaDe(L)[i];
   abrirVideo(e.n, e.video, dosis(e) + ' — ' + e.nota);
@@ -124,6 +152,32 @@ function actualizarCuenta(){
   var n = 0; for(var k in hechos) if(hechos[k]) n++;
   c.textContent = n + ' de ' + programaDe(L).length;
 }
+function turnoProximo(){
+  var r = null;
+  Object.keys(BASE.agenda).sort().forEach(function(d){
+    BASE.agenda[d].forEach(function(t){
+      if(!r && t.pid === miPid() && t.estado === 'reservado') r = {d:d, t:t};
+    });
+  });
+  return r;
+}
+function confirmarTurno(){
+  var x = turnoProximo(); if(!x) return;
+  x.t.confirmado = true;
+  guardar('kine/agenda/turnos/' + x.d + '/' + x.t.h + '/confirmado', true);
+  asentar(miPid(), 'turno', 'Confirmó que asiste al turno del ' + fechaLarga(x.d) + ' a las ' + x.t.h + '.');
+  pintar();
+}
+function cancelarTurno(){
+  var x = turnoProximo(); if(!x) return;
+  if(!confirm('¿Seguro que no vas a poder ir? El turno queda libre para otra persona.')) return;
+  delete x.t.pid; delete x.t.dorsal; delete x.t.tipo; delete x.t.confirmado;
+  x.t.estado = 'cancelado';
+  guardar('kine/agenda/turnos/' + x.d + '/' + x.t.h, {estado:'cancelado'});
+  asentar(miPid(), 'turno', 'Canceló el turno del ' + fechaLarga(x.d) + ' a las ' + x.t.h + '.');
+  pintar();
+}
+
 function enviar(){
   if(dolor === null || esfuerzo === null){
     alert('Marcá cuánto te dolió y qué tan exigente te resultó.'); return;

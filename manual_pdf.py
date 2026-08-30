@@ -392,6 +392,45 @@ d.append(Paragraph('Se completan <b>despues</b> de entrenar, no antes. Si se car
 d.append(PageBreak())
 
 # ── PIZARRON Y REFERENCIA ──────────────────────────────────────────────
+d.append(Paragraph('Los mensajes y los avisos', H1))
+d.append(Paragraph('Lo que se agrego al final, y es lo que mas cambia el dia a dia.', SUB))
+
+d.append(Paragraph('El paciente ahora te puede escribir', H2))
+d.append(Paragraph('Al lado de cada ejercicio tiene un boton de consultar. Lo que escribe '
+                   'queda pegado a ESE ejercicio, asi sabes exactamente de cual habla. '
+                   'No es un chat suelto.', P))
+d.append(Paragraph('Lo ves en tres lugares: en el aviso del panel, en el padron con un '
+                   'cartelito rojo, y desde la ficha de la lesion.', P))
+d.append(caja('<b>El portal le dice al paciente que respondes antes de su proximo turno, '
+              'y que esto NO es una guardia.</b> Sin eso, un chat es una trampa: el paciente '
+              'escribe a las tres de la mañana creyendo que alguien lo lee.', AMBAR, '#FBF3E6'))
+d.append(Spacer(1, 6 * mm))
+
+d.append(Paragraph('Los avisos del panel', H2))
+d.append(Paragraph('Arriba de todo, antes que los turnos. Cruzan solos tres cosas que ya se '
+                   'cargan todos los dias: el dolor de cada sesion, si hizo o no sus '
+                   'ejercicios, y los mensajes sin responder.', P))
+d.append(tabla(['Cuando salta', 'Que te dice que hagas'], [
+    ['El dolor le sube tres sesiones seguidas', 'Bajarle la carga antes de seguir.'],
+    ['Termina peor de como llega, dos veces', 'Revisar que se hace en sesion.'],
+    ['Hizo menos de la mitad de sus ejercicios', 'Preguntarle por que.'],
+    ['Hace cinco dias que no registra nada', 'Escribirle antes de que abandone.'],
+    ['Cumplio todos los criterios de la fase', 'Pasarlo a la siguiente.'],
+    ['Se paso de la fecha estimada de alta', 'Reestimarla y avisarle al entrenador.'],
+    ['Te escribio y no le respondiste', 'Responderle.'],
+], [72 * mm, 93 * mm]))
+d.append(Spacer(1, 5 * mm))
+d.append(Paragraph('Ninguna alerta dice solamente que algo anda mal: todas dicen que hacer. '
+                   'Un aviso sin accion es ruido.', CHICO))
+
+d.append(Paragraph('El turno', H2))
+d.append(Paragraph('El paciente ahora puede confirmar con "Ahi voy" o avisar que no puede. '
+                   'En tu agenda los confirmados salen marcados.', P))
+d.append(Paragraph('Y tenes un boton de <b>Recordar</b> que arma el mensaje y lo manda por '
+                   'WhatsApp de un toque. Solo aparece en los que todavia no confirmaron.', P))
+
+d.append(PageBreak())
+
 d.append(Paragraph('El pizarron de circuitos', H1))
 d.append(Paragraph('Para los trabajos de campo, en la cancha.', SUB))
 

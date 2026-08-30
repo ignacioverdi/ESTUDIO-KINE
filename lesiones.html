@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="ficha">
 <div class="hoja">
@@ -80,6 +80,8 @@ function pintar(){
       }).join('')
     + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">'
     + '<button class="bt" ' + (faltanC ? 'disabled' : '') + ' onclick="avanzar()">Pasar a fase ' + sigue + '</button>'
+    + '<button class="bt hueco" onclick="abrirConversacion(\'' + L.pid + '\')">Mensajes'
+    + (sinLeer(L.pid) ? ' (' + sinLeer(L.pid) + ')' : '') + '</button>'
     + '<a class="bt neutro" href="historia.html?p=' + L.pid + '" style="text-decoration:none">Historia clínica</a>'
     + '</div></div>'
     /* mecanismo */

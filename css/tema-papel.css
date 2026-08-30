@@ -11,7 +11,7 @@
   --acc-texto:#1D3E6E; --sobre-acc:#FFFFFF;
   --verde:#2E7D4F; --verde-suave:#E4F1E9; --verde-borde:#BCDCC9;
   --ambar:#8A5A11; --ambar-suave:#FAEFDD; --ambar-borde:#E8CFA4;
-  --rojo:#AE3226;  --rojo-suave:#F9E6E3;  --rojo-borde:#EBBFB9;
+  --rojo:#AE3226; --sobre-rojo:#FFFFFF;  --rojo-suave:#F9E6E3;  --rojo-borde:#EBBFB9;
   --tit:'Space Grotesk',system-ui,sans-serif; --txt:'IBM Plex Sans',system-ui,sans-serif;
   --dat:'IBM Plex Mono',ui-monospace,monospace;
   --tit-tam:27px; --tit-peso:700; --tit-track:-.6px; --sub-track:-.2px; --tit-caja:none;

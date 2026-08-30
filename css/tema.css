@@ -20,7 +20,7 @@
 
   --verde:#3BE08A; --verde-suave:rgba(59,224,138,.11); --verde-borde:rgba(59,224,138,.36);
   --ambar:#FFB531; --ambar-suave:rgba(255,181,49,.11); --ambar-borde:rgba(255,181,49,.36);
-  --rojo:#FF5C57;  --rojo-suave:rgba(255,92,87,.11);   --rojo-borde:rgba(255,92,87,.36);
+  --rojo:#FF5C57; --sobre-rojo:#FFFFFF;  --rojo-suave:rgba(255,92,87,.11);   --rojo-borde:rgba(255,92,87,.36);
 
   --tit:'Rajdhani',system-ui,sans-serif; --txt:'IBM Plex Sans',system-ui,sans-serif;
   --dat:'JetBrains Mono',ui-monospace,monospace;

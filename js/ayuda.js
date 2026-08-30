@@ -30,11 +30,12 @@ var AYUDA = {
     titulo: 'El panel del estudio',
     que_es: 'Lo primero que abrís a la mañana: qué hay que resolver hoy y cómo está el plantel.',
     pasos: [
-      ['Turnos de hoy', 'Los del día en orden. Tocá uno ocupado y se abre la ficha de esa persona.'],
+      ['Para mirar hoy', 'Lo primero de la pantalla. Cruza el dolor, los ejercicios que hizo y los mensajes sin responder. Cada aviso dice qué hacer, no solo qué pasa.'],
+      ['Turnos de hoy', 'Los del día en orden. Tocá uno pendiente y se abre todo el flujo de atención.'],
       ['En tratamiento', 'Las lesiones abiertas, con la barra de fase y cuántos criterios lleva cumplidos.'],
       ['Parte médico', 'El plantel entero con su semáforo. Verde disponible, ámbar limitado, rojo de baja.']
     ],
-    ojo: 'El parte médico es lo ÚNICO que ve el cuerpo técnico. El diagnóstico no aparece ahí a propósito: es un dato de salud y el entrenador no lo necesita para armar el equipo.'
+    ojo: 'Las alertas se calculan solas con lo que ya se carga todos los días. Si el dolor de alguien sube tres sesiones seguidas, te enterás antes de que te lo cuente. El parte médico es lo ÚNICO que ve el cuerpo técnico. El diagnóstico no aparece ahí a propósito: es un dato de salud y el entrenador no lo necesita para armar el equipo.'
   },
 
   ficha: {
@@ -57,7 +58,8 @@ var AYUDA = {
       ['Elegí el día', 'Con las pestañas de arriba.'],
       ['Un turno ocupado', 'Si sos el kine, se abre la ficha. Si sos jugador, solo ves el tuyo.'],
       ['Un turno libre', 'El kine lo asigna a un dorsal. El jugador lo reserva para él.'],
-      ['El horario del estudio', 'Abajo, solo para el kine. Cambia la grilla de toda la semana.']
+      ['El horario del estudio', 'Abajo, solo para el kine. Cambia la grilla de toda la semana.'],
+      ['Recordarle el turno', 'Botón "Recordar": arma el mensaje y lo manda por WhatsApp de un toque. Los que ya confirmaron no lo muestran.']
     ],
     ojo: 'El jugador ve "ocupado" en los turnos de otros, nunca de quién son. No tiene por qué saber quién más se está tratando.'
   },
@@ -69,7 +71,9 @@ var AYUDA = {
       ['Dónde estás', 'La barra de cinco tramos. Abajo dice exactamente qué te falta para pasar a la siguiente.'],
       ['Tu turno', 'El próximo que tenés reservado. Se cambia desde la agenda.'],
       ['Tus ejercicios', 'Tildá cada uno cuando lo hacés. Si no te acordás cómo era, tocá "ver video".'],
-      ['Enviá al final', 'Marcá cuánto te dolió y qué tan exigente fue, y mandá.']
+      ['Enviá al final', 'Marcá cuánto te dolió y qué tan exigente fue, y mandá.'],
+      ['Si algo te duele, escribí', 'Al lado de cada ejercicio hay un botón de consultar. Lo que escribas queda pegado a ESE ejercicio, así Vero sabe exactamente de cuál hablás.'],
+      ['Confirmá el turno', 'Con "Ahí voy". Y si no vas a poder, avisá con tiempo: el turno se lo damos a otro.']
     ],
     ojo: 'Contestá con la verdad, aunque te haya dolido. Si decís que estuvo todo bien y no fue así, la carga de mañana se calcula mal y volvés para atrás.'
   },

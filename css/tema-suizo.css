@@ -20,7 +20,7 @@
 
   --verde:#5BD98A; --verde-suave:rgba(91,217,138,.1); --verde-borde:rgba(91,217,138,.34);
   --ambar:#FFC048; --ambar-suave:rgba(255,192,72,.1); --ambar-borde:rgba(255,192,72,.34);
-  --rojo:#FF6B62;  --rojo-suave:rgba(255,107,98,.1);  --rojo-borde:rgba(255,107,98,.34);
+  --rojo:#FF6B62; --sobre-rojo:#FFFFFF;  --rojo-suave:rgba(255,107,98,.1);  --rojo-borde:rgba(255,107,98,.34);
 
   --tit:'Archivo',system-ui,sans-serif; --txt:'Inter',system-ui,sans-serif;
   --dat:'Space Mono',ui-monospace,monospace;

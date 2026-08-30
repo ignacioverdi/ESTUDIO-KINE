@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="pacientes">
 <div class="hoja">
@@ -109,7 +109,9 @@ function pintar(){
   document.getElementById('lista').innerHTML = l.length
     ? l.map(function(p){
         var L = lesionesDe(p);
-        var marca = p.estado === 'pendiente' ? '<span class="pin limitado">sin atender</span>'
+        var nm = sinLeer(p.id);
+        var marca = nm ? '<span class="pin ausente">' + nm + ' sin leer</span>'
+                  : p.estado === 'pendiente' ? '<span class="pin limitado">sin atender</span>'
                   : (L ? '<span class="pin reservado">en tratamiento</span>'
                        : '<span class="pin gris">al día</span>');
         return '<button class="fila" onclick="abrir(\'' + p.id + '\')">'
@@ -157,6 +159,8 @@ function abrir(id){
     + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">'
     + (L ? '<a class="bt" href="lesiones.html?f=' + L.id + '" style="text-decoration:none">Ver su ficha</a>'
          : '<button class="bt" onclick="abrirLesion(\'' + p.id + '\')">Abrir una lesión</button>')
+    + '<button class="bt hueco" onclick="abrirConversacion(\'' + p.id + '\')">Mensajes'
+    + (sinLeer(p.id) ? ' (' + sinLeer(p.id) + ' sin leer)' : '') + '</button>'
     + '<a class="bt neutro" href="agenda.html" style="text-decoration:none">Darle un turno</a>'
     + '<button class="bt neutro" onclick="cerrar()">Cerrar</button>'
     + '</div></div>';
