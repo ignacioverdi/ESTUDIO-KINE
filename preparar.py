@@ -34,13 +34,14 @@ for _f in (_sys.stdout, _sys.stderr):
 import hashlib, io, re, subprocess, sys, os
 
 
-def huella_actual(archivos):
-    """Una sola firma de todo lo que el sw entrega. Si cambia un byte
-       de cualquier archivo, cambia la firma."""
+def huella_actual(archivos, extra=''):
+    """Una sola firma de todo lo que el sw entrega, mas la logica del
+       propio sw. Si cambia un byte de cualquiera, cambia la firma."""
     h = hashlib.sha1()
     for a in sorted(archivos):
         if os.path.exists(a):
             h.update(io.open(a, 'rb').read())
+    h.update(extra.encode('utf-8'))
     return h.hexdigest()[:12]
 
 
@@ -48,7 +49,16 @@ def actualizar_version():
     sw = io.open('sw.js', encoding='utf-8').read()
 
     archivos = re.findall(r"^\s*'([^']+)',?\s*$", sw, re.M)
-    nueva = huella_actual(archivos)
+
+    # El propio sw.js tambien cuenta. Si cambia SU LOGICA (no solo los
+    # archivos que guarda), la version tiene que subir igual: si no, el
+    # navegador se queda con el service worker viejo para siempre.
+    # Ya paso una vez: un sw roto dejaba el portal sin abrir en iPhone.
+    # Se le sacan las lineas de VERSION y de huella para no morderse la cola.
+    propio = re.sub(r"var VERSION = '[^']*';", '', sw)
+    propio = re.sub(r'/\* huella: [a-f0-9]+ \*/', '', propio)
+
+    nueva = huella_actual(archivos, propio)
 
     m = re.search(r'/\* huella: ([a-f0-9]+) \*/', sw)
     vieja = m.group(1) if m else None

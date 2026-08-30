@@ -14,7 +14,7 @@
    volverte loco preguntándote por qué no se ve el cambio.
    ══════════════════════════════════════════════════════════════════════ */
 
-var VERSION = 'estudio-v34';
+var VERSION = 'estudio-v35';
 
 var ARCHIVOS = [
   'index.html',
@@ -47,11 +47,29 @@ var ARCHIVOS = [
   'img/icono-512.png'
 ];
 
+/* Safari rechaza cualquier respuesta que el service worker devuelva si esa
+   respuesta vino de una redirección: falla con "Response served by service
+   worker has redirections" y la página no abre. Chrome lo tolera; Safari no.
+
+   Por eso toda respuesta se vuelve a armar antes de guardarla o devolverla:
+   mismo contenido, misma cabecera, sin la marca de redirección.            */
+function limpiar(r){
+  if(!r || !r.redirected) return Promise.resolve(r);
+  return r.blob().then(function(b){
+    return new Response(b, {status:r.status, statusText:r.statusText, headers:r.headers});
+  });
+}
+
 self.addEventListener('install', function(e){
   e.waitUntil(
-    caches.open(VERSION)
-      .then(function(c){ return c.addAll(ARCHIVOS); })
-      .then(function(){ return self.skipWaiting(); })
+    caches.open(VERSION).then(function(c){
+      return Promise.all(ARCHIVOS.map(function(u){
+        return fetch(u, {cache:'reload'})
+          .then(limpiar)
+          .then(function(r){ if(r && r.ok) return c.put(u, r); })
+          .catch(function(){});          /* si uno falla, el resto se guarda igual */
+      }));
+    }).then(function(){ return self.skipWaiting(); })
   );
 });
 
@@ -79,12 +97,12 @@ self.addEventListener('fetch', function(e){
 
   e.respondWith(
     caches.match(e.request).then(function(guardado){
-      if(guardado) return guardado;
-      return fetch(e.request).catch(function(){
-        return caches.match('index.html');
+      if(guardado) return limpiar(guardado);
+      return fetch(e.request).then(limpiar).catch(function(){
+        return caches.match('index.html').then(limpiar);
       });
     })
   );
 });
 
-/* huella: 45efdf1a4d5e */
+/* huella: 08adae199279 */

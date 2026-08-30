@@ -88,6 +88,8 @@ INVENTARIO = [
     ('INVESTIGACION.md','Que le falta al portal: obligaciones legales, evidencia clinica y competencia.', False),
     ('INSTALAR_DESDE_CERO.pdf','La guia imprimible para una PC en blanco. Se genera con armar_pdf.py.', False),
     ('armar_pdf.py',    'Genera la guia en PDF para instalar desde cero.', False),
+    ('COMO_SE_USA.pdf', 'El manual de uso del portal para el kinesiologo.', False),
+    ('manual_pdf.py',   'Genera el manual de uso. Correlo si cambia alguna pantalla.', False),
     ('ABRIR.bat',       'EL DE TODOS LOS DIAS. Prepara, abre el portal y se cierra solo.', False),
     ('PROBAR_COMO_APP.bat','Solo para probar sin internet y la instalacion como app.', False),
     ('CREAR_ACCESO_DIRECTO.bat','Deja el icono del portal en el escritorio del kinesiologo.', False),
@@ -96,6 +98,7 @@ INVENTARIO = [
     ('auditar.py',      'Revisa el PROYECTO: enlaces rotos, archivos que faltan, claves expuestas.', False),
     ('medir_pantallas.py','Revisa el portal en celular, tablet y monitor: desbordes y botones chicos.', False),
     ('probar_qr.py',    'Genera codigos QR y los LEE con un lector, para probar que sirven.', False),
+    ('probar_sw.py',    'Comprueba que el portal abra aunque el servidor redirija (el fallo de Safari).', False),
 
     ('videos/LEEME.txt','Los videos NO van al repo: pesan. Van a un hosting y acá queda el enlace.', False),
     ('ARMAR_DESDE_CERO.md', 'Esta guía: qué tiene que haber, en qué orden y qué no subir nunca.', False),
