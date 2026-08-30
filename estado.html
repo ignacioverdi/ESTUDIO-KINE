@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Estado del portal</title>
+<style>
+  /* Sin hoja de estilo externa, sin fuentes de internet, sin ningun
+     archivo aparte. Esta pagina TIENE que abrir aunque todo lo demas
+     este roto: es la que dice QUE esta roto. */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#05070B;color:#E4F2F8;font-family:-apple-system,system-ui,sans-serif;
+    font-size:16px;line-height:1.5;padding:20px 16px 60px}
+  h1{font-size:24px;margin-bottom:4px}
+  .sub{color:#8FA6B4;font-size:14px;margin-bottom:20px}
+  .caja{border:1px solid rgba(120,200,225,.2);border-radius:8px;padding:14px;margin-bottom:14px;
+    background:#0C1016}
+  .caja h2{font-size:15px;color:#00D8E8;margin-bottom:10px;text-transform:uppercase;
+    letter-spacing:1px}
+  .fila{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid rgba(120,200,225,.1);
+    font-size:14px;align-items:flex-start}
+  .fila:last-child{border:none}
+  .fila .q{flex:1;min-width:0;word-break:break-word}
+  .ok{color:#3BE08A;font-weight:600;white-space:nowrap}
+  .mal{color:#FF5C57;font-weight:600;white-space:nowrap}
+  .dato{font-family:ui-monospace,monospace;font-size:13px;color:#8FA6B4;word-break:break-all}
+  .grande{font-family:ui-monospace,monospace;font-size:19px;color:#00D8E8;
+    padding:10px;background:rgba(0,216,232,.08);border-radius:6px;text-align:center;
+    margin:8px 0;word-break:break-all}
+  button{width:100%;padding:15px;margin-top:8px;border-radius:8px;border:1px solid #00D8E8;
+    background:#00D8E8;color:#03161A;font-size:15px;font-weight:700;cursor:pointer}
+  button.gris{background:transparent;color:#00D8E8}
+  .aviso{background:rgba(255,181,49,.12);border:1px solid rgba(255,181,49,.4);color:#FFB531;
+    border-radius:8px;padding:12px;font-size:14px;margin-bottom:14px}
+</style>
+</head>
+<!-- PANTALLA PUBLICA — suelta a proposito. No carga estilos, ni codigo,
+     ni menu: tiene que abrir aunque todo lo demas este roto, porque es
+     la que dice QUE esta roto. -->
+<body data-pag="estado">
+
+<h1>Estado del portal</h1>
+<p class="sub">Esta pantalla dice si el portal esta bien y, si no lo esta, por que.
+Sacale una foto y mandala.</p>
+
+<div class="caja">
+  <h2>Que version estas viendo</h2>
+  <div class="grande" id="version">…</div>
+  <p style="font-size:13px;color:#8FA6B4">Si este numero no cambia despues de publicar,
+  el problema no es el codigo: lo que subiste no llego al sitio.</p>
+</div>
+
+<div class="caja">
+  <h2>Donde estas parado</h2>
+  <div id="donde"></div>
+</div>
+
+<div class="caja">
+  <h2>Los archivos del portal</h2>
+  <div id="archivos">Probando…</div>
+</div>
+
+<div class="caja">
+  <h2>Las pantallas</h2>
+  <div id="pantallas">Probando…</div>
+</div>
+
+<div class="caja">
+  <h2>Lo que quedo guardado en el telefono</h2>
+  <div id="guardado"></div>
+  <button onclick="limpiarTodo()">Borrar todo lo guardado y recargar</button>
+  <p style="font-size:13px;color:#8FA6B4;margin-top:8px">Si el portal no abre, este boton
+  es lo primero que hay que probar. Borra lo que el navegador guardo de versiones
+  anteriores. No borra ningun dato de pacientes del servidor.</p>
+</div>
+
+<button class="gris" onclick="location.href='index.html'">Ir al portal</button>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   La version se cambia en UN solo lugar y se ve en pantalla. Es la
+   unica forma de saber, sin adivinar, si lo que se publico llego.
+   ══════════════════════════════════════════════════════════════════ */
+var VERSION = '2026-08-30-a';
+
+document.getElementById('version').textContent = VERSION;
+
+function linea(txt, bien, extra){
+  return '<div class="fila"><span class="q">' + txt
+       + (extra ? '<br><span class="dato">' + extra + '</span>' : '') + '</span>'
+       + '<span class="' + (bien ? 'ok' : 'mal') + '">' + (bien ? 'OK' : 'FALLA') + '</span></div>';
+}
+
+/* Donde esta parado */
+(function(){
+  var d = '';
+  d += '<div class="fila"><span class="q">Direccion<br><span class="dato">'
+     + location.href + '</span></span></div>';
+  d += '<div class="fila"><span class="q">Navegador<br><span class="dato">'
+     + navigator.userAgent.slice(0, 90) + '</span></span></div>';
+  d += '<div class="fila"><span class="q">Ancho de pantalla<br><span class="dato">'
+     + window.innerWidth + ' px</span></span></div>';
+  d += linea('Conexion a internet', navigator.onLine);
+  document.getElementById('donde').innerHTML = d;
+})();
+
+/* Cada archivo que el portal necesita */
+var ARCHIVOS = ['css/tema.css', 'css/estudio.css', 'js/datos.js', 'js/plantillas.js',
+                'js/qr.js', 'js/historia.js', 'js/dinero.js', 'js/atender.js',
+                'js/base.js', 'js/ayuda.js', 'manifest.json'];
+
+var PANTALLAS = ['index.html', 'panel.html', 'agenda.html', 'lesiones.html',
+                 'pacientes.html', 'historia.html', 'programa.html', 'caja.html',
+                 'perfil.html', 'cartel.html', 'mi.html', 'diario.html',
+                 'alta.html', 'pizarron.html', 'ejercicios.html'];
+
+function probar(lista, donde, alTerminar){
+  var html = '', pendientes = lista.length, malos = 0;
+  lista.forEach(function(a, i){
+    fetch(a + '?t=' + Date.now(), {cache: 'no-store'})
+      .then(function(r){
+        var bien = r.ok && !r.redirected;
+        if(!bien) malos++;
+        lista[i] = {a: a, bien: bien,
+                    detalle: 'respondio ' + r.status + (r.redirected ? ', REDIRIGIDO' : '')};
+      })
+      .catch(function(e){
+        malos++;
+        lista[i] = {a: a, bien: false, detalle: 'no se pudo pedir: ' + e.message};
+      })
+      .then(function(){
+        if(--pendientes === 0){
+          lista.forEach(function(x){
+            html += linea(x.a, x.bien, x.bien ? null : x.detalle);
+          });
+          document.getElementById(donde).innerHTML = html;
+          if(alTerminar) alTerminar(malos);
+        }
+      });
+  });
+}
+
+probar(ARCHIVOS, 'archivos');
+probar(PANTALLAS, 'pantallas');
+
+/* Lo que el navegador guardo de antes: la causa mas comun de que no abra */
+function verGuardado(){
+  var d = '';
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      var g = '';
+      g += linea('Sin programas viejos instalados', regs.length === 0,
+                 regs.length ? 'hay ' + regs.length + ' instalados. Toca el boton de abajo.' : null);
+      if('caches' in window){
+        caches.keys().then(function(c){
+          g += linea('Sin copias viejas guardadas', c.length === 0,
+                     c.length ? c.join(', ') : null);
+          document.getElementById('guardado').innerHTML = g;
+        });
+      }else{
+        document.getElementById('guardado').innerHTML = g;
+      }
+    }).catch(function(){
+      document.getElementById('guardado').innerHTML =
+        '<div class="fila"><span class="q">No se pudo revisar</span></div>';
+    });
+  }else{
+    document.getElementById('guardado').innerHTML =
+      linea('Este navegador no guarda programas', true);
+  }
+}
+verGuardado();
+
+function limpiarTodo(){
+  var pasos = [];
+  if('serviceWorker' in navigator){
+    pasos.push(navigator.serviceWorker.getRegistrations().then(function(rs){
+      return Promise.all(rs.map(function(r){ return r.unregister(); }));
+    }));
+  }
+  if('caches' in window){
+    pasos.push(caches.keys().then(function(c){
+      return Promise.all(c.map(function(k){ return caches.delete(k); }));
+    }));
+  }
+  try{ localStorage.clear(); sessionStorage.clear(); }catch(e){}
+  Promise.all(pasos).catch(function(){}).then(function(){
+    location.reload(true);
+  });
+}
+</script>
+</body></html>

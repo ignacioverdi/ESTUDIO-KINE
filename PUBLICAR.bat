@@ -92,7 +92,22 @@ if errorlevel 1 (
 
 echo.
 echo  ═══════════════════════════════════════════════════════════
-echo   LISTO. Vercel publica solo en un minuto.
+echo   SUBIDO A GITHUB.
 echo  ═══════════════════════════════════════════════════════════
+echo.
+echo   FALTA UN PASO Y ES IMPORTANTE.
+echo.
+echo   Que GitHub lo reciba NO significa que el sitio se actualice.
+echo   Vercel puede rechazar la publicacion y seguir mostrando la
+echo   version vieja sin avisar nada. Ya paso: cinco horas publicando
+echo   sin que cambiara nada.
+echo.
+echo   Te abro la pagina donde se ve. Fijate el de arriba de todo:
+echo.
+echo     Ready  = listo, el sitio ya tiene lo nuevo
+echo     Error  = NO se publico. Tocalo y mira el motivo.
+echo.
+timeout /t 3 >nul
+start "" https://vercel.com/ignacio-verdi-s-projects/estudio-kine/deployments
 echo.
 pause

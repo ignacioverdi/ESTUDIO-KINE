@@ -133,6 +133,8 @@ def main():
         faltantes = []
         for p2 in PANTALLAS:
             h = open(p2, encoding='utf-8').read()
+            if 'PANTALLA PUBLICA' in h:   # suelta a proposito, no lleva nada
+                continue
             for etiqueta in ['apple-touch-icon', 'apple-mobile-web-app-capable',
                              'apple-mobile-web-app-title', 'viewport-fit=cover']:
                 if etiqueta not in h:

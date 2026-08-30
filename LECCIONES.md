@@ -27,8 +27,9 @@
 | El auditor avisó 11 veces de mentira | Windows usa `\` y el HTML `/` |
 | El menú del celular estaba al final de la página | Lo probé en el archivo único, no en el real |
 | Tocar el turno no hacía nada, sin avisar | La agenda de ejemplo no tenía el paciente |
+| **Cinco horas publicando sin que cambiara nada** | **Un comentario mío adentro de `vercel.json`** |
 
-**Quince errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Dieciséis errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---
@@ -68,6 +69,20 @@ Cada una se arregló igual: en vez de escribir la lista, leer la carpeta.
 
 **Si algo se puede deducir, se deduce. Una lista a mano es una promesa de
 olvidarse.**
+
+### 3b. Los archivos de configuración no aceptan comentarios
+
+Le puse un comentario adentro de `vercel.json` explicando por qué no había que
+volver a activar las URLs limpias. Vercel rechaza cualquier propiedad que no
+conoce, así que **rechazó todas las publicaciones durante cinco horas** y siguió
+mostrando la versión vieja sin avisar.
+
+Fue el error más caro de todos, y el más tonto: un comentario bienintencionado.
+
+**Un error que no se ve es peor que uno que revienta.** `PUBLICAR.bat` decía
+"LISTO" cuando lo único listo era la subida a GitHub. Ahora abre la pantalla de
+Vercel para que se vea si dice Ready o Error, y el auditor revisa `vercel.json`
+antes de dejar publicar.
 
 ### 4. Probar donde se usa, no donde se programa
 

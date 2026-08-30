@@ -6,6 +6,18 @@
    solo lugar y no en nueve.
    ══════════════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════════
+   LA VERSION, A LA VISTA
+
+   Sin esto no habia forma de saber si lo que se publicaba llegaba al
+   sitio o el navegador seguia mostrando algo viejo. Se pasaron horas
+   arreglando a ciegas por no tener este numero en pantalla.
+
+   Se cambia aca y en estado.html, y tiene que coincidir con lo que se
+   ve arriba a la derecha del portal.
+   ══════════════════════════════════════════════════════════════════ */
+var VERSION_PORTAL = '2026-08-30-a';
+
 var MENU = {
   kine: [
     {id:'panel',      t:'Panel',       ic:'▤', a:'panel.html'},
@@ -48,7 +60,10 @@ function armarCabecera(){
     '<div class="top-in">'
     + '<a class="marca" href="index.html"><span class="sig"></span>'
     + '<span><b>ESTUDIO</b><span>Kinesiología del club</span></span></a>'
-    + '<div class="quien"><span class="av">' + quien.ini + '</span>' + quien.txt + '</div>'
+    + '<div class="quien"><a href="estado.html" title="Estado del portal" '
+    + 'style="color:var(--tinta3);text-decoration:none;font-size:10px;letter-spacing:.5px">v'
+    + VERSION_PORTAL + '</a>'
+    + '<span class="av">' + quien.ini + '</span>' + quien.txt + '</div>'
     + '<div class="quien" style="margin-left:0">' + botonAyuda(pag) + '</div>'
     + '</div>';
 

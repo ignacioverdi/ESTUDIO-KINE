@@ -121,25 +121,19 @@ document.getElementById('plantel').innerHTML = BASE.plantel.map(function(j){
 pintar();
 </script>
 <script>
-/* SALIDA DE EMERGENCIA.
-   Una version anterior guardaba el portal para que anduviera sin internet.
-   Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
-   quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
-   Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
-   habia guardado, y recarga una sola vez para que se vea la version
-   nueva. Despues no vuelve a hacer nada.
-   Se puede sacar dentro de unos meses, cuando ya no queden telefonos
-   con la version vieja. */
+/* Desinstala cualquier programa que haya quedado de versiones anteriores.
+   Uno viejo guardaba el portal para funcionar sin internet y rompia
+   Safari: la pagina directamente no abria. Como ademas quedaba instalado
+   en el telefono, el arreglo no llegaba nunca. */
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(regs){
-    if(!regs.length) return;
-    Promise.all(regs.map(function(r){ return r.unregister(); }))
+  navigator.serviceWorker.getRegistrations().then(function(r){
+    if(!r.length) return;
+    Promise.all(r.map(function(x){ return x.unregister(); }))
       .then(function(){ return caches.keys(); })
       .then(function(c){ return Promise.all(c.map(function(k){ return caches.delete(k); })); })
       .then(function(){
-        if(!sessionStorage.getItem('sw_limpio')){
-          sessionStorage.setItem('sw_limpio', '1');
-          location.reload();
+        if(!sessionStorage.getItem('limpio')){
+          sessionStorage.setItem('limpio','1'); location.reload();
         }
       }).catch(function(){});
   }).catch(function(){});

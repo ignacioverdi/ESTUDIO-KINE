@@ -34,6 +34,12 @@ import os
 #  Cada vez que algo se reemplaza, se suma una linea aca.
 # ══════════════════════════════════════════════════════════════════════
 SOBRAN = [
+    ('sw.js',
+     'Guardaba el portal para andar sin internet. Rompia Safari: no abria.',
+     'Nada. El portal se usa con internet.'),
+    ('vercel.json',
+     'Tenia cleanUrls, que redirigia y rompia Safari.',
+     'Nada. Vercel funciona igual sin ese archivo.'),
     ('ESTUDIO.html',
      'El archivo unico. Era una segunda aplicacion y de ahi salieron cinco errores.',
      'Se usa el portal publicado.'),
@@ -85,7 +91,7 @@ SOBRAN = [
 ]
 
 # Nunca, bajo ninguna circunstancia.
-INTOCABLES = {'index.html', 'sw.js', 'manifest.json', 'config.json', 'vercel.json',
+INTOCABLES = {'index.html', 'estado.html', 'manifest.json', 'config.json', 'vercel.json',
               '.gitattributes', '.gitignore',
               'auditar.py', 'probar.py', 'armar_pdf.py', 'manual_pdf.py', 'limpiar.py',
               'ABRIR.bat', 'PUBLICAR.bat', 'CREAR_ACCESO_DIRECTO.bat', 'LIMPIAR.bat'}

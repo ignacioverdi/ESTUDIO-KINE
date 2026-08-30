@@ -75,7 +75,7 @@ def todas_cargan_lo_comun():
                             ('js/dinero.js', 'no sabe de planes ni de caja'),
                             ('js/base.js', 'queda sin encabezado ni menú'),
                             ('js/ayuda.js', 'se queda sin el botón ?')]:
-            if publica and req == 'js/base.js':
+            if publica:          # una pagina suelta no carga nada a proposito
                 continue
             if req not in s:
                 ROTO.append('%s no carga %s: %s' % (p, req, porque))
@@ -150,7 +150,7 @@ def archivos_huerfanos():
         return x.replace('\\', '/').lstrip('./')
 
     usados = set()
-    for p in PANTALLAS + glob.glob('js/*.js') + glob.glob('css/*.css') + ['sw.js']:
+    for p in PANTALLAS + glob.glob('js/*.js') + glob.glob('css/*.css'):
         if not os.path.exists(p):
             continue
         s2 = leer(p)
@@ -159,6 +159,39 @@ def archivos_huerfanos():
     for f in glob.glob('js/*.js') + glob.glob('css/*.css'):
         if barras(f) not in usados and 'tema-' not in f and 'firebase' not in f:
             AVISO.append('%s no lo usa ninguna pantalla' % barras(f))
+
+
+def config_de_vercel():
+    """vercel.json no acepta propiedades que no conoce.
+
+    Un comentario explicativo adentro de ese archivo hizo que TODAS las
+    publicaciones fallaran durante cinco horas. Vercel las rechazaba y
+    seguia sirviendo la version vieja, sin nada visible: uno publicaba,
+    decia LISTO, y el sitio no cambiaba.
+
+    Lo mas barato es no tener el archivo: sin vercel.json, Vercel usa lo
+    que viene por defecto, que es exactamente lo que este portal necesita.
+    """
+    if not os.path.exists('vercel.json'):
+        return
+    permitidas = {
+        'buildCommand', 'cleanUrls', 'devCommand', 'framework', 'functions',
+        'headers', 'ignoreCommand', 'images', 'installCommand', 'outputDirectory',
+        'public', 'redirects', 'regions', 'rewrites', 'trailingSlash', 'crons',
+        'git', 'github', 'installCommand', '$schema'
+    }
+    try:
+        import json
+        cfg = json.loads(leer('vercel.json'))
+    except Exception as e:
+        ROTO.append('vercel.json no es JSON valido: %s. Vercel va a rechazar la publicacion.' % e)
+        return
+    for k in cfg:
+        if k not in permitidas:
+            ROTO.append('vercel.json tiene "%s", que Vercel no acepta. '
+                        'La publicacion va a fallar y el sitio se queda en la version vieja.' % k)
+    if cfg.get('cleanUrls'):
+        ROTO.append('vercel.json tiene cleanUrls activado: redirige y rompe Safari.')
 
 
 def secretos_a_la_vista():
@@ -202,7 +235,7 @@ def lo_que_falta_hacer():
 def main():
     for f in [enlaces_rotos, archivos_que_pide_cada_pantalla, todas_cargan_lo_comun,
               cada_pantalla_tiene_ayuda, componentes_sin_color_propio, temas_completos,
-              archivos_huerfanos, sobras, secretos_a_la_vista, js_balanceado,
+              archivos_huerfanos, sobras, config_de_vercel, secretos_a_la_vista, js_balanceado,
               lo_que_falta_hacer]:
         f()
 
