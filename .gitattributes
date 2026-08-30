@@ -1,0 +1,20 @@
+# ══════════════════════════════════════════════════════════════════════
+#  Windows y Linux terminan las lineas distinto. Sin este archivo, Git
+#  avisa "LF will be replaced by CRLF" por CADA archivo en cada subida:
+#  cuarenta lineas de ruido que tapan lo que importa. Y ademas marca
+#  como modificados archivos que nadie toco.
+#
+#  Con esto se guardan siempre igual y los avisos desaparecen.
+# ══════════════════════════════════════════════════════════════════════
+
+* text=auto eol=lf
+
+# Los .bat son de Windows: si se guardan con finales de Linux, algunas
+# versiones de Windows no los ejecutan bien.
+*.bat text eol=crlf
+
+# Binarios: Git no los toca.
+*.png binary
+*.pdf binary
+*.jpg binary
+*.zip binary

@@ -127,7 +127,9 @@ def sobras():
         import limpiar
     except Exception:
         return
-    viejos = [n for n, _, _ in limpiar.SOBRAN if os.path.isfile(n)]
+    # El .ultimo_chequeo lo crea ABRIR.bat cada vez: no es una sobra.
+    viejos = [n for n, _, _ in limpiar.SOBRAN
+              if os.path.isfile(n) and not n.startswith('.ultimo')]
     if viejos:
         AVISO.append('sobran %d archivos viejos (%s...). Doble clic en LIMPIAR.bat'
                      % (len(viejos), ', '.join(viejos[:3])))
@@ -141,16 +143,22 @@ def archivos_huerfanos():
     agregaba una pantalla, el auditor se quejaba de la lista, no del
     codigo. Ahora se deduce mirando quien referencia a quien.
     """
+    # Windows devuelve js\base.js y el HTML dice js/base.js: sin unificar
+    # las barras no coinciden nunca y el auditor avisa de todo por las dudas.
+    # Solo se notaba en Windows, no en la maquina donde programo.
+    def barras(x):
+        return x.replace('\\', '/').lstrip('./')
+
     usados = set()
     for p in PANTALLAS + glob.glob('js/*.js') + glob.glob('css/*.css') + ['sw.js']:
         if not os.path.exists(p):
             continue
         s2 = leer(p)
-        for a in re.findall(r'["\'(]([\w./-]+\.(?:css|js|png|html|json))["\')]', s2):
-            usados.add(a.lstrip('./'))
+        for a in re.findall(r'["\'(]([\w./\\-]+\.(?:css|js|png|html|json))["\')]', s2):
+            usados.add(barras(a))
     for f in glob.glob('js/*.js') + glob.glob('css/*.css'):
-        if f not in usados and 'tema-' not in f and 'firebase' not in f:
-            AVISO.append('%s no lo usa ninguna pantalla' % f)
+        if barras(f) not in usados and 'tema-' not in f and 'firebase' not in f:
+            AVISO.append('%s no lo usa ninguna pantalla' % barras(f))
 
 
 def secretos_a_la_vista():

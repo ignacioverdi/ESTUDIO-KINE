@@ -24,9 +24,10 @@
 | El editor descartaba lo que escribías | Releía el estado en cada redibujado |
 | La ruta de firebase apuntaba a otro lado | Nadie lo verificaba |
 | Una pantalla sin encabezado ni menú | Nadie lo verificaba |
+| El auditor avisó 11 veces de mentira | Windows usa `\` y el HTML `/` |
 
-**Doce errores. Cinco salieron del archivo único, cuatro de agregar cosas que
-nadie pidió.**
+**Trece errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+nadie pidió, y dos de no probar en Windows.**
 
 ---
 
@@ -72,6 +73,11 @@ El error de los acentos solo aparece en Windows. El del iPhone solo en Safari.
 Ninguno de los dos se veía probando en Chrome sobre Linux.
 
 **Lo que no se probó en el aparato donde se va a usar, no está probado.**
+
+Volvió a pasar: el auditor avisaba once veces de que archivos que sí se usan no
+se usaban, porque Windows escribe las rutas con barra invertida y el HTML con
+barra normal. En mi máquina no se veía. Un auditor que avisa de más deja de
+leerse, que es peor que no tener auditor.
 Por eso conviene que cada cosa nueva la abra él en el iPhone antes de darla por
 buena: es el navegador más estricto y encuentra los errores primero.
 

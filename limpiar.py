@@ -86,6 +86,7 @@ SOBRAN = [
 
 # Nunca, bajo ninguna circunstancia.
 INTOCABLES = {'index.html', 'sw.js', 'manifest.json', 'config.json', 'vercel.json',
+              '.gitattributes', '.gitignore',
               'auditar.py', 'probar.py', 'armar_pdf.py', 'manual_pdf.py', 'limpiar.py',
               'ABRIR.bat', 'PUBLICAR.bat', 'CREAR_ACCESO_DIRECTO.bat', 'LIMPIAR.bat'}
 
