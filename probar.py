@@ -97,6 +97,26 @@ def main():
                 problemas += ['%s: %s' % (nom, e) for e in errs[:3]]
             pg.close()
 
+        print('\n  1b. EL MENU DEL CELULAR')
+        pg = b.new_page(viewport={'width':390,'height':844}, has_touch=True, is_mobile=True)
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(700)
+        pg.evaluate("ponerRol('kine')")
+        pg.goto(base + 'panel.html'); pg.wait_for_timeout(1000)
+        # No alcanza con que exista: tiene que verse SIN bajar la pagina.
+        # Estuvo al final del documento y nadie se dio cuenta.
+        y = pg.evaluate("(function(e){return e?Math.round(e.getBoundingClientRect().top):99999})"
+                        "(document.querySelector('.menu-movil'))")
+        arriba = y < 400
+        print('     el menu se ve sin bajar   :', arriba, '(a %d px)' % y)
+        if not arriba:
+            problemas.append('el menu del celular no se ve sin bajar la pagina')
+        pg.evaluate("if(typeof abrirMenu==='function') abrirMenu()"); pg.wait_for_timeout(400)
+        n_sec = pg.evaluate("document.querySelectorAll('#menuLista a').length")
+        print('     abre con                  :', n_sec, 'secciones')
+        if n_sec < 5:
+            problemas.append('el menu del celular no abre la lista')
+        pg.close()
+
         print('\n  2. CODIGOS QR')
         try:
             import cv2

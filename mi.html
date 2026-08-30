@@ -140,8 +140,31 @@ function enviar(){
 }
 </script>
 <script>
-/* Registra el sw para que el portal ande sin internet. Falla en silencio
-   si se abre con doble clic desde el disco: eso es normal. */
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+/* SALIDA DE EMERGENCIA.
+
+   Una version anterior guardaba el portal para que anduviera sin internet.
+   Eso rompia Safari: la pagina directamente no abria. Y lo peor es que
+   quedaba instalado en el telefono, asi que el arreglo no llegaba nunca.
+
+   Esto lo desinstala apenas se abre cualquier pantalla, borra lo que
+   habia guardado, y recarga una sola vez para que se vea la version
+   nueva. Despues no vuelve a hacer nada.
+
+   Se puede sacar dentro de unos meses, cuando ya no queden telefonos
+   con la version vieja. */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    if(!regs.length) return;
+    Promise.all(regs.map(function(r){ return r.unregister(); }))
+      .then(function(){ return caches.keys(); })
+      .then(function(c){ return Promise.all(c.map(function(k){ return caches.delete(k); })); })
+      .then(function(){
+        if(!sessionStorage.getItem('sw_limpio')){
+          sessionStorage.setItem('sw_limpio', '1');
+          location.reload();
+        }
+      }).catch(function(){});
+  }).catch(function(){});
+}
 </script>
 </body></html>

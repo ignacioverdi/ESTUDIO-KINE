@@ -77,10 +77,25 @@ function armarCabecera(){
       }).join('')
     + '</div>';
 
+  /* El orden importa y se arma de atras para adelante, porque cada uno
+     se mete ANTES del anterior:
+
+        cartel de demostracion
+        marca y boton de ayuda
+        fila de secciones        (solo en monitor)
+        menu desplegable         (solo en celular)
+        ...el contenido
+
+     El desplegable iba con appendChild, o sea al FINAL de la pagina,
+     debajo de todo el contenido: existia pero habia que bajar hasta el
+     fondo para encontrarlo. Antes era una barra fija abajo y daba igual
+     donde se insertara; al cambiarla por un desplegable, dejo de dar
+     igual y no me di cuenta. */
+  document.body.insertBefore(abajo, document.body.firstChild);
   document.body.insertBefore(nav, document.body.firstChild);
   document.body.insertBefore(top, document.body.firstChild);
-  if(typeof esDemo === 'function' && esDemo()) document.body.insertBefore(cartelDemo(), document.body.firstChild);
-  document.body.appendChild(abajo);
+  if(typeof esDemo === 'function' && esDemo())
+    document.body.insertBefore(cartelDemo(), document.body.firstChild);
 }
 
 function cartelDemo(){
