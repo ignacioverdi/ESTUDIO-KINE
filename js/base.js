@@ -58,12 +58,24 @@ function armarCabecera(){
       return '<a href="' + i.a + '"' + (i.id === pag ? ' class="on"' : '') + '>' + i.t + '</a>';
     }).join('') + '</div>';
 
-  var abajo = document.createElement('nav');
-  abajo.className = 'barra-abajo';
-  abajo.innerHTML = items.map(function(i){
-      return '<a href="' + i.a + '"' + (i.id === pag ? ' class="on"' : '') + '>'
-           + '<span class="ic">' + i.ic + '</span>' + i.t + '</a>';
-    }).join('');
+  /* En el celular la fila de once secciones no entra: hay que barrer de
+     costado para encontrar las del final. Se reemplaza por un boton que
+     abre la lista entera. En la computadora la fila se ve bien y queda. */
+  var actual = items.filter(function(i){ return i.id === pag; })[0] || items[0];
+  var abajo = document.createElement('div');
+  abajo.className = 'menu-movil';
+  abajo.innerHTML =
+    '<button class="menu-bt" onclick="abrirMenu()" aria-label="Menu">'
+    + '<span class="hamburguesa"><i></i><i></i><i></i></span>'
+    + '<span class="menu-actual">' + actual.t + '</span>'
+    + '<span class="menu-flecha">&#9662;</span></button>'
+    + '<div class="menu-lista" id="menuLista">'
+    + items.map(function(i){
+        return '<a href="' + i.a + '"' + (i.id === pag ? ' class="on"' : '') + '>'
+             + '<span class="ic">' + i.ic + '</span>' + i.t
+             + (i.id === pag ? '<span class="tilde">&#10003;</span>' : '') + '</a>';
+      }).join('')
+    + '</div>';
 
   document.body.insertBefore(nav, document.body.firstChild);
   document.body.insertBefore(top, document.body.firstChild);
@@ -79,6 +91,17 @@ function cartelDemo(){
     + '<a href="perfil.html">Vaciar y empezar</a>';
   return d;
 }
+
+function abrirMenu(){
+  var l = document.getElementById('menuLista');
+  if(l) l.classList.toggle('abierto');
+}
+/* Tocar fuera del menu lo cierra: si no, queda tapando la pantalla. */
+document.addEventListener('click', function(e){
+  var l = document.getElementById('menuLista');
+  if(l && l.classList.contains('abierto') && !e.target.closest('.menu-movil'))
+    l.classList.remove('abierto');
+});
 
 /* ── La pista de recuperación ──────────────────────────────────────
    El elemento firma del portal. Se usa igual en el panel, en la ficha

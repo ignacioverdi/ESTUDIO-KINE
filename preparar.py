@@ -34,50 +34,18 @@ for _f in (_sys.stdout, _sys.stderr):
 import hashlib, io, re, subprocess, sys, os
 
 
-def huella_actual(archivos, extra=''):
-    """Una sola firma de todo lo que el sw entrega, mas la logica del
-       propio sw. Si cambia un byte de cualquiera, cambia la firma."""
-    h = hashlib.sha1()
-    for a in sorted(archivos):
-        if os.path.exists(a):
-            h.update(io.open(a, 'rb').read())
-    h.update(extra.encode('utf-8'))
-    return h.hexdigest()[:12]
-
-
 def actualizar_version():
-    sw = io.open('sw.js', encoding='utf-8').read()
+    """Ya no hace falta.
 
-    archivos = re.findall(r"^\s*'([^']+)',?\s*$", sw, re.M)
+    Antes esto subia un numero de version en sw.js cada vez que cambiaba
+    un archivo, para obligar al navegador a soltar la copia guardada. El
+    service worker ya no guarda nada, asi que no hay copia vieja posible:
+    el navegador siempre trae lo ultimo.
 
-    # El propio sw.js tambien cuenta. Si cambia SU LOGICA (no solo los
-    # archivos que guarda), la version tiene que subir igual: si no, el
-    # navegador se queda con el service worker viejo para siempre.
-    # Ya paso una vez: un sw roto dejaba el portal sin abrir en iPhone.
-    # Se le sacan las lineas de VERSION y de huella para no morderse la cola.
-    propio = re.sub(r"var VERSION = '[^']*';", '', sw)
-    propio = re.sub(r'/\* huella: [a-f0-9]+ \*/', '', propio)
-
-    nueva = huella_actual(archivos, propio)
-
-    m = re.search(r'/\* huella: ([a-f0-9]+) \*/', sw)
-    vieja = m.group(1) if m else None
-
-    if vieja == nueva:
-        print('  Nada cambió. sw.js queda como está.')
-        return False
-
-    mv = re.search(r"var VERSION = 'estudio-v(\d+)';", sw)
-    n = int(mv.group(1)) + 1
-    sw = sw.replace(mv.group(0), "var VERSION = 'estudio-v%d';" % n)
-
-    marca = '/* huella: %s */' % nueva
-    sw = re.sub(r'/\* huella: [a-f0-9]+ \*/', marca, sw) if m else sw.rstrip() + '\n\n' + marca + '\n'
-
-    io.open('sw.js', 'w', encoding='utf-8').write(sw)
-    print('  Cambiaron archivos. sw.js pasa a la version %d.' % n)
-    print('  (esto es lo que hace que el navegador muestre lo nuevo)')
-    return True
+    Era el paso que mas tiempo hacia perder de todo el proyecto.
+    """
+    print('  El portal no guarda copias: siempre se ve lo ultimo.')
+    return False
 
 
 def main():

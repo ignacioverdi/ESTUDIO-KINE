@@ -119,15 +119,9 @@ def temas_completos():
 
 
 def sw_al_dia():
-    """El sw guarda una lista de archivos. Si falta uno, sin internet
-       esa pantalla no abre."""
-    s = leer('sw.js')
-    listados = set(re.findall(r"^\s*'([^']+)',?$", s, re.M))
-    debe = set(PANTALLAS) | {'css/tema.css', 'css/estudio.css', 'js/datos.js',
-                             'js/plantillas.js', 'js/qr.js', 'js/historia.js', 'js/dinero.js', 'js/base.js', 'js/ayuda.js', 'manifest.json'}
-    faltan = debe - listados
-    if faltan:
-        ROTO.append('sw.js no guarda: %s' % ', '.join(sorted(faltan)))
+    """El service worker ya no guarda archivos, asi que no hay lista que
+       controlar. Se deja la funcion para no tocar el resto del auditor."""
+    return
 
 
 def inventario_cuadra():

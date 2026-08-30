@@ -1,108 +1,50 @@
 /* ══════════════════════════════════════════════════════════════════════
-   SW — el que hace que el portal ande sin internet
+   SW — este archivo ya NO guarda nada. Se desinstala solo.
 
-   El estudio suele tener mala señal (subsuelo, gimnasio, vestuario).
-   Sin esto, el kinesiólogo abre la app en el medio de una sesión y ve
-   una pantalla en blanco.
+   POR QUE SE SACO
+   ---------------
+   Antes esto guardaba el portal entero para que funcionara sin internet.
+   Sonaba bien y trajo mas problemas de los que resolvia:
 
-   Estrategia: las pantallas y estilos se guardan al instalar y se sirven
-   desde el teléfono. Firebase maneja sus propios datos aparte y ya sabe
-   trabajar sin conexión.
+   1. En iPhone rompia el portal. Safari rechaza cualquier respuesta que
+      un service worker devuelva si vino de una redireccion, y la pagina
+      directamente no abria.
+   2. Obligaba a subir un numero de version en cada cambio. Si uno se
+      olvidaba, el navegador seguia mostrando la copia vieja y uno juraba
+      que el cambio no se habia aplicado.
+   3. Escondia los errores: en Chrome andaba, en Safari no, y no habia
+      forma de darse cuenta hasta que otra persona lo abria en su celular.
 
-   IMPORTANTE: cada vez que se toca una pantalla hay que subir el número
-   de VERSION. Si no, el navegador sigue mostrando la copia vieja y vas a
-   volverte loco preguntándote por qué no se ve el cambio.
+   El portal se usa con internet. Sin guardar nada anda igual de rapido,
+   se ve siempre la ultima version, y no hay nada que recordar.
+
+   QUE HACE AHORA
+   --------------
+   Se desinstala a si mismo y borra todo lo que habia guardado. Eso
+   arregla los celulares que quedaron trabados con la version vieja: al
+   entrar de nuevo bajan este archivo, se limpia solo, y el portal vuelve
+   a andar. No hay que borrar datos a mano.
+
+   Este archivo se puede eliminar del proyecto dentro de unos meses,
+   cuando ya no queden celulares con la version vieja instalada.
+
+   SI ALGUN DIA HACE FALTA QUE FUNCIONE SIN INTERNET
+   -------------------------------------------------
+   Se vuelve a escribir, pero con dos reglas que antes no estaban:
+   las navegaciones NUNCA pasan por aca (van derecho a la red), y solo
+   se guardan los estilos y las imagenes.
    ══════════════════════════════════════════════════════════════════════ */
 
-var VERSION = 'estudio-v35';
+self.addEventListener('install', function(){ self.skipWaiting(); });
 
-var ARCHIVOS = [
-  'index.html',
-  'panel.html',
-  'agenda.html',
-  'lesiones.html',
-  'pizarron.html',
-  'ejercicios.html',
-  'mi.html',
-  'diario.html',
-  'pacientes.html',
-  'alta.html',
-  'cartel.html',
-  'historia.html',
-  'caja.html',
-  'programa.html',
-  'perfil.html',
-  'css/tema.css',
-  'css/estudio.css',
-  'js/datos.js',
-  'js/plantillas.js',
-  'js/qr.js',
-  'js/historia.js',
-  'js/dinero.js',
-  'js/atender.js',
-  'js/base.js',
-  'js/ayuda.js',
-  'manifest.json',
-  'img/icono-192.png',
-  'img/icono-512.png'
-];
-
-/* Safari rechaza cualquier respuesta que el service worker devuelva si esa
-   respuesta vino de una redirección: falla con "Response served by service
-   worker has redirections" y la página no abre. Chrome lo tolera; Safari no.
-
-   Por eso toda respuesta se vuelve a armar antes de guardarla o devolverla:
-   mismo contenido, misma cabecera, sin la marca de redirección.            */
-function limpiar(r){
-  if(!r || !r.redirected) return Promise.resolve(r);
-  return r.blob().then(function(b){
-    return new Response(b, {status:r.status, statusText:r.statusText, headers:r.headers});
-  });
-}
-
-self.addEventListener('install', function(e){
-  e.waitUntil(
-    caches.open(VERSION).then(function(c){
-      return Promise.all(ARCHIVOS.map(function(u){
-        return fetch(u, {cache:'reload'})
-          .then(limpiar)
-          .then(function(r){ if(r && r.ok) return c.put(u, r); })
-          .catch(function(){});          /* si uno falla, el resto se guarda igual */
-      }));
-    }).then(function(){ return self.skipWaiting(); })
-  );
-});
-
-/* Al activar una versión nueva se borran las viejas, para que no queden
-   dos copias del portal peleándose. */
 self.addEventListener('activate', function(e){
   e.waitUntil(
-    caches.keys().then(function(claves){
-      return Promise.all(claves.map(function(k){
-        if(k !== VERSION) return caches.delete(k);
-      }));
-    }).then(function(){ return self.clients.claim(); })
+    caches.keys()
+      .then(function(claves){ return Promise.all(claves.map(function(k){ return caches.delete(k); })); })
+      .then(function(){ return self.registration.unregister(); })
+      .then(function(){ return self.clients.matchAll({type:'window'}); })
+      .then(function(ventanas){ ventanas.forEach(function(v){ v.navigate(v.url); }); })
   );
 });
 
-self.addEventListener('fetch', function(e){
-  var url = e.request.url;
-
-  /* Firebase y las tipografías se piden siempre a la red: los datos
-     tienen que estar frescos y Firebase ya guarda lo suyo. */
-  if(url.indexOf('firebaseio') > -1 || url.indexOf('googleapis') > -1
-     || url.indexOf('gstatic') > -1 || e.request.method !== 'GET'){
-    return;
-  }
-
-  e.respondWith(
-    caches.match(e.request).then(function(guardado){
-      if(guardado) return limpiar(guardado);
-      return fetch(e.request).then(limpiar).catch(function(){
-        return caches.match('index.html').then(limpiar);
-      });
-    })
-  );
-});
-
-/* huella: 08adae199279 */
+/* Sin fetch: todo va derecho a la red. Es la linea que faltaba. */

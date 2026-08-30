@@ -154,16 +154,23 @@ function cabecera(pag){
   if(typeof esDemo === 'function' && esDemo() && !document.querySelector('.cartel-demo'))
     document.body.insertBefore(cartelDemo(), document.body.firstChild);
 
-  var vieja = document.querySelector('.barra-abajo');
+  var vieja = document.querySelector('.menu-movil');
   if(vieja) vieja.remove();
-  var ab = document.createElement('nav');
-  ab.className = 'barra-abajo';
-  ab.innerHTML = items.map(function(i){
-      return '<a href="#" onclick="irA(\\'' + i.a + '\\');return false"'
-           + (i.id === pag ? ' class="on"' : '') + '>'
-           + '<span class="ic">' + i.ic + '</span>' + i.t + '</a>';
-    }).join('');
-  document.body.appendChild(ab);
+  var actual = items.filter(function(i){ return i.id === pag; })[0] || items[0];
+  var ab = document.createElement('div');
+  ab.className = 'menu-movil';
+  ab.innerHTML =
+    '<button class="menu-bt" onclick="abrirMenu()" aria-label="Menu">'
+    + '<span class="hamburguesa"><i></i><i></i><i></i></span>'
+    + '<span class="menu-actual">' + actual.t + '</span>'
+    + '<span class="menu-flecha">\u25BE</span></button>'
+    + '<div class="menu-lista" id="menuLista">'
+    + items.map(function(i){
+        return '<a href="' + i.a + '"' + (i.id === pag ? ' class="on"' : '') + '>'
+             + '<span class="ic">' + i.ic + '</span>' + i.t + '</a>';
+      }).join('') + '</div>';
+  var armazon = document.getElementById('armazon');
+  armazon.appendChild(ab);
 }
 
 function mostrar(clave){
