@@ -111,50 +111,73 @@ panel de tu dominio.
 
 ---
 
-## PARTE 5 — CONECTAR FIREBASE
+## PARTE 5 — CONECTAR LA BASE (para que los datos se compartan)
 
-Esto convierte el portal de una demo en algo real. Hasta acá todo funciona con
-los datos de ejemplo de `js/datos.js`.
+**Este es el paso que convierte el portal en algo usable de verdad.**
 
-### Base de datos propia
+Sin esto, cada navegador guarda lo suyo. Vos cargás un paciente en tu computadora
+y el kinesiólogo no lo ve en la suya. Un paciente se da de alta con el QR desde su
+celular y no aparece en la lista. Para probar alcanza; para trabajar no.
 
-**Aparte de la del club.** Los datos de salud no tienen por qué vivir donde vive
-el scouting, y un estudio puede atender a más de un club.
+Con la base conectada, **todos ven lo mismo desde cualquier aparato, al instante**.
 
-1. **console.firebase.google.com** → Agregar proyecto
-2. Realtime Database → Crear → **modo bloqueado**
-3. Copiá las credenciales que te da
+### Crear la base
 
-### Copiar firebase.js
+```
+1. console.firebase.google.com  →  Agregar proyecto
+2. Realtime Database  →  Crear  →  modo BLOQUEADO
+3. Authentication  →  Comenzar  →  activar Correo y contraseña
+```
 
-Copiá `firebase.js` del repo del club a `js/firebase.js` de acá, reemplazando el
-archivo vacío que viene.
+**Modo bloqueado, no de prueba.** El de prueba deja la base abierta a cualquiera
+durante 30 días. Son datos de salud.
 
-**No lo reescribas.** Ya trae la sesión, los roles y el modo sin internet, y está
-probado con gente usándolo.
+### Completar tres líneas
 
-Cambiale las credenciales por las del proyecto nuevo, y tocá dos líneas:
+Abrí `js/firebase.js`. Arriba de todo hay tres líneas que dicen `PONER_ACA`:
 
 ```javascript
-var VB_STAFF = ['coach','at','pf','kine'];
-
-var VB_PLAYER_PATHS = ['wellness','pesos','rm','prep_hist','notas','obs',
-                       'kine/adherencia','kine/agenda/turnos','kine/wellness'];
+var FB_URL  = 'https://tu-proyecto-default-rtdb.firebaseio.com';
+var FB_KEY  = 'la apiKey del proyecto';
+var FB_DOM  = 'estudio.app';
 ```
 
-### Las reglas
+Los dos primeros salen de Firebase, en Configuración del proyecto.
 
-En Firebase, pestaña Reglas. La idea es esta:
+**La apiKey no es un secreto.** Va a la vista en cualquier aplicación web. Lo que
+protege los datos son las reglas, no ella.
+
+### Pegar las reglas
+
+Están al final de `js/firebase.js`, listas para copiar. Van en Firebase, en
+Realtime Database, pestaña **Reglas**.
+
+Lo que hacen, en una línea: **el cuerpo técnico ve la disponibilidad, nunca el
+diagnóstico.** Y un paciente solo ve lo suyo.
+
+### Crear las cuentas
+
+En Firebase, en Authentication, agregá un usuario para el kinesiólogo. Después,
+en la base, cargá dos cosas a mano una sola vez:
 
 ```
-kine/disponibilidad   → la lee cualquiera del club, la escribe solo el kine
-kine/lesiones         → la lee el kine y el propio jugador. NADIE MÁS.
-kine/agenda/turnos    → la lee el kine, el jugador escribe solo el suyo
-kine/adherencia       → cada jugador escribe solo la suya
+kine/roles/<uid del kinesiólogo>   =  "kine"
+kine/uid_pid/<uid de un paciente>  =  "P07"
 ```
 
-Que un jugador no pueda pisar el turno de otro se valida **acá**, no en el
-navegador: cualquiera abre la consola del navegador y se saltea un `if`.
+La primera dice quién es el kinesiólogo. La segunda ata cada cuenta con su ficha.
+
+**Las dos tienen escritura prohibida en las reglas, y no es un olvido:** si un
+paciente pudiera escribir ahí, se haría kinesiólogo solo y vería todas las
+historias clínicas.
+
+### Comprobarlo
+
+Publicá y abrí el portal en dos aparatos distintos. Cargá un paciente en uno y
+recargá el otro: tiene que aparecer.
+
+**Mientras las tres líneas digan `PONER_ACA`, el portal funciona igual pero
+guardando en cada navegador.** No se rompe nada: simplemente no se comparte.
 
 ---
 

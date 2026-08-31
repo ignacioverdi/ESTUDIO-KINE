@@ -196,10 +196,14 @@ def config_de_vercel():
 
 def secretos_a_la_vista():
     """Lo más caro de equivocarse."""
-    sospechoso = re.compile(r'(apiKey|api_key|password|secret|token)\s*[:=]\s*["\'][^"\']{12,}', re.I)
+    # Busca una clave ESCRITA en el codigo. No confundir con nombres de
+    # campo ni con direcciones de servicios: "signInWithPassword" es el
+    # nombre de una funcion de Google, no una contraseña.
+    sospechoso = re.compile(r'\b(apiKey|api_key|password|passwd|secret|token|clave)\s*[:=]\s*["\'][^"\']{12,}', re.I)
+    permitido = re.compile(r'signInWith|identitytoolkit|googleapis|PONER_ACA|refreshToken|idToken')
     for p in glob.glob('*.html') + glob.glob('js/*.js') + glob.glob('*.json'):
         for n, linea in enumerate(leer(p).split('\n'), 1):
-            if sospechoso.search(linea):
+            if sospechoso.search(linea) and not permitido.search(linea):
                 ROTO.append('POSIBLE CLAVE EXPUESTA en %s línea %d' % (p, n))
     if not os.path.exists('.gitignore'):
         ROTO.append('no hay .gitignore: cualquier dato de paciente se sube')
