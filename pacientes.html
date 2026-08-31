@@ -28,7 +28,17 @@
     <div class="dato"><div class="v" id="kPend" style="color:var(--ambar)">—</div><div class="l">Sin atender</div></div>
   </div>
   <div class="tarjeta">
-    <div class="tarjeta-cab"><h2 class="sub">El enlace para darse de alta</h2>
+    <div class="tarjeta-cab"><h2 class="sub">Sumar un paciente</h2>
+      <span class="eti">Dos formas</span></div>
+    <p style="color:var(--tinta2);font-size:14px;margin-bottom:14px">
+      Lo más rápido es que lo cargue él mismo con el código QR: no tipeás nada y no hay
+      errores de dictado. Pero si lo tenés adelante y es más cómodo cargarlo vos, usá el botón.</p>
+    <a class="bt ancho" href="alta.html" style="text-decoration:none;text-align:center">
+      + Nuevo paciente</a>
+  </div>
+
+  <div class="tarjeta">
+    <div class="tarjeta-cab"><h2 class="sub">O que se cargue solo, con el código</h2>
       <span class="eti">Pegalo en la puerta del estudio</span></div>
     <p style="color:var(--tinta2);font-size:14px;margin-bottom:12px">
       Mandáselo por WhatsApp al paciente nuevo, o dejalo a la vista en la recepción.
@@ -223,12 +233,25 @@ function pintarLesion(){
     + '<label class="campo"><span class="eti">Cómo se lesionó</span>'
     + '<textarea id="lMec" placeholder="Caída tras disputa aérea, apoyo sobre el pie de un rival...">'
     + (NL.mecanismo || '') + '</textarea></label>'
-    + '<label class="campo"><span class="eti">Cuándo</span>'
+    + '<label class="campo"><span class="eti">Cuándo se lesionó</span>'
     + '<input type="date" id="lFecha" value="' + NL.fecha + '"></label>'
+
+    /* Si hubo cirugia, el reloj cuenta desde ahi: es la fecha que usa
+       toda la literatura de retorno al juego. */
+    + '<label class="campo"><span class="eti">¿Hubo cirugía?</span>'
+    + '<div class="pestanias" id="lOp" style="margin-bottom:0">'
+    + '<button class="pest' + (NL.operado ? '' : ' on') + '" data-o="0">No</button>'
+    + '<button class="pest' + (NL.operado ? ' on' : '') + '" data-o="1">Sí</button>'
+    + '</div></label>'
+    + (NL.operado
+        ? '<label class="campo"><span class="eti">Fecha de la cirugía</span>'
+          + '<input type="date" id="lCirugia" value="' + (NL.cirugia || NL.fecha) + '"></label>'
+        : '')
     /* Lo que el sistema completa solo: se muestra para que el kine lo
        vea antes de guardar, no para que lo escriba. */
     + '<div class="nota info"><b>Se va a completar solo:</b><br>'
     + 'Alta estimada el ' + fechaCorta(NL.alta) + ' (' + faltan(NL.alta) + ' días).<br>'
+    + 'Los días de rehabilitación se cuentan desde la primera sesión.<br>'
     + 'Arranca en fase 1 con ' + crit.length + ' criterios de ' + NL.zona.toLowerCase() + '.<br>'
     + 'El parte médico lo va a mostrar como <b>de baja</b>.</div>'
     + '<button class="bt ancho" onclick="guardarLesion()">Abrir la lesión</button>';
@@ -241,6 +264,15 @@ function pintarLesion(){
   document.querySelectorAll('#lGrav .pest').forEach(function(b){
     b.onclick = function(){ NL.gravedad = +b.dataset.g; pintarLesion(); };
   });
+  document.querySelectorAll('#lOp .pest').forEach(function(b){
+    b.onclick = function(){
+      NL.operado = b.dataset.o === '1';
+      if(NL.operado && !NL.cirugia) NL.cirugia = NL.fecha;
+      pintarLesion();
+    };
+  });
+  var ci = document.getElementById('lCirugia');
+  if(ci) ci.onchange = function(){ NL.cirugia = ci.value; };
   ['lDiag','lMec','lFecha'].forEach(function(id){
     var e = document.getElementById(id);
     e.onchange = e.oninput = function(){
@@ -266,6 +298,7 @@ function guardarLesion(){
     zona: NL.zona, lado: NL.lado,
     diagnostico: diag, mecanismo: mec || '—',
     fecha: fec, gravedad: NL.gravedad,
+    cirugia: NL.operado ? (document.getElementById('lCirugia') || {}).value || fec : null,
     fase: 1, estado: 'activa',
     alta: altaEstimada(NL.zona, NL.gravedad, fec),
     kine: 'Vero',

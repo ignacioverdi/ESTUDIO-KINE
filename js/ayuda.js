@@ -44,11 +44,12 @@ var AYUDA = {
     pasos: [
       ['Abrí una ficha', 'De la lista, o tocando a alguien en el panel.'],
       ['Mirá la pista de fases', 'Cinco tramos. Los verdes ya pasaron, el marcado es donde está hoy.'],
+      ['Los dos relojes', 'Arriba hay dos números distintos: los días desde la lesión o la cirugía, y los días que lleva tratándose. No son lo mismo.'],
       ['Tildá los criterios', 'A medida que se cumplen. El botón de avanzar se enciende solo cuando están todos.'],
       ['Al avanzar no escribís nada', 'Los criterios de la fase nueva aparecen solos, y el parte médico que ve el entrenador cambia con la fase.'],
       ['Cargá la sesión del día', 'Botón al final de la ficha. Elegís el tipo, tocás el dolor al llegar y al terminar, y la nota es opcional.']
     ],
-    ojo: 'Los dos valores de dolor son obligatorios y la nota no: la diferencia entre el dolor al llegar y al terminar es el dato que muestra si la sesión sirvió. Al pasar de fase, los criterios se vacían y aparecen los de la fase nueva. Es a propósito: cada fase se gana de nuevo.'
+    ojo: 'Alguien que se operó hace 90 días pero empezó la rehabilitación hace 10 no está atrasado: recién empieza. Con un solo número eso no se ve, y es la diferencia entre apurar a un paciente o entenderlo. Si la espera entre la lesión y la primera sesión fue larga, el portal te lo avisa. Los dos valores de dolor son obligatorios y la nota no: la diferencia entre el dolor al llegar y al terminar es el dato que muestra si la sesión sirvió. Al pasar de fase, los criterios se vacían y aparecen los de la fase nueva. Es a propósito: cada fase se gana de nuevo.'
   },
 
   agenda: {
@@ -120,7 +121,8 @@ var AYUDA = {
     titulo: 'El padrón',
     que_es: 'Todos los que pasaron por el estudio, del plantel y particulares. Se cargan solos.',
     pasos: [
-      ['Repartí el enlace', 'Mandáselo por WhatsApp al paciente nuevo o dejalo en la recepción. Se completa en dos minutos.'],
+      ['Nuevo paciente', 'El botón de arriba abre la misma ficha para que la cargues vos, con la persona adelante.'],
+      ['O que se cargue solo', 'Con el código QR. Es más rápido y no hay errores de dictado: no tipeás nada.'],
       ['Mirá los que dicen "sin atender"', 'Son los que se dieron de alta y todavía no viste. Pasan a activo con la primera sesión.'],
       ['Buscá por nombre o documento', 'Con el buscador de arriba de la lista.'],
       ['Abrí una ficha', 'Tocá el paciente y desde ahí le abrís una lesión o le das turno.'],

@@ -237,6 +237,42 @@ def main():
         problemas += e3[:2]
         ctx.close()
 
+        print('\n  1f. LOS DOS RELOJES Y EL ALTA A MANO')
+        ctx = b.new_context(**pw.devices['iPhone 14 Pro'])
+        pg = ctx.new_page()
+        e4 = []
+        pg.on('pageerror', lambda x: e4.append(str(x)))
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+        pg.evaluate("localStorage.clear()")
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+        pg.evaluate("ponerRol('kine')")
+
+        # Una lesion operada tiene DOS relojes: desde la cirugia y desde
+        # que empezo a tratarse. Con uno solo no se ve la diferencia entre
+        # alguien atrasado y alguien que recien empieza.
+        pg.goto(base + 'lesiones.html?f=L2'); pg.wait_for_timeout(800)
+        txt = pg.evaluate("document.documentElement.textContent")
+        dl = pg.evaluate("diasDeLesion(lesionPorId('L2'))")
+        dr = pg.evaluate("diasDeRehab(lesionPorId('L2'))")
+        dos = ('Días de rehabilitación' in txt) and (dl != dr)
+        print('     dos relojes distintos        :', dos, '(%d y %d)' % (dl, dr))
+
+        pg.goto(base + 'pacientes.html'); pg.wait_for_timeout(800)
+        hay_boton = any('Nuevo paciente' in x for x in pg.evaluate(
+            "Array.from(document.querySelectorAll('a.bt')).map(function(a){return a.textContent})"))
+        hay_qr = pg.evaluate("!!document.querySelector('#qrChico svg')")
+        pg.goto(base + 'alta.html'); pg.wait_for_timeout(800)
+        titulo = pg.evaluate("(document.querySelector('h1.tit')||{}).textContent")
+        print('     boton NUEVO PACIENTE         :', hay_boton, '| el QR sigue:', hay_qr)
+        print('     el alta habla al kinesiologo :', titulo == 'Nuevo paciente')
+        for cond, t2 in [(dos, 'no se distinguen los dias de lesion de los de rehabilitacion'),
+                         (hay_boton, 'falta el boton de nuevo paciente'),
+                         (hay_qr, 'desaparecio el QR del padron'),
+                         (titulo == 'Nuevo paciente', 'el alta no se adapta al kinesiologo')]:
+            if not cond: problemas.append(t2)
+        problemas += e4[:2]
+        ctx.close()
+
         print('\n  2. CODIGOS QR')
         try:
             import cv2

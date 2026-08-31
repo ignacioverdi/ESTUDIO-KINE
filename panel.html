@@ -117,7 +117,7 @@ document.getElementById('activas').innerHTML = BASE.lesiones.filter(function(L){
   var listos = criteriosListos(L), tot = L.criterios.length;
   return '<button class="fila" style="align-items:flex-start" onclick="irA(\'lesiones.html?f=' + L.id + '\')">'
     + '<span class="cu"><b>' + nombrePaciente(L) + ' · ' + L.zona.toLowerCase() + '</b>'
-    + '<small>' + L.diagnostico + ' — día ' + dias(L.fecha) + '</small>'
+    + '<small>' + L.diagnostico + ' — día ' + diasDeLesion(L) + ' · ' + diasDeRehab(L) + ' de rehab</small>'
     + pista(L.fase, false)
     + '<small class="mono" style="margin-top:6px">FASE ' + L.fase + ' · ' + FASES[L.fase-1].t.toUpperCase()
     + ' · ' + listos + '/' + tot + ' CRITERIOS</small></span></button>';

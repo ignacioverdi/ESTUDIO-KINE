@@ -30,17 +30,29 @@
 <div class="hoja angosta" id="todo"></div>
 <script>
 var F = {};
+
+/* La misma pantalla sirve para las dos formas de dar de alta: el paciente
+   cargandose solo desde el QR, o el kinesiologo cargandolo con la persona
+   adelante. Los campos son los mismos; lo que cambia es como se habla.
+   Al paciente se le dice "tus datos"; al kine, "sus datos". */
+var LOCARGA_EL_KINE = (typeof rol === 'function' && rol() === 'kine');
+function vos(a, b){ return LOCARGA_EL_KINE ? b : a; }
 function pintar(){
   document.getElementById('todo').innerHTML =
-    '<h1 class="tit">Darse de alta</h1>'
-    + '<p class="bajada">Completá esto una sola vez. Después vas a poder pedir turno, '
-    + 'ver tus ejercicios y seguir tu recuperación desde el celular.</p>'
+    '<h1 class="tit">' + vos('Darse de alta', 'Nuevo paciente') + '</h1>'
+    + '<p class="bajada">'
+    + vos('Completá esto una sola vez. Después vas a poder pedir turno, ver tus ejercicios '
+          + 'y seguir tu recuperación desde el celular.',
+          'Cargalo una sola vez. Después va a poder pedir turno y ver sus ejercicios desde '
+          + 'el celular. Si preferís que lo complete él, mandale el enlace del QR: no tipeás '
+          + 'nada y no hay errores de dictado.')
+    + '</p>'
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Quién sos</h2></div>'
-    + '<label class="campo"><span class="eti">¿Sos del plantel del club?</span>'
+    + '<label class="campo"><span class="eti">' + vos('¿Sos del plantel del club?', '¿Es del plantel del club?') + '</span>'
     + '<div class="pestanias" id="tipo" style="margin-bottom:0">'
-    + '<button class="pest" data-t="plantel">Sí, juego en el club</button>'
-    + '<button class="pest" data-t="particular">No, vengo por mi cuenta</button>'
+    + '<button class="pest" data-t="plantel">' + vos('Sí, juego en el club', 'Sí, del plantel') + '</button>'
+    + '<button class="pest" data-t="particular">' + vos('No, vengo por mi cuenta', 'No, particular') + '</button>'
     + '</div></label>'
     + '<div id="camposTipo"></div>'
     + '<div style="display:flex;gap:16px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'
@@ -67,7 +79,7 @@ function pintar(){
     + '<div id="cajaTutor"></div>'
     + '</div>'
     + '<div class="tarjeta">'
-    + '<div class="tarjeta-cab"><h2 class="sub">Cómo te ubicamos</h2>'
+    + '<div class="tarjeta-cab"><h2 class="sub">' + vos('Cómo te ubicamos', 'Cómo ubicarlo') + '</h2>'
     + '<span class="eti">Para el aviso del turno</span></div>'
     + '<div class="rejilla c2">'
     + '<label class="campo"><span class="eti">Teléfono</span>'
@@ -75,7 +87,7 @@ function pintar(){
     + '<label class="campo"><span class="eti">Correo</span>'
     + '<input type="text" id="f_mail" inputmode="email" placeholder="vos@mail.com"></label>'
     + '</div>'
-    + '<label class="campo"><span class="eti">¿Por qué venís? (en tus palabras)</span>'
+    + '<label class="campo"><span class="eti">' + vos('¿Por qué venís? (en tus palabras)', 'Motivo de consulta, con sus palabras') + '</span>'
     + '<textarea id="f_motivo" placeholder="Me duele el hombro cuando levanto el brazo, hace tres semanas..."></textarea></label>'
     + '</div>'
     /* Admisión. Estos datos cambian el tratamiento: no es lo mismo un
@@ -83,7 +95,7 @@ function pintar(){
        jugador de hockey. Y los antecedentes quirúrgicos pueden
        contraindicar ejercicios enteros. */
     + '<div class="tarjeta">'
-    + '<div class="tarjeta-cab"><h2 class="sub">Tu vida y tu deporte</h2>'
+    + '<div class="tarjeta-cab"><h2 class="sub">' + vos('Tu vida y tu deporte', 'Su vida y su deporte') + '</h2>'
     + '<span class="eti">Cambia el tratamiento</span></div>'
     + '<div class="rejilla c2">'
     + '<label class="campo"><span class="eti">¿De qué trabajás?</span>'
@@ -106,19 +118,30 @@ function pintar(){
     /* El consentimiento no es un trámite: son datos de salud y sin esto
        no se pueden guardar. Va explicado en castellano, no en jurídico. */
     + '<div class="tarjeta">'
-    + '<div class="tarjeta-cab"><h2 class="sub">Tus datos</h2></div>'
+    + '<div class="tarjeta-cab"><h2 class="sub">' + vos('Tus datos', 'Consentimiento') + '</h2></div>'
     + '<p style="color:var(--tinta2);font-size:14px;margin-bottom:14px">'
-    + 'Lo que cargues acá es información de salud y se trata como tal. '
-    + 'Lo ve el kinesiólogo que te atiende y lo ves vos. Nadie más: ni el entrenador, '
-    + 'ni los otros pacientes. Si sos del plantel, el cuerpo técnico ve solamente si '
-    + 'estás disponible para entrenar, nunca tu diagnóstico.</p>'
-    + '<label class="crit"><input type="checkbox" id="f_ok">'
-    + '<span>Entiendo y autorizo al estudio a guardar mis datos para mi tratamiento.</span></label>'
+    + vos('Lo que cargues acá es información de salud y se trata como tal. '
+          + 'Lo ve el kinesiólogo que te atiende y lo ves vos. Nadie más: ni el entrenador, '
+          + 'ni los otros pacientes. Si sos del plantel, el cuerpo técnico ve solamente si '
+          + 'estás disponible para entrenar, nunca tu diagnóstico.',
+          'Leele esto y que lo confirme. Es información de salud: sin consentimiento no se '
+          + 'puede registrar nada. La ve el kinesiólogo que lo atiende y el propio paciente. '
+          + 'Nadie más: ni el entrenador ni los otros pacientes.')
+    + '</p>'
+    + '<label class="crit"><input type="checkbox" id="f_ok"><span>'
+    + vos('Entiendo y autorizo al estudio a guardar mis datos para mi tratamiento.',
+          'El paciente entiende y autoriza al estudio a guardar sus datos para su tratamiento.')
+    + '</span></label>'
     + '</div>'
     + '<div id="aviso"></div>'
-    + '<button class="bt ancho" onclick="enviar()">Darme de alta</button>'
-    + '<p style="text-align:center;color:var(--tinta3);font-size:13px;margin-top:14px">'
-    + '¿Ya te diste de alta antes? <a href="index.html" style="color:var(--acc-texto)">Entrá por acá</a></p>';
+    + '<button class="bt ancho" onclick="enviar()">'
+    + vos('Darme de alta', 'Guardar el paciente') + '</button>'
+    + (LOCARGA_EL_KINE
+        ? '<a class="bt neutro ancho" href="pacientes.html" style="text-decoration:none;'
+          + 'text-align:center;margin-top:8px">Cancelar</a>'
+        : '<p style="text-align:center;color:var(--tinta3);font-size:13px;margin-top:14px">'
+          + '¿Ya te diste de alta antes? <a href="index.html" style="color:var(--acc-texto)">'
+          + 'Entrá por acá</a></p>');
   document.querySelectorAll('#frec .pest').forEach(function(b){
     if(F.frecuencia === b.dataset.f) b.classList.add('on');
     b.onclick = function(){
@@ -284,7 +307,9 @@ function enviar(){
   /* Primeros dos asientos de la historia: el alta y el consentimiento.
      El consentimiento es un asiento propio porque la ley pide que conste
      de forma expresa y destacada, con fecha. */
-  try{ ponerRol('jugador'); localStorage.setItem('estudio_pid', nuevo.id); }catch(e){}
+  if(!LOCARGA_EL_KINE){
+    try{ ponerRol('jugador'); localStorage.setItem('estudio_pid', nuevo.id); }catch(e){}
+  }
   asentar(nuevo.id, 'alta_paciente',
           'Se dio de alta en el padrón como ' + (nuevo.tipo === 'plantel' ? 'jugador del plantel' : 'paciente particular')
           + '. Ocupación: ' + nuevo.ocupacion + '. Deporte: ' + nuevo.deporte
@@ -296,14 +321,20 @@ function enviar(){
           + (esMenor(nuevo.nac || F.nac) && nuevo.tutor
              ? ', con autorización de ' + nuevo.tutor.nombre + ' (' + nuevo.tutor.vinculo + ')' : '')
           + '.');
-  document.getElementById('todo').innerHTML =
-    '<div class="tarjeta" style="margin-top:30px">'
-    + '<div class="vacio"><b>Listo, ' + F.nombre.split(' ')[0] + '</b>'
-    + 'Ya estás en el sistema. El kinesiólogo te va a ver en la lista y '
-    + 'podés pedir turno cuando quieras.</div>'
-    + '<a class="bt ancho" href="agenda.html" style="text-decoration:none;text-align:center">Pedir mi primer turno</a>'
-    + '<a class="bt neutro ancho" href="index.html" style="text-decoration:none;text-align:center;margin-top:8px">Ir al inicio</a>'
-    + '</div>';
+  document.getElementById('todo').innerHTML = LOCARGA_EL_KINE
+    ? '<div class="tarjeta" style="margin-top:30px">'
+      + '<div class="vacio"><b>' + F.nombre + ' quedó cargado</b>'
+      + 'Ya figura en el padrón como sin atender. Podés abrirle una lesión o darle turno.</div>'
+      + '<a class="bt ancho" href="pacientes.html" style="text-decoration:none;text-align:center">Ir al padrón</a>'
+      + '<a class="bt neutro ancho" href="alta.html" style="text-decoration:none;text-align:center;margin-top:8px">Cargar otro</a>'
+      + '</div>'
+    : '<div class="tarjeta" style="margin-top:30px">'
+      + '<div class="vacio"><b>Listo, ' + F.nombre.split(' ')[0] + '</b>'
+      + 'Ya estás en el sistema. El kinesiólogo te va a ver en la lista y '
+      + 'podés pedir turno cuando quieras.</div>'
+      + '<a class="bt ancho" href="agenda.html" style="text-decoration:none;text-align:center">Pedir mi primer turno</a>'
+      + '<a class="bt neutro ancho" href="index.html" style="text-decoration:none;text-align:center;margin-top:8px">Ir al inicio</a>'
+      + '</div>';
   scrollTo(0, 0);
 }
 pintar();

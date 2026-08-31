@@ -153,7 +153,7 @@ var BASE = {
         {f:'2026-08-12', t:'Evaluación',  pre:7, post:6, nota:'Esguince lateral grado II. Bota diez días.'}
       ]},
 
-    { id:'L2', pid:'P12', dorsal:12, zona:'Hombro', lado:'derecho',
+    { id:'L2', pid:'P12', dorsal:12, zona:'Hombro', lado:'derecho', cirugia:'2026-08-18',
       diagnostico:'Tendinopatía del supraespinoso',
       mecanismo:'Sobrecarga por volumen de lanzamiento en la pretemporada.',
       fecha:'2026-08-20', fase:3, estado:'activa', alta:'2026-09-02', kine:'Vero',
@@ -329,6 +329,42 @@ function dosis(e){
   if(e.carga && e.carga !== '—') p.push(e.carga);
   return p.join(' · ');
 }
+/* ── LOS DOS RELOJES DE UNA LESION ──────────────────────────────────
+   No es lo mismo el tiempo desde que se lesiono que el tiempo que lleva
+   tratandose, y el segundo es el que dice si el tratamiento avanza.
+
+   Alguien que se rompio hace 90 dias pero empezo la rehabilitacion hace
+   10 no esta atrasado: recien empieza. Con un solo numero eso no se ve,
+   y es la diferencia entre apurar a un paciente o entenderlo.
+
+   Si hubo cirugia, el reloj de la lesion cuenta desde la cirugia: es la
+   fecha que usa toda la literatura de retorno al juego.               */
+function diasDeLesion(L){
+  if(!L) return 0;
+  return dias(L.cirugia || L.fecha);
+}
+
+function inicioRehab(L){
+  if(!L) return null;
+  if(L.inicio_rehab) return L.inicio_rehab;
+  var s = L.sesiones || [];
+  if(!s.length) return null;
+  return s.map(function(x){ return x.f; }).sort()[0];   /* la primera sesion */
+}
+
+function diasDeRehab(L){
+  var i = inicioRehab(L);
+  return i ? dias(i) : 0;
+}
+
+/* La espera entre la lesion y el comienzo del tratamiento. Cuando es
+   larga vale la pena verla: explica por que alguien va lento. */
+function diasDeEspera(L){
+  var i = inicioRehab(L);
+  if(!i) return null;
+  return Math.max(0, Math.round((new Date(i) - new Date(L.cirugia || L.fecha)) / 86400000));
+}
+
 function programaDe(L){
   var p = BASE.programas[L.id];
   return (p && p[L.fase]) ? p[L.fase] : [];

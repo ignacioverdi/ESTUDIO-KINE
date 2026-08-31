@@ -38,8 +38,9 @@ function pintar(){
   });
   document.getElementById('todo').innerHTML =
     '<h1 class="tit">' + L.zona + ' ' + (L.lado === '—' ? '' : L.lado) + '</h1>'
-    + '<p class="bajada">' + L.diagnostico + '. Llevás ' + dias(L.fecha)
-    + ' días y faltan ' + faltan(L.alta) + ' para el alta prevista.</p>'
+    + '<p class="bajada">' + L.diagnostico + '. Llevás ' + diasDeLesion(L) + ' días desde '
+    + (L.cirugia ? 'la operación' : 'la lesión') + ' y ' + diasDeRehab(L)
+    + ' de tratamiento. Faltan ' + faltan(L.alta) + ' para el alta prevista.</p>'
     /* dónde estás */
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Dónde estás</h2>'

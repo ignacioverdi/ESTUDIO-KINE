@@ -43,7 +43,8 @@ function pintar(){
       return '<button class="fila" style="align-items:flex-start" onclick="abrir(\'' + L.id + '\')">'
         + '<span class="hh">' + (L.dorsal ? '#' + L.dorsal : 'P') + '</span>'
         + '<span class="cu"><b>' + nombrePaciente(L) + ' — ' + L.zona + ' ' + L.lado + '</b>'
-        + '<small>' + L.diagnostico + '</small>' + pista(L.fase, false) + '</span>'
+        + '<small>' + L.diagnostico + ' · día ' + diasDeLesion(L) + ', ' + diasDeRehab(L)
+        + ' de rehabilitación</small>' + pista(L.fase, false) + '</span>'
         + '<span class="pin reservado">' + listos + '/' + L.criterios.length + '</span></button>';
     }).join('') + '</div>';
     return;
@@ -52,18 +53,37 @@ function pintar(){
   if(!L){ abierta = null; return pintar(); }
   lista.innerHTML = '<button class="bt neutro chico" style="margin-bottom:16px" onclick="abrir(null)">← Todas las lesiones</button>';
   document.getElementById('titulo').textContent = nombrePaciente(L) + ' · ' + L.zona.toLowerCase() + ' ' + L.lado;
-  document.getElementById('bajada').textContent = L.diagnostico + '. Lesionado el ' + fechaCorta(L.fecha) + '.';
+  document.getElementById('bajada').textContent = L.diagnostico
+    + (L.cirugia ? '. Operado el ' + fechaLarga(L.cirugia) : '. Lesionado el ' + fechaLarga(L.fecha))
+    + (inicioRehab(L) ? '. Empezó a tratarse el ' + fechaLarga(inicioRehab(L)) + '.' : '.');
   var sigue  = Math.min(L.fase + 1, 5);
   var faltanC = L.criterios.length - criteriosListos(L);
   ficha.innerHTML =
     /* estado */
     '<div class="tarjeta">'
     + '<div class="rejilla c4" style="margin-bottom:18px">'
-    + '<div class="dato"><div class="v">' + dias(L.fecha) + '</div><div class="l">Días de baja</div></div>'
-    + '<div class="dato"><div class="v" style="color:var(--azul)">' + L.fase + '</div><div class="l">Fase actual</div></div>'
+    + '<div class="dato"><div class="v">' + diasDeLesion(L) + '</div><div class="l">'
+    + (L.cirugia ? 'Días de la cirugía' : 'Días de la lesión') + '</div></div>'
+    + '<div class="dato"><div class="v" style="color:var(--acc)">' + diasDeRehab(L)
+    + '</div><div class="l">Días de rehabilitación</div></div>'
     + '<div class="dato"><div class="v">' + faltan(L.alta) + '</div><div class="l">Días para el alta</div></div>'
     + '<div class="dato"><div class="v">' + L.sesiones.length + '</div><div class="l">Sesiones</div></div>'
     + '</div>'
+    + '<div class="rejilla c3" style="margin-bottom:18px">'
+    + '<div class="dato"><div class="v" style="color:var(--acc)">' + L.fase + '</div><div class="l">Fase actual</div></div>'
+    + '<div class="dato"><div class="v" style="font-size:20px">'
+    + (L.cirugia ? fechaCorta(L.cirugia) : fechaCorta(L.fecha)) + '</div><div class="l">'
+    + (L.cirugia ? 'Fecha de cirugía' : 'Fecha de lesión') + '</div></div>'
+    + '<div class="dato"><div class="v" style="font-size:20px">'
+    + (inicioRehab(L) ? fechaCorta(inicioRehab(L)) : '—') + '</div><div class="l">Empezó a tratarse</div></div>'
+    + '</div>'
+    /* Una espera larga entre la lesion y la primera sesion explica por que
+       alguien va lento. Sin verla, se lo apura de mas. */
+    + (diasDeEspera(L) !== null && diasDeEspera(L) > 7
+        ? '<div class="nota aviso">Pasaron ' + diasDeEspera(L) + ' días entre '
+          + (L.cirugia ? 'la cirugía' : 'la lesión') + ' y la primera sesión. '
+          + 'Tenerlo en cuenta al comparar contra los plazos habituales.</div>'
+        : '')
     + pista(L.fase)
     + '<p style="font-size:14px;color:var(--tinta2);margin-top:14px">' + FASES[L.fase-1].d + '</p>'
     + '</div>'

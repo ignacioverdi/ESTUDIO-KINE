@@ -166,7 +166,14 @@ d.append(PageBreak())
 d.append(Paragraph('Sumar un paciente', H1))
 d.append(Paragraph('La idea de fondo: vos no cargas datos. Los carga el paciente.', SUB))
 
-d.append(Paragraph('Como funciona', H2))
+d.append(Paragraph('Dos formas de cargarlo', H2))
+d.append(Paragraph('En <b>Pacientes</b>, arriba, tenes un boton <b>Nuevo paciente</b>: abre la '
+                   'ficha para que la cargues vos, con la persona adelante.', P))
+d.append(Paragraph('Pero si podes, dejá que la cargue el: es mas rapido y no hay errores de '
+                   'dictado. Para eso esta el codigo QR.', P))
+d.append(Spacer(1, 4 * mm))
+
+d.append(Paragraph('Con el codigo QR', H2))
 d.append(paso(1, 'El paciente escanea el codigo',
               'Apunta la camara del celular al QR del cartel. Se le abre un formulario.'))
 d.append(paso(2, 'Completa sus datos en dos minutos',
@@ -238,6 +245,19 @@ d.append(paso(3, 'Lo demas se completa solo',
               'de alta se calcula con la zona y la gravedad. Y el parte medico lo marca '
               'como de baja.<br/><br/>'
               'Todo eso lo podes corregir despues desde la ficha.'))
+
+d.append(Paragraph('Los dos relojes', H2))
+d.append(Paragraph('Arriba de cada ficha hay dos numeros distintos: los <b>dias desde la lesion '
+                   'o la cirugia</b>, y los <b>dias que lleva tratandose</b>.', P))
+d.append(Paragraph('No son lo mismo, y confundirlos hace daño. Alguien que se opero hace 90 dias '
+                   'pero empezo la rehabilitacion hace 10 no esta atrasado: recien empieza. Con '
+                   'un solo numero eso no se ve, y es la diferencia entre apurar a un paciente o '
+                   'entenderlo.', P))
+d.append(Paragraph('Si la espera entre la lesion y la primera sesion fue de mas de una semana, el '
+                   'portal te lo avisa en la ficha.', P))
+d.append(Paragraph('Cuando abris una lesion te pregunta si hubo cirugia. Si la hubo, el reloj '
+                   'cuenta desde ahi: es la fecha que usa toda la literatura de retorno al juego.', P))
+d.append(Spacer(1, 4 * mm))
 
 d.append(Paragraph('Las cinco fases', H2))
 d.append(tabla(['Fase', 'Que se busca', 'Cancha'], [
