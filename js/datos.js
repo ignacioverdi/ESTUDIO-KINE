@@ -72,7 +72,7 @@ var BASE = {
     estudio: 'Estudio de kinesiología',
     club: 'Club Atlético',
     tel: '11 5555 0000',
-    email: 'vero@estudiokine.com',
+    email: 'guidoverdi91@gmail.com',
     clave: 'estudio',
     direccion: 'Av. Siempreviva 742',
     presentacion: 'Kinesióloga con quince años de trabajo en deporte. Me formé en '

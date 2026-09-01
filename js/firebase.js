@@ -27,8 +27,8 @@
    comparte. Sirve para probar, no para trabajar.
    ══════════════════════════════════════════════════════════════════════ */
 
-var FB_URL  = 'PONER_ACA';   // https://tu-proyecto-default-rtdb.firebaseio.com
-var FB_KEY  = 'PONER_ACA';   // la apiKey del proyecto
+var FB_URL  = 'https://estudio-kine-default-rtdb.firebaseio.com';
+var FB_KEY  = 'AIzaSyB45Ao5hGAi9GTy7CxXu8mUOV5K16Zt3BY';
 var FB_DOM  = 'estudio.app'; // dominio interno de las cuentas de pacientes
 var FB_CLUB = 'ESTUDIO';
 
@@ -332,7 +332,22 @@ function _fbEntrar(usuario, clave){
 }
 
 /* ── pantalla de ingreso ────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   LA PANTALLA DE ACCESO DEL CLUB, APAGADA
+
+   El archivo del club trae su propio cartel de usuario y contraseña. El
+   portal tiene el suyo, con dos puertas distintas para el paciente y el
+   kinesiologo, asi que este se superpondria encima y taparia los botones.
+
+   No se borra: se deja devolviendo una promesa que nunca resuelve. Asi,
+   si algo intenta leer la base sin haber entrado, se queda esperando en
+   vez de mostrar un cartel de golpe arriba de todo.
+   ══════════════════════════════════════════════════════════════════════ */
 function _fbPantalla(){
+  return new Promise(function(){});   /* la entrada la maneja index.html */
+}
+
+function _fbPantallaDelClub(){
   return new Promise(function(resolve){
     var d = document.createElement('div');
     d.id = 'fb-login';
@@ -438,7 +453,10 @@ function _fbArrancar(){
   });
   return _fbListo;
 }
-if(FB_CONFIGURADO) _fbArrancar();
+/* No se arranca sola al abrir cualquier pantalla: si no hay sesion, la
+   puerta de index.html se encarga. Arrancar aca haria que cada pantalla
+   intentara autenticar por su cuenta. */
+if(FB_CONFIGURADO && typeof sesion === 'function' && sesion()) _fbArrancar();
 
 /* ── API de siempre, ahora firmada (y con los permisos por rol intactos) ── */
 function fbSet(path, value){
@@ -495,6 +513,53 @@ function fbPush(path, value){
 
 
 /* ══════════════════════════════════════════════════════════════════════
+   EL PUENTE CON LA ENTRADA DEL PORTAL
+
+   Sin esto, la pantalla de entrada validaria la contraseña contra el
+   archivo de datos en vez de contra Firebase: cualquiera que mire el
+   codigo la vería. La contraseña de verdad vive en Firebase y este
+   portal no la conoce nunca.
+
+   Devuelve lo mismo que la version sin Firebase, para que la pantalla
+   de entrada no tenga que saber cual de las dos esta usando.
+   ══════════════════════════════════════════════════════════════════════ */
+function fbEntrarKine(usuario, clave){
+  return _fbEntrar(usuario, clave)
+    .then(function(){
+      /* El rol NO se decide acá: se lee de la base, donde el paciente no
+         puede escribir. Si se decidiera acá, cualquiera con una cuenta
+         entraria como kinesiologo. */
+      return fbGet('kine/roles/' + (FB_SES && FB_SES.uid));
+    })
+    .then(function(rol){
+      if(rol !== 'kine'){
+        if(typeof fbLogout === 'function') fbLogout();
+        return {ok:false, motivo:'Esa cuenta no está habilitada como kinesiólogo. '
+          + 'Hay que cargarla en la base, en kine/roles.'};
+      }
+      guardarSesion({tipo:'kine', desde:HOY, uid:FB_SES.uid, email:FB_SES.email});
+      return {ok:true, destino:'panel.html',
+              nombre:((BASE.perfil || {}).nombre) || 'Kinesiólogo'};
+    })
+    .catch(function(e){
+      var m = (e && e.message) || '';
+      /* "Failed to fetch" no le dice nada a nadie. Se traduce a lo que
+         de verdad pasa, que es que no hay internet o el servicio no
+         responde. */
+      if(m.indexOf('Failed to fetch') >= 0 || m.indexOf('NetworkError') >= 0){
+        return {ok:false, motivo:'No hay conexión con el servidor. '
+          + 'Revisá tu internet y volvé a intentar.'};
+      }
+      return {ok:false, motivo: m || 'No se pudo entrar.'};
+    });
+}
+
+/* El paciente entra sin Firebase: sus datos ya estan en la base y se
+   comparan contra la ficha. No tiene cuenta propia, y es a proposito:
+   crear una cuenta por paciente es una barrera que no vuelve a cruzar. */
+
+
+/* ══════════════════════════════════════════════════════════════════════
    SIN CONFIGURAR, ESTE ARCHIVO NO EXISTE
 
    Las funciones de arriba quedan definidas igual por como funciona
@@ -527,7 +592,24 @@ var RAMAS_ESTUDIO = ['pacientes','lesiones','disponibilidad','programas','agenda
 
 function fbCargarTodo(){
   if(!FB_CONFIGURADO || typeof BASE === 'undefined') return;
+
+  /* Si los datos no llegan, el portal muestra los de ejemplo y nadie se
+     entera de que esta viendo algo que no es real. Eso es peligroso en
+     una historia clinica: mejor decirlo. */
+  var llego = false;
+  setTimeout(function(){
+    if(llego || !document.body) return;
+    var d = document.createElement('div');
+    d.className = 'cartel-demo';
+    d.style.background = 'var(--rojo-suave)';
+    d.style.color = 'var(--rojo)';
+    d.innerHTML = '<span><b>No se pudieron traer los datos.</b> Lo que ves puede no estar '
+      + 'actualizado. Revisá tu conexión y recargá.</span>';
+    document.body.insertBefore(d, document.body.firstChild);
+  }, 9000);
+
   fbGet('kine', function(d){
+    llego = true;
     if(!d) return;
     RAMAS_ESTUDIO.forEach(function(r){
       if(d[r] !== undefined) BASE[r] = d[r];

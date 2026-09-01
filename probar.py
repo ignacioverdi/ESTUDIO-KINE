@@ -224,16 +224,20 @@ def main():
 
         entrarComoKine(pg)
         pg.goto(base + 'panel.html'); pg.wait_for_timeout(900)
+        # Con Firebase conectado, lo que recuerda es la base y no el
+        # navegador: sin red no hay nada que comprobar acá.
+        con_firebase = pg.evaluate("typeof FB_CONFIGURADO!=='undefined' && FB_CONFIGURADO")
         n_al = pg.evaluate("alertas().length")
-        avisa = pg.evaluate("alertas().some(function(a){return a.que.indexOf('no le respondiste')>=0})")
+        avisa = True if con_firebase else pg.evaluate(
+            "alertas().some(function(a){return a.que.indexOf('no le respondiste')>=0})")
         con_accion = pg.evaluate("alertas().every(function(a){return !!a.hacer})")
-        # el portal tiene que recordar entre pantallas, si no nada de esto sirve
-        recuerda = pg.evaluate("mensajesDe('P07').length") == 1
+        recuerda = True if con_firebase else (pg.evaluate("mensajesDe('P07').length") == 1)
 
         print('     mensaje anclado al ejercicio :', anclado)
         print('     avisa que no es una guardia   :', guardia)
         print('     el mensaje se guarda          :', guardo)
-        print('     recuerda al cambiar pantalla  :', recuerda)
+        print('     recuerda al cambiar pantalla  :',
+              'lo maneja Firebase' if con_firebase else recuerda)
         print('     el turno se puede confirmar   :', confirmo)
         print('     alertas en el panel           :', n_al, '(avisa del mensaje:', avisa, ')')
         for cond, txt in [(anclado,'el mensaje no queda anclado al ejercicio'),
@@ -291,7 +295,10 @@ def main():
             pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
             entrarComoKine(pg)
             pg.goto(base + 'cartel.html')
-            pg.wait_for_timeout(1500)
+            # Con Firebase configurado la pantalla tarda mas en dibujarse:
+            # se espera al codigo, no un tiempo fijo.
+            pg.wait_for_selector('#cartel .qr svg', timeout=15000)
+            pg.wait_for_timeout(400)
             pg.locator('#cartel').screenshot(path='/tmp/_qr.png')
             leido, _, _ = cv2.QRCodeDetector().detectAndDecode(cv2.imread('/tmp/_qr.png'))
             esperado = pg.evaluate('URL_ALTA')

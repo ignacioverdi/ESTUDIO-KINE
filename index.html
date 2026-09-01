@@ -129,20 +129,30 @@ function demo(){
 function elegir(p){ puerta = p; pintar(); }
 
 function enviar(){
-  var av = document.getElementById('aviso'), r;
+  var av = document.getElementById('aviso');
+  var r;
   if(puerta === 'paciente'){
     r = entrarPaciente(document.getElementById('pDoc').value,
                        document.getElementById('pNac').value);
   }else{
+    av.innerHTML = '<div class="nota info" style="margin-top:14px">Entrando…</div>';
     r = entrarKine(document.getElementById('kMail').value,
                    document.getElementById('kClave').value);
   }
-  if(!r.ok){
-    av.innerHTML = '<div class="nota reserva" style="margin-top:14px">' + r.motivo + '</div>';
+  /* Con Firebase la respuesta tarda: la funcion devuelve una promesa.
+     Sin Firebase contesta al instante. Se atienden los dos casos igual. */
+  Promise.resolve(r).then(resolver);
+}
+
+function resolver(r){
+  var av = document.getElementById('aviso');
+  if(!r || !r.ok){
+    av.innerHTML = '<div class="nota reserva" style="margin-top:14px">'
+      + ((r && r.motivo) || 'No se pudo entrar.') + '</div>';
     return;
   }
   av.innerHTML = '<div class="nota bien" style="margin-top:14px">Hola, '
-    + r.nombre.split(' ')[0] + '.</div>';
+    + String(r.nombre || '').split(' ')[0] + '.</div>';
   setTimeout(function(){ location.href = volver || r.destino; }, 400);
 }
 

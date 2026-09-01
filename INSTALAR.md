@@ -121,55 +121,60 @@ celular y no aparece en la lista. Para probar alcanza; para trabajar no.
 
 Con la base conectada, **todos ven lo mismo desde cualquier aparato, al instante**.
 
-### Crear la base
+### Ya está conectada
+
+Las credenciales están cargadas en `js/firebase.js`:
 
 ```
-1. console.firebase.google.com  →  Agregar proyecto
-2. Realtime Database  →  Crear  →  modo BLOQUEADO
-3. Authentication  →  Comenzar  →  activar Correo y contraseña
+base:   estudio-kine-default-rtdb.firebaseio.com
+cuenta: guidoverdi91@gmail.com
 ```
 
-**Modo bloqueado, no de prueba.** El de prueba deja la base abierta a cualquiera
-durante 30 días. Son datos de salud.
+**Faltan dos cosas que se hacen UNA sola vez en la consola de Firebase.**
 
-### Completar tres líneas
+### 1. Pegar las reglas
 
-Abrí `js/firebase.js`. Arriba de todo hay tres líneas que dicen `PONER_ACA`:
+Están al final de `js/firebase.js`, listas para copiar. Van en Firebase →
+**Realtime Database** → pestaña **Reglas** → Publicar.
 
-```javascript
-var FB_URL  = 'https://tu-proyecto-default-rtdb.firebaseio.com';
-var FB_KEY  = 'la apiKey del proyecto';
-var FB_DOM  = 'estudio.app';
-```
+Lo que hacen en una línea: el cuerpo técnico ve la disponibilidad, nunca el
+diagnóstico. Y cada paciente ve solo lo suyo.
 
-Los dos primeros salen de Firebase, en Configuración del proyecto.
+### 2. Decir quién es el kinesiólogo
 
-**La apiKey no es un secreto.** Va a la vista en cualquier aplicación web. Lo que
-protege los datos son las reglas, no ella.
+Sin esto **nadie puede entrar**, ni siquiera con la contraseña correcta. El rol
+no se decide en el portal a propósito: si se decidiera ahí, cualquiera con una
+cuenta entraría como kinesiólogo.
 
-### Pegar las reglas
+Primero, el identificador de la cuenta. En Firebase → **Authentication** →
+pestaña Users, al lado del correo hay una columna **User UID**. Es un texto
+largo. Copialo.
 
-Están al final de `js/firebase.js`, listas para copiar. Van en Firebase, en
-Realtime Database, pestaña **Reglas**.
-
-Lo que hacen, en una línea: **el cuerpo técnico ve la disponibilidad, nunca el
-diagnóstico.** Y un paciente solo ve lo suyo.
-
-### Crear las cuentas
-
-En Firebase, en Authentication, agregá un usuario para el kinesiólogo. Después,
-en la base, cargá dos cosas a mano una sola vez:
+Después, en **Realtime Database** → pestaña Datos, con el botón `+` creá esto:
 
 ```
-kine/roles/<uid del kinesiólogo>   =  "kine"
-kine/uid_pid/<uid de un paciente>  =  "P07"
+kine
+ └── roles
+      └── <el UID que copiaste>  :  "kine"
 ```
 
-La primera dice quién es el kinesiólogo. La segunda ata cada cuenta con su ficha.
+Queda así: la rama `kine`, adentro `roles`, adentro el UID como nombre y la
+palabra `kine` como valor.
 
-**Las dos tienen escritura prohibida en las reglas, y no es un olvido:** si un
-paciente pudiera escribir ahí, se haría kinesiólogo solo y vería todas las
-historias clínicas.
+**Ojo con el orden:** pegá las reglas *después* de crear esa rama. Si las pegás
+antes, la consola te va a impedir escribir, porque las reglas prohíben escribir
+en `roles` — que es justamente lo que las hace seguras.
+
+### 3. Atar cada paciente con su cuenta (solo si algún día usan cuentas)
+
+Hoy el paciente entra con documento y fecha de nacimiento, sin cuenta de
+Firebase. Esta tabla queda preparada para cuando haga falta:
+
+```
+kine/uid_pid/<UID del paciente>  :  "P07"
+```
+
+---
 
 ### Comprobarlo
 
