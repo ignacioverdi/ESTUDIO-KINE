@@ -14,102 +14,138 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
 </head>
+<style>
+  /* La entrada no lleva menu ni encabezado: todavia no sabemos quien es. */
+  .entrada{max-width:440px;margin:0 auto;padding:34px 18px 60px}
+  .marca-grande{text-align:center;margin-bottom:28px}
+  .marca-grande .sig{width:64px;height:64px;border-radius:16px;background:var(--acc);
+    margin:0 auto 14px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 34px rgba(0,216,232,.28)}
+  .marca-grande .sig::after{content:'';width:30px;height:30px;
+    background:linear-gradient(var(--sobre-acc),var(--sobre-acc)) center/30px 5px no-repeat,
+               linear-gradient(var(--sobre-acc),var(--sobre-acc)) center/5px 30px no-repeat}
+  .marca-grande b{display:block;font-family:var(--tit);font-size:30px;font-weight:var(--tit-peso);
+    letter-spacing:var(--tit-track);text-transform:var(--tit-caja);line-height:1}
+  .marca-grande span{display:block;font-family:var(--dat);font-size:11px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--tinta3);margin-top:6px}
+  .puertas{display:flex;gap:8px;margin-bottom:20px}
+  .puerta{flex:1;padding:16px 12px;border-radius:var(--r2);border:var(--borde) solid var(--linea2);
+    background:var(--sup2);cursor:pointer;text-align:center;transition:.14s}
+  .puerta:hover{border-color:var(--acc)}
+  .puerta.on{border-color:var(--acc);background:var(--acc-suave);border-width:2px}
+  .puerta .ic{font-size:24px;display:block;margin-bottom:6px;color:var(--acc-texto)}
+  .puerta b{display:block;font-size:15px;font-weight:600}
+  .puerta small{display:block;color:var(--tinta3);font-size:12.5px;margin-top:2px}
+  .pie-entrada{text-align:center;color:var(--tinta3);font-size:13px;margin-top:20px;line-height:1.7}
+  .pie-entrada a{color:var(--acc-texto)}
+</style>
+</head>
+<!-- PANTALLA PUBLICA — es la puerta: no puede exigir haber entrado. -->
 <body data-pag="inicio">
-<div class="hoja angosta">
-  <h1 class="tit">El estudio, en un solo lugar</h1>
-  <p class="bajada">Turnos, fichas de lesión, circuitos de readaptación y el programa de cada
-  jugador. El kinesiólogo carga una vez; el jugador ve lo suyo desde el celular.</p>
-  <div class="rejilla c3" style="margin-bottom:26px">
-    <div class="dato"><div class="v" id="dOk">—</div><div class="l">Disponibles</div></div>
-    <div class="dato"><div class="v" id="dLim" style="color:var(--ambar)">—</div><div class="l">Limitados</div></div>
-    <div class="dato"><div class="v" id="dBaja" style="color:var(--rojo)">—</div><div class="l">De baja</div></div>
-  </div>
-  <div class="tarjeta">
-    <div class="tarjeta-cab"><h2 class="sub">Entrar</h2>
-      <span class="eti">Elegí cómo mirar</span></div>
-    <button class="fila" onclick="entrar('kine')">
-      <span class="hh">▤</span>
-      <span class="cu"><b>Soy el kinesiólogo</b>
-        <small>Agenda del día, fichas, pizarrón de circuitos y biblioteca.</small></span>
-      <span class="pin reservado">Panel</span>
-    </button>
-    <button class="fila" onclick="entrar('jugador')">
-      <span class="hh">◉</span>
-      <span class="cu"><b>Estoy lesionado</b>
-        <small>Mi fase, mi turno, mis ejercicios de hoy y cómo me siento.</small></span>
-      <span class="pin gris">Mi vista</span>
-    </button>
-    <a class="fila" href="alta.html" style="text-decoration:none;color:inherit">
-      <span class="hh">+</span>
-      <span class="cu"><b>Es mi primera vez</b>
-        <small>Darme de alta. Dos minutos, una sola vez.</small></span>
-      <span class="pin limitado">Alta</span>
-    </a>
-    <label class="campo" style="margin-top:16px">
-      <span class="eti">Si entrás como jugador, ¿cuál sos?</span>
-      <select id="quien"></select>
-    </label>
-    <p style="font-size:13px;color:var(--tinta2)">
-      Esta pantalla existe para probar las dos vistas sin crear cuentas. En el portal
-      publicado el rol viene de la cuenta y no se puede elegir.
-    </p>
-  </div>
-  <div class="tarjeta">
-    <div class="tarjeta-cab"><h2 class="sub">Quién ve qué</h2></div>
-    <p style="font-size:14px;color:var(--tinta2);margin-bottom:14px">
-      El diagnóstico es un dato de salud y vive separado de la disponibilidad. El cuerpo
-      técnico ve si un jugador está, no qué tiene.</p>
-    <div class="fila" style="cursor:default">
-      <span class="cu"><b>Kinesiólogo</b><small>Todo: fichas, sesiones, agenda, programas.</small></span></div>
-    <div class="fila" style="cursor:default">
-      <span class="cu"><b>Jugador</b><small>Su ficha, su turno, su programa. Nada de los demás.</small></span></div>
-    <div class="fila" style="cursor:default">
-      <span class="cu"><b>Cuerpo técnico</b><small>Solo el semáforo de disponibilidad y la fecha estimada.</small></span></div>
-  </div>
-</div>
+
+<div class="entrada" id="todo"></div>
+
 <script>
-/* contadores */
-var c = {ok:0, limitado:0, baja:0};
-BASE.plantel.forEach(function(j){ c[estadoDe(j.d).estado]++; });
-document.getElementById('dOk').textContent   = c.ok;
-document.getElementById('dLim').textContent  = c.limitado;
-document.getElementById('dBaja').textContent = c.baja;
-/* quién */
-document.getElementById('quien').innerHTML = BASE.plantel.map(function(j){
-  var e = estadoDe(j.d);
-  var t = e.estado === 'ok' ? 'sin lesión' : e.motivo;
-  return '<option value="' + j.d + '"' + (j.d === miDorsal() ? ' selected' : '') + '>'
-       + j.d + ' · ' + j.n + ' — ' + t + '</option>';
-}).join('');
-function entrar(r){
-  ponerRol(r);
-  if(r === 'jugador'){
-    ponerDorsal(+document.getElementById('quien').value);
-    irA('mi.html');
+var puerta = 'paciente';
+var volver = new URLSearchParams(location.search).get('volver');
+
+/* Si ya habia entrado, no se le pregunta de nuevo. */
+(function(){
+  var s = sesion();
+  if(s) location.replace(s.tipo === 'kine' ? (volver || 'panel.html') : (volver || 'mi.html'));
+})();
+
+function pintar(){
+  var P = BASE.perfil || {};
+  document.getElementById('todo').innerHTML =
+
+    '<div class="marca-grande">'
+    + (P.logo ? '<img src="' + P.logo + '" style="max-width:180px;max-height:70px;margin:0 auto 12px;display:block">'
+              : '<span class="sig"></span>')
+    + '<b>' + (P.estudio || 'ESTUDIO') + '</b>'
+    + '<span>' + (P.club || 'Kinesiología') + '</span></div>'
+
+    + '<div class="puertas">'
+    + '<button class="puerta' + (puerta === 'paciente' ? ' on' : '') + '" onclick="elegir(\'paciente\')">'
+    + '<span class="ic">&#9679;</span><b>Soy paciente</b><small>Ver lo mío</small></button>'
+    + '<button class="puerta' + (puerta === 'kine' ? ' on' : '') + '" onclick="elegir(\'kine\')">'
+    + '<span class="ic">&#9635;</span><b>Soy el kinesiólogo</b><small>Entrar al estudio</small></button>'
+    + '</div>'
+
+    + (puerta === 'paciente' ? formPaciente() : formKine())
+
+    + '<div id="aviso"></div>'
+
+    + (puerta === 'paciente'
+        ? '<p class="pie-entrada">¿Es tu primera vez en el estudio?<br>'
+          + '<a href="alta.html">Cargá tus datos acá</a>, tarda dos minutos.</p>'
+        : '<p class="pie-entrada">Si olvidaste la contraseña, se cambia desde Firebase.</p>')
+
+    + (esDemo() ? demo() : '');
+
+  ['pDoc','pNac','kMail','kClave'].forEach(function(id){
+    var e = document.getElementById(id);
+    if(e) e.addEventListener('keydown', function(ev){ if(ev.key === 'Enter') enviar(); });
+  });
+}
+
+function formPaciente(){
+  return '<div class="tarjeta">'
+    + '<p style="color:var(--tinta2);font-size:14px;margin-bottom:16px">'
+    + 'Entrá con los mismos datos que cargaste cuando te diste de alta. '
+    + 'No hay contraseña que recordar.</p>'
+    + '<label class="campo"><span class="eti">Tu documento</span>'
+    + '<input type="text" id="pDoc" inputmode="numeric" placeholder="Sin puntos" autocomplete="off"></label>'
+    + '<label class="campo" style="margin-bottom:0"><span class="eti">Tu fecha de nacimiento</span>'
+    + '<input type="date" id="pNac"></label>'
+    + '</div>'
+    + '<button class="bt ancho" onclick="enviar()">Entrar</button>';
+}
+
+function formKine(){
+  return '<div class="tarjeta">'
+    + '<label class="campo"><span class="eti">Correo</span>'
+    + '<input type="text" id="kMail" inputmode="email" autocomplete="username"></label>'
+    + '<label class="campo" style="margin-bottom:0"><span class="eti">Contraseña</span>'
+    + '<input type="password" id="kClave" autocomplete="current-password"></label>'
+    + '</div>'
+    + '<button class="bt ancho" onclick="enviar()">Entrar al estudio</button>';
+}
+
+/* Con datos de prueba, las credenciales a la vista: si no, nadie puede
+   mirar el portal. Desaparece al vaciar los datos de demostracion. */
+function demo(){
+  var p = BASE.pacientes[0] || {};
+  return '<div class="nota aviso" style="margin-top:22px;text-align:left">'
+    + '<b>Datos de demostración.</b><br>'
+    + 'Paciente: documento <b>' + p.doc + '</b>, nacimiento <b>'
+    + (p.nacimiento || '').split('-').reverse().join('/') + '</b><br>'
+    + 'Kinesiólogo: <b>' + ((BASE.perfil || {}).email || 'vero@estudiokine.com')
+    + '</b>, contraseña <b>estudio</b></div>';
+}
+
+function elegir(p){ puerta = p; pintar(); }
+
+function enviar(){
+  var av = document.getElementById('aviso'), r;
+  if(puerta === 'paciente'){
+    r = entrarPaciente(document.getElementById('pDoc').value,
+                       document.getElementById('pNac').value);
   }else{
-    irA('panel.html');
+    r = entrarKine(document.getElementById('kMail').value,
+                   document.getElementById('kClave').value);
   }
+  if(!r.ok){
+    av.innerHTML = '<div class="nota reserva" style="margin-top:14px">' + r.motivo + '</div>';
+    return;
+  }
+  av.innerHTML = '<div class="nota bien" style="margin-top:14px">Hola, '
+    + r.nombre.split(' ')[0] + '.</div>';
+  setTimeout(function(){ location.href = volver || r.destino; }, 400);
 }
-</script>
-<script>
-/* Desinstala cualquier programa que haya quedado de versiones anteriores.
-   Uno viejo guardaba el portal para funcionar sin internet y rompia
-   Safari: la pagina directamente no abria. Como ademas quedaba instalado
-   en el telefono, el arreglo no llegaba nunca. */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(r){
-    if(!r.length) return;
-    Promise.all(r.map(function(x){ return x.unregister(); }))
-      .then(function(){ return caches.keys(); })
-      .then(function(c){ return Promise.all(c.map(function(k){ return caches.delete(k); })); })
-      .then(function(){
-        if(!sessionStorage.getItem('limpio')){
-          sessionStorage.setItem('limpio','1'); location.reload();
-        }
-      }).catch(function(){});
-  }).catch(function(){});
-}
+
+pintar();
 </script>
 </body></html>

@@ -29,4 +29,6 @@
   --r:3px; --r2:4px; --r-chico:3px; --r-min:1px;
   --sombra:none; --sombra-alta:0 30px 80px rgba(0,0,0,.7);
   --fulgor:none; --trama:none; --velo-fondo:rgba(10,11,13,.85);
+  --brillo:rgba(120,220,240,.42);
+  --sombra-acc:rgba(0,216,232,.22);
 }

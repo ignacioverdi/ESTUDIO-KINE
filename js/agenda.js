@@ -24,19 +24,45 @@ var DIAS_CORTO   = ['do','lu','ma','mi','ju','vi','sá'];
 var MESES_NOMBRE = ['enero','febrero','marzo','abril','mayo','junio',
                     'julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
+/* ── EL HORARIO, DIA POR DIA ────────────────────────────────────────
+   Un solo horario para toda la semana no alcanza: un estudio atiende
+   mañanas unos dias y tardes otros, o corta al mediodia. Cada dia tiene
+   sus propias franjas, y pueden ser varias.
+
+   franjas: [{abre:'08:30', cierra:'12:30'}, {abre:'16:00', cierra:'20:00'}]
+   Un dia sin franjas es un dia que no se atiende.                     */
 function horario(){
-  if(!BASE.horario){
-    BASE.horario = {
-      dias: [1, 2, 3, 4, 5],      /* lunes a viernes; 0 = domingo */
-      abre: '08:30',
-      cierra: '12:30',
-      minutos: 30,
-      /* Fechas puntuales en las que el estudio no atiende: feriados,
-         vacaciones, un congreso. Van como 'AAAA-MM-DD'. */
-      cerrado: []
+  if(!BASE.horario) BASE.horario = {};
+  var h = BASE.horario;
+
+  /* Los horarios viejos, de cuando era uno solo para toda la semana, se
+     convierten sin perder nada. */
+  if(h.abre && !h.semana){
+    h.semana = {};
+    [0,1,2,3,4,5,6].forEach(function(d){
+      h.semana[d] = (h.dias || []).indexOf(d) >= 0
+        ? [{abre:h.abre, cierra:h.cierra}] : [];
+    });
+  }
+  if(!h.semana){
+    h.semana = {
+      0: [],
+      1: [{abre:'08:30', cierra:'12:30'}, {abre:'16:00', cierra:'20:00'}],
+      2: [{abre:'08:30', cierra:'12:30'}],
+      3: [{abre:'08:30', cierra:'12:30'}, {abre:'16:00', cierra:'20:00'}],
+      4: [{abre:'08:30', cierra:'12:30'}],
+      5: [{abre:'08:30', cierra:'12:30'}, {abre:'16:00', cierra:'20:00'}],
+      6: [],
+      0: []
     };
   }
-  return BASE.horario;
+  if(!h.minutos) h.minutos = 30;
+  if(!h.cerrado) h.cerrado = [];   /* feriados y vacaciones: 'AAAA-MM-DD' */
+  return h;
+}
+
+function franjasDe(dia){
+  return horario().semana[dia] || [];
 }
 
 function aMinutos(h){
@@ -54,17 +80,24 @@ function diaSemana(fecha){
 function esDiaDeAtencion(fecha){
   var h = horario();
   if((h.cerrado || []).indexOf(fecha) >= 0) return false;
-  return h.dias.indexOf(diaSemana(fecha)) >= 0;
+  return franjasDe(diaSemana(fecha)).length > 0;
 }
 
 /* Los horarios que existirian ese dia segun el horario del estudio. */
 function horariosDe(fecha){
   if(!esDiaDeAtencion(fecha)) return [];
   var h = horario(), r = [];
-  for(var m = aMinutos(h.abre); m + h.minutos <= aMinutos(h.cierra); m += h.minutos){
-    r.push(aHora(m));
-  }
-  return r;
+  franjasDe(diaSemana(fecha)).forEach(function(f){
+    for(var m = aMinutos(f.abre); m + h.minutos <= aMinutos(f.cierra); m += h.minutos){
+      r.push(aHora(m));
+    }
+  });
+  return r.sort();
+}
+
+/* Para separar mañana de tarde en la pantalla. */
+function franjaDeHora(hora){
+  return aMinutos(hora) < 13 * 60 ? 'Mañana' : 'Tarde';
 }
 
 /* ── LA AGENDA DE UN DIA ────────────────────────────────────────────

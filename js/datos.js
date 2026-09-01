@@ -65,6 +65,22 @@ var BASE = {
 
   club: 'Club Atlético — Estudio de kinesiología',
 
+  /* Los datos del profesional. Se editan en Mi perfil. */
+  perfil: {
+    nombre: 'Verónica Ramírez',
+    matricula: 'MP 12345 — Kinesióloga Fisiatra',
+    estudio: 'Estudio de kinesiología',
+    club: 'Club Atlético',
+    tel: '11 5555 0000',
+    email: 'vero@estudiokine.com',
+    clave: 'estudio',
+    direccion: 'Av. Siempreviva 742',
+    presentacion: 'Kinesióloga con quince años de trabajo en deporte. Me formé en '
+      + 'readaptación de lesiones deportivas y trabajo con el plantel del club desde 2019. '
+      + 'Atiendo también consultas particulares, con o sin lesión deportiva.',
+    foto: null, logo: null
+  },
+
   plantel: [
     {d:1,  n:'Ferrari',  p:'Arquero'},   {d:4,  n:'Molina',  p:'Central'},
     {d:6,  n:'Acosta',   p:'Volante'},   {d:7,  n:'Duarte',  p:'Extremo'},
@@ -187,11 +203,19 @@ var BASE = {
   /* El horario del estudio. De aca salen todos los turnos de todos los
      dias: no hay fechas escritas a mano. */
   horario: {
-    dias: [1, 2, 3, 4, 5],
-    abre: '08:30',
-    cierra: '12:30',
     minutos: 30,
-    cerrado: []
+    cerrado: [],
+    /* Cada dia con sus franjas. Un dia sin franjas no se atiende.
+       Se puede tener mañana y tarde, o cortar al mediodia. */
+    semana: {
+      0: [],
+      1: [{abre:'08:30', cierra:'12:30'}, {abre:'16:00', cierra:'20:00'}],
+      2: [{abre:'08:30', cierra:'12:30'}],
+      3: [{abre:'08:30', cierra:'12:30'}, {abre:'16:00', cierra:'20:00'}],
+      4: [{abre:'08:30', cierra:'12:30'}],
+      5: [{abre:'08:30', cierra:'12:30'}, {abre:'16:00', cierra:'20:00'}],
+      6: []
+    }
   },
 
   /* Solo lo OCUPADO. Los horarios libres se calculan al momento. */

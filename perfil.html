@@ -17,7 +17,7 @@
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script>
 <script src="js/qr.js"></script><script src="js/historia.js"></script>
 <script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script>
-<script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
 <style>
   .retrato{width:120px;height:120px;border-radius:50%;object-fit:cover;
     border:2px solid var(--linea2);background:var(--sup2);display:block}
@@ -32,22 +32,13 @@
 <script>
 /* El perfil vive en config.json en producción. Acá se guarda igual que
    todo lo demás, para poder editarlo desde la app sin tocar archivos. */
+/* El perfil vive en los datos y se guarda como todo lo demas. */
 function perfil(){
-  if(!BASE.perfil) BASE.perfil = {
-    nombre: 'Verónica Ramírez',
-    matricula: 'MP 12345 — Kinesióloga Fisiatra',
-    estudio: 'Estudio de kinesiología',
-    club: 'Club Atlético',
-    tel: '11 5555 0000',
-    email: 'vero@estudiokine.com',
-    direccion: 'Av. Siempreviva 742',
-    presentacion: 'Kinesióloga con quince años de trabajo en deporte. Me formé en '
-      + 'readaptación de lesiones deportivas y trabajo con el plantel del club desde 2019. '
-      + 'Atiendo también consultas particulares, con o sin lesión deportiva.',
-    foto: null, logo: null
-  };
+  if(!BASE.perfil) BASE.perfil = {nombre:'', matricula:'', estudio:'', club:'',
+    tel:'', email:'', clave:'estudio', direccion:'', presentacion:'', foto:null, logo:null};
   return BASE.perfil;
 }
+
 function pintar(){
   var P = perfil();
   document.getElementById('todo').innerHTML =
@@ -87,6 +78,16 @@ function pintar(){
     + '<div class="rejilla c2">' + campo('estudio', 'Nombre del estudio') + campo('club', 'Club') + '</div>'
     + '<div class="rejilla c2">' + campo('tel', 'Teléfono') + campo('email', 'Correo') + '</div>'
     + campo('direccion', 'Dirección')
+    + '</div>'
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Tu acceso</h2>'
+    + '<span class="eti">Con esto entrás vos</span></div>'
+    + '<p style="color:var(--tinta2);font-size:14px;margin-bottom:14px">'
+    + 'El correo de arriba y esta contraseña son los que usás para entrar al estudio. '
+    + 'Los pacientes entran distinto: con su documento y su fecha de nacimiento, sin contraseña.</p>'
+    + '<label class="campo" style="margin-bottom:0"><span class="eti">Contraseña</span>'
+    + '<input type="password" id="c_clave" value="' + (P.clave || 'estudio') + '" '
+    + 'oninput="tocar(\'clave\',this.value)"></label>'
     + '</div>'
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Quién sos</h2>'

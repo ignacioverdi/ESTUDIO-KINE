@@ -30,6 +30,58 @@ body{
   background-image:var(--trama); background-attachment:fixed;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   PROFUNDIDAD
+
+   El portal era plano: todo al mismo nivel visual. Con un poco de
+   relieve el ojo entiende antes que es un dato, que es una accion y
+   que es solo contexto.
+
+   Regla que no se rompe: el verde, el ambar y el rojo SIGNIFICAN
+   disponible, limitado y de baja. No se usan de adorno en ningun lado.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Las tarjetas dejan de ser cajas planas: un borde superior apenas mas
+   claro simula luz cayendo desde arriba. */
+.tarjeta{position:relative;overflow:hidden}
+.tarjeta::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--brillo),transparent);
+  opacity:.55;pointer-events:none}
+
+/* Los numeros grandes son lo primero que se mira: se les da presencia. */
+.dato{position:relative;overflow:hidden;transition:.15s}
+.dato::after{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--acc);opacity:.28}
+.dato:hover{border-color:var(--linea2)}
+.dato .v{font-feature-settings:'tnum' 1}
+
+/* Un titulo con una barrita al costado se encuentra mas rapido al
+   barrer la pantalla con la vista. */
+h2.sub{position:relative;padding-left:12px}
+h2.sub::before{content:'';position:absolute;left:0;top:.18em;bottom:.18em;width:3px;
+  border-radius:2px;background:var(--acc);opacity:.75}
+
+/* El boton principal se despega del resto. */
+.bt{position:relative;overflow:hidden}
+.bt:not(.neutro):not(.hueco){box-shadow:0 2px 10px var(--sombra-acc)}
+.bt:active{transform:translateY(1px)}
+
+/* Las filas responden al pasar por encima: dan la pista de que se tocan. */
+button.fila{position:relative}
+button.fila::after{content:'';position:absolute;left:0;top:0;bottom:0;width:0;
+  background:var(--acc);transition:width .13s;border-radius:2px}
+button.fila:hover::after{width:3px}
+
+/* El encabezado se despega del contenido al bajar la pagina. */
+.top{box-shadow:0 1px 0 var(--linea)}
+
+/* Las pastillas de estado, un poco mas legibles. */
+.pin{font-weight:600;letter-spacing:1.2px}
+
+/* Los vacios dejan de ser un hueco gris: son una invitacion. */
+.vacio{border:1px dashed var(--linea);border-radius:var(--r);background:var(--sup2)}
+.vacio b{color:var(--acc-texto)}
+
 /* ── CARTEL DE DEMOSTRACION ─────────────────────────────────────
    Tiene que ser imposible de pasar por alto: el riesgo es cargar un
    paciente real y que quede mezclado con los inventados.            */

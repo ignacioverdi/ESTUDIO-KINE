@@ -36,4 +36,6 @@
   --trama:linear-gradient(rgba(120,200,225,.045) 1px, transparent 1px),
           linear-gradient(90deg, rgba(120,200,225,.045) 1px, transparent 1px);
 }
-body{background-size:46px 46px}
+body{background-size:46px 46px  --brillo:rgba(120,220,240,.42);
+  --sombra-acc:rgba(0,216,232,.22);
+}

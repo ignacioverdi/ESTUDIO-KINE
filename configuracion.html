@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Horarios · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script>
+<script src="js/qr.js"></script><script src="js/historia.js"></script>
+<script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script>
+<script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
+<style>
+  .retrato{width:120px;height:120px;border-radius:50%;object-fit:cover;
+    border:2px solid var(--linea2);background:var(--sup2);display:block}
+  .retrato-vacio{width:120px;height:120px;border-radius:50%;border:2px dashed var(--linea2);
+    background:var(--sup2);display:flex;align-items:center;justify-content:center;
+    color:var(--tinta3);font-family:var(--dat);font-size:11px;text-align:center;padding:10px}
+  .logo-prev{max-width:170px;max-height:70px;object-fit:contain;display:block}
+</style>
+</head>
+<style>
+  .dia-fila{border:var(--borde) solid var(--linea);border-radius:var(--r);background:var(--sup2);
+    padding:14px;margin-bottom:9px}
+  .dia-cab{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .dia-cab b{flex:1;font-size:16px;text-transform:capitalize}
+  .franja{display:grid;grid-template-columns:1fr 1fr 44px;gap:8px;align-items:end;margin-bottom:8px}
+  .franja .quitar{height:44px;border-radius:var(--r);border:var(--borde) solid var(--linea2);
+    background:transparent;color:var(--tinta3);font-size:19px;cursor:pointer}
+  .franja .quitar:hover{border-color:var(--rojo);color:var(--rojo)}
+  .cerrado-dia{color:var(--tinta3);font-size:14px;font-style:italic}
+  .cupo{font-family:var(--dat);font-size:11px;letter-spacing:1px;text-transform:uppercase;
+    color:var(--acc-texto)}
+</style>
+</head>
+<body data-pag="configuracion">
+
+<div class="hoja angosta" id="todo"></div>
+
+<script>
+var DIAS_ORDEN = [1, 2, 3, 4, 5, 6, 0];
+
+function pintar(){
+  var h = horario();
+  var totalSemana = 0;
+  DIAS_ORDEN.forEach(function(d){
+    franjasDe(d).forEach(function(f){
+      totalSemana += Math.floor((aMinutos(f.cierra) - aMinutos(f.abre)) / h.minutos);
+    });
+  });
+
+  document.getElementById('todo').innerHTML =
+
+    '<h1 class="tit">Tus horarios</h1>'
+    + '<p class="bajada">Acá decidís cuándo atendés. De esto salen todos los turnos de todos '
+    + 'los días, para siempre: no hay que crear ningún mes.</p>'
+
+    + '<div class="rejilla c3" style="margin-bottom:20px">'
+    + '<div class="dato"><div class="v">' + totalSemana + '</div><div class="l">Turnos por semana</div></div>'
+    + '<div class="dato"><div class="v">' + h.minutos + '</div><div class="l">Minutos cada uno</div></div>'
+    + '<div class="dato"><div class="v">'
+    + DIAS_ORDEN.filter(function(d){ return franjasDe(d).length; }).length
+    + '</div><div class="l">Días que abrís</div></div></div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Cuánto dura cada turno</h2></div>'
+    + '<div class="pestanias" id="dur" style="margin-bottom:0">'
+    + [20, 30, 40, 45, 60].map(function(m){
+        return '<button class="pest' + (m === h.minutos ? ' on' : '') + '" data-m="' + m + '">'
+             + m + ' min</button>';
+      }).join('') + '</div></div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Tu semana</h2>'
+    + '<span class="eti">Podés poner mañana y tarde</span></div>'
+    + DIAS_ORDEN.map(filaDia).join('')
+    + '</div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Días que no atendés</h2>'
+    + '<span class="eti">Feriados y vacaciones</span></div>'
+    + '<p style="color:var(--tinta2);font-size:14px;margin-bottom:12px">'
+    + 'Los días que agregues acá quedan cerrados aunque sean días de atención. '
+    + 'Los turnos ya dados no se borran: los vas a ver marcados.</p>'
+    + '<div style="display:flex;gap:8px;align-items:end;margin-bottom:12px">'
+    + '<label class="campo" style="flex:1;margin-bottom:0"><span class="eti">Fecha</span>'
+    + '<input type="date" id="fCerrado"></label>'
+    + '<button class="bt hueco" onclick="cerrarDia()">Agregar</button></div>'
+    + ((h.cerrado || []).length
+        ? h.cerrado.sort().map(function(f){
+            return '<div class="fila" style="cursor:default"><span class="hh">'
+              + fechaCorta(f) + '</span><span class="cu"><b>' + fechaLegible(f) + '</b></span>'
+              + '<button class="bt neutro chico" onclick="abrirDia(\'' + f + '\')">Quitar</button></div>';
+          }).join('')
+        : '<p style="color:var(--tinta3);font-size:14px">Ninguno cargado.</p>')
+    + '</div>'
+
+    + '<div id="aviso"></div>'
+    + '<button class="bt ancho" onclick="guardarTodo()">Guardar</button>'
+    + '<a class="bt neutro ancho" href="agenda.html" style="text-decoration:none;text-align:center;margin-top:8px">Ver la agenda</a>';
+
+  document.querySelectorAll('#dur .pest').forEach(function(b){
+    b.onclick = function(){ horario().minutos = +b.dataset.m; pintar(); };
+  });
+}
+
+function filaDia(d){
+  var f = franjasDe(d);
+  var h = horario();
+  var cupos = 0;
+  f.forEach(function(x){ cupos += Math.floor((aMinutos(x.cierra) - aMinutos(x.abre)) / h.minutos); });
+
+  return '<div class="dia-fila">'
+    + '<div class="dia-cab"><b>' + DIAS_NOMBRE[d] + '</b>'
+    + (f.length ? '<span class="cupo">' + cupos + ' turnos</span>' : '')
+    + '<button class="bt ' + (f.length ? 'neutro' : 'hueco') + ' chico" onclick="sumarFranja(' + d + ')">'
+    + (f.length ? '+ Otra franja' : '+ Abrir este día') + '</button></div>'
+    + (f.length
+        ? f.map(function(x, i){
+            return '<div class="franja">'
+              + '<label><span class="eti">Desde</span>'
+              + '<input type="text" value="' + x.abre + '" onchange="setFranja(' + d + ',' + i + ',\'abre\',this.value)"></label>'
+              + '<label><span class="eti">Hasta</span>'
+              + '<input type="text" value="' + x.cierra + '" onchange="setFranja(' + d + ',' + i + ',\'cierra\',this.value)"></label>'
+              + '<button class="quitar" onclick="quitarFranja(' + d + ',' + i + ')" title="Quitar">&times;</button>'
+              + '</div>';
+          }).join('')
+        : '<div class="cerrado-dia">Cerrado</div>')
+    + '</div>';
+}
+
+function sumarFranja(d){
+  var f = franjasDe(d);
+  /* La segunda franja arranca a la tarde: es lo que se hace casi siempre
+     y ahorra tipear. */
+  f.push(f.length ? {abre:'16:00', cierra:'20:00'} : {abre:'08:30', cierra:'12:30'});
+  horario().semana[d] = f;
+  pintar();
+}
+function quitarFranja(d, i){
+  horario().semana[d].splice(i, 1);
+  pintar();
+}
+function setFranja(d, i, campo, valor){
+  var v = (valor || '').trim();
+  if(!/^\d{1,2}:\d{2}$/.test(v)){
+    document.getElementById('aviso').innerHTML =
+      '<div class="nota aviso">La hora se escribe así: 08:30</div>';
+    return;
+  }
+  horario().semana[d][i][campo] = ('0' + v).slice(-5);
+  pintar();
+}
+function cerrarDia(){
+  var f = document.getElementById('fCerrado').value;
+  if(!f) return;
+  var h = horario();
+  if(h.cerrado.indexOf(f) < 0) h.cerrado.push(f);
+  pintar();
+}
+function abrirDia(f){
+  var h = horario();
+  var i = h.cerrado.indexOf(f);
+  if(i >= 0) h.cerrado.splice(i, 1);
+  pintar();
+}
+
+function guardarTodo(){
+  var h = horario();
+  /* Un dia con la hora de cierre antes que la de apertura no genera
+     turnos y nadie entiende por que. Se avisa. */
+  var mal = [];
+  DIAS_ORDEN.forEach(function(d){
+    franjasDe(d).forEach(function(f){
+      if(aMinutos(f.cierra) <= aMinutos(f.abre)) mal.push(DIAS_NOMBRE[d]);
+    });
+  });
+  if(mal.length){
+    document.getElementById('aviso').innerHTML =
+      '<div class="nota reserva">En ' + mal.join(' y ') + ' la hora de cierre es anterior '
+      + 'a la de apertura. Ese día no va a generar ningún turno.</div>';
+    return;
+  }
+  BASE.agenda = BASE.agenda || {};
+  guardar('kine/horario', h);
+  document.getElementById('aviso').innerHTML =
+    '<div class="nota bien">Guardado. Los turnos de todos los días se recalcularon solos.</div>';
+}
+
+pintar();
+</script>
+</body></html>

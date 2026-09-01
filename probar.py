@@ -66,6 +66,15 @@ MEDIR = """(MIN) => {
 }"""
 
 
+def entrarComoKine(pg):
+    """Ahora hay puerta: sin entrar no se ve nada."""
+    pg.evaluate("guardarSesion({tipo:'kine', desde:HOY})")
+
+
+def entrarComoPaciente(pg, pid='P07'):
+    pg.evaluate("guardarSesion({tipo:'paciente', pid:'%s', dorsal:7, desde:HOY})" % pid)
+
+
 def servidor():
     """Un servidor local: hace falta para que el navegador cargue los
        archivos hermanos como lo hace Vercel."""
@@ -90,6 +99,8 @@ def main():
             pg = b.new_page(viewport={'width': w, 'height': h}, has_touch=tac, is_mobile=tac)
             errs = []
             pg.on('pageerror', lambda e: errs.append(str(e)))
+            pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
+            entrarComoKine(pg)
             hallazgos = set()
             for p in PANTALLAS:
                 pg.goto(base + p)
@@ -107,7 +118,7 @@ def main():
         print('\n  1b. EL MENU DEL CELULAR')
         pg = b.new_page(viewport={'width':390,'height':844}, has_touch=True, is_mobile=True)
         pg.goto(base + 'index.html'); pg.wait_for_timeout(700)
-        pg.evaluate("ponerRol('kine')")
+        entrarComoKine(pg)
         pg.goto(base + 'panel.html'); pg.wait_for_timeout(1000)
         # No alcanza con que exista: tiene que verse SIN bajar la pagina.
         # Estuvo al final del documento y nadie se dio cuenta.
@@ -159,7 +170,7 @@ def main():
             e2 = []
             pg.on('pageerror', lambda x: e2.append(str(x)))
             pg.goto(base + 'index.html'); pg.wait_for_timeout(700)
-            pg.evaluate("ponerRol('kine')")
+            entrarComoKine(pg)
             pg.goto(base + 'panel.html'); pg.wait_for_timeout(900)
 
             pg.tap('.menu-bt'); pg.wait_for_timeout(350)
@@ -194,7 +205,7 @@ def main():
         pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
         pg.evaluate("localStorage.clear()")      # arrancar limpio: el portal recuerda
         pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
-        pg.evaluate("ponerRol('jugador'); ponerDorsal(7); localStorage.setItem('estudio_pid','P07')")
+        entrarComoPaciente(pg)
         pg.goto(base + 'mi.html'); pg.wait_for_timeout(1000)
 
         pg.evaluate("consultar(1)"); pg.wait_for_timeout(500)
@@ -211,7 +222,7 @@ def main():
                                "function(d){BASE.agenda[d].forEach(function(t){"
                                "if(t.pid===miPid()&&t.confirmado)r=true;});});return r;})()")
 
-        pg.evaluate("ponerRol('kine')")
+        entrarComoKine(pg)
         pg.goto(base + 'panel.html'); pg.wait_for_timeout(900)
         n_al = pg.evaluate("alertas().length")
         avisa = pg.evaluate("alertas().some(function(a){return a.que.indexOf('no le respondiste')>=0})")
@@ -245,7 +256,7 @@ def main():
         pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
         pg.evaluate("localStorage.clear()")
         pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
-        pg.evaluate("ponerRol('kine')")
+        entrarComoKine(pg)
 
         # Una lesion operada tiene DOS relojes: desde la cirugia y desde
         # que empezo a tratarse. Con uno solo no se ve la diferencia entre
@@ -277,8 +288,10 @@ def main():
         try:
             import cv2
             pg = b.new_page(viewport={'width': 900, 'height': 900})
+            pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
+            entrarComoKine(pg)
             pg.goto(base + 'cartel.html')
-            pg.wait_for_timeout(1200)
+            pg.wait_for_timeout(1500)
             pg.locator('#cartel').screenshot(path='/tmp/_qr.png')
             leido, _, _ = cv2.QRCodeDetector().detectAndDecode(cv2.imread('/tmp/_qr.png'))
             esperado = pg.evaluate('URL_ALTA')
@@ -296,7 +309,7 @@ def main():
         pg.on('pageerror', lambda e: errs.append(str(e)))
         pg.goto(base + 'index.html')
         pg.wait_for_timeout(700)
-        pg.evaluate("ponerRol('kine')")
+        entrarComoKine(pg)
 
         pg.goto(base + 'panel.html'); pg.wait_for_timeout(700)
         antes = pg.evaluate('BASE.lesiones[0].sesiones.length')

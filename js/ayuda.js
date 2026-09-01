@@ -52,6 +52,29 @@ var AYUDA = {
     ojo: 'Alguien que se operó hace 90 días pero empezó la rehabilitación hace 10 no está atrasado: recién empieza. Con un solo número eso no se ve, y es la diferencia entre apurar a un paciente o entenderlo. Si la espera entre la lesión y la primera sesión fue larga, el portal te lo avisa. Los dos valores de dolor son obligatorios y la nota no: la diferencia entre el dolor al llegar y al terminar es el dato que muestra si la sesión sirvió. Al pasar de fase, los criterios se vacían y aparecen los de la fase nueva. Es a propósito: cada fase se gana de nuevo.'
   },
 
+  inicio: {
+    titulo: 'La entrada',
+    que_es: 'Dos puertas distintas para dos personas distintas.',
+    pasos: [
+      ['El paciente', 'Entra con su documento y su fecha de nacimiento. Sin contraseña que recordar.'],
+      ['El kinesiólogo', 'Entra con correo y contraseña, que se cambian en Mi perfil.'],
+      ['Primera vez', 'Si nunca se dio de alta, el enlace de abajo lo lleva a cargar sus datos.']
+    ],
+    ojo: 'Documento más fecha de nacimiento no es tan fuerte como una contraseña, y es a propósito: la alternativa real no es una contraseña fuerte, es que el paciente no entre nunca. Para compensar, cada paciente ve SOLO lo suyo y cada ingreso queda registrado. Si querés exigirle contraseña a alguien, se puede.'
+  },
+
+  configuracion: {
+    titulo: 'Tus horarios',
+    que_es: 'Cuándo atendés. De acá salen todos los turnos de todos los días, para siempre.',
+    pasos: [
+      ['Cuánto dura cada turno', 'Arriba. Cambiarlo recalcula la agenda entera.'],
+      ['Tu semana', 'Cada día con sus franjas. Podés poner mañana y tarde por separado, o cerrar el día.'],
+      ['Abrir un día', 'El botón lo enciende con un horario sugerido, que después ajustás.'],
+      ['Feriados y vacaciones', 'Abajo. Cierran ese día puntual aunque sea día de atención.']
+    ],
+    ojo: 'No hace falta crear los meses: los turnos existen para cualquier fecha. Si cambiás el horario, la agenda de todos los días se recalcula sola, incluidos los meses que todavía no miraste.'
+  },
+
   agenda: {
     titulo: 'La agenda',
     que_es: 'El calendario del estudio. Los turnos existen para cualquier fecha, sin límite.',

@@ -14,12 +14,27 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
 </head>
 <style>
   /* ── EL CALENDARIO ─────────────────────────────────────────────
      Cada dia muestra cuantos turnos tiene tomados con puntitos, para
      ver la semana de un vistazo sin entrar dia por dia.            */
+  /* La tira de siete dias: ocupa una linea y resuelve casi todo. */
+  .tira{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:12px}
+  .dcorto{border:var(--borde) solid var(--linea);border-radius:var(--r);background:var(--sup2);
+    padding:9px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;
+    color:var(--tinta);min-height:66px;transition:.13s}
+  .dcorto:hover{border-color:var(--acc)}
+  .dcorto .dsem{font-family:var(--dat);font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;
+    color:var(--tinta3)}
+  .dcorto .dnum{font-family:var(--dat);font-size:19px;font-weight:600;line-height:1}
+  .dcorto .dlib{font-family:var(--dat);font-size:8.5px;letter-spacing:.4px;color:var(--acc-texto)}
+  .dcorto.cerrado{opacity:.32;cursor:default;border-style:dashed}
+  .dcorto.cerrado .dlib{color:var(--tinta3)}
+  .dcorto.hoy{border-color:var(--acc)}
+  .dcorto.elegido{background:var(--acc);border-color:var(--acc);color:var(--sobre-acc)}
+  .dcorto.elegido .dsem,.dcorto.elegido .dlib{color:var(--sobre-acc);opacity:.85}
   .mes-cab{display:flex;align-items:center;gap:10px;margin-bottom:12px}
   .mes-cab .nombre{flex:1;font-family:var(--tit);font-size:19px;font-weight:var(--tit-peso);
     letter-spacing:var(--tit-track);text-transform:var(--tit-caja);text-align:center}
@@ -56,6 +71,13 @@
   <div class="rejilla c2">
     <div>
       <div class="tarjeta">
+        <!-- Por defecto una tira de siete dias, que ocupa una linea.
+             El mes entero se despliega con el boton: la mayoria de las
+             veces se da turno para esta semana o la que viene. -->
+        <div class="tira" id="tira"></div>
+        <button class="bt neutro ancho" style="margin-bottom:14px" onclick="verMes()"
+                id="btMes">Ver el mes entero</button>
+        <div id="cajaMes" style="display:none">
         <div class="mes-cab">
           <button onclick="moverMes(-1)" aria-label="Mes anterior">&#9664;</button>
           <span class="nombre" id="nombreMes"></span>
@@ -65,6 +87,7 @@
         <div class="grilla" id="grilla"></div>
         <p style="font-size:13px;color:var(--tinta3);margin-top:12px" id="pieMes"></p>
         <button class="bt neutro ancho" style="margin-top:8px" onclick="irAHoy()">Volver a hoy</button>
+        </div>
       </div>
     </div>
 
@@ -82,23 +105,13 @@
           Quien compra un plan de diez no quiere pedir turno diez veces. Elegí los días
           y la hora, y se reservan todas de una.</p>
         <button class="bt hueco ancho" onclick="abrirSerie()">Reservar una serie</button>
+        <a class="bt neutro ancho" href="configuracion.html" id="lnkHorarios"
+           style="text-decoration:none;text-align:center;margin-top:8px">Cambiar mis horarios</a>
       </div>
     </div>
   </div>
 
-  <div class="tarjeta" id="cajaCfg">
-    <div class="tarjeta-cab"><h2 class="sub">Horario del estudio</h2>
-      <span class="eti">De acá salen todos los turnos</span></div>
-    <div class="rejilla c3">
-      <label class="campo"><span class="eti">Abre</span><input type="text" id="cAbre"></label>
-      <label class="campo"><span class="eti">Cierra</span><input type="text" id="cCierra"></label>
-      <label class="campo"><span class="eti">Minutos por turno</span><input type="number" id="cMin"></label>
-    </div>
-    <label class="campo"><span class="eti">Días que atendés</span>
-      <div class="pestanias" id="cDias" style="margin-bottom:0"></div></label>
-    <div id="avisoCfg"></div>
-    <button class="bt hueco" onclick="guardarHorario()">Guardar horario</button>
-  </div>
+</div>
 </div>
 
 <script>
@@ -107,17 +120,49 @@ var dia = HOY;
 var mes = mesDe(HOY);
 
 if(!esKine){
-  document.getElementById('cajaCfg').style.display = 'none';
   document.getElementById('cajaSerie').style.display = 'none';
   document.getElementById('tit').textContent = 'Mis turnos';
 }
 
-function moverMes(n){ mes = sumarMeses(mes, n); pintar(); }
+function moverMes(n){ mes = sumarMeses(mes, n); mesAbierto = true;
+  document.getElementById('cajaMes').style.display='block'; pintar(); }
 function irAHoy(){ mes = mesDe(HOY); dia = HOY; pintar(); }
-function elegirDia(f){ dia = f; pintar(); }
+function elegirDia(f){ dia = f; if(mesDe(f) !== mes) mes = mesDe(f); pintar(); }
+
+var mesAbierto = false;
+function verMes(){
+  mesAbierto = !mesAbierto;
+  document.getElementById('cajaMes').style.display = mesAbierto ? 'block' : 'none';
+  document.getElementById('btMes').textContent = mesAbierto ? 'Ocultar el mes' : 'Ver el mes entero';
+  if(mesAbierto) pintar();
+}
+
+/* Siete dias desde hoy (o desde el elegido si es mas adelante). Con esto
+   se resuelve casi todo sin abrir el mes. */
+function pintarTira(){
+  var arranque = dia < HOY ? HOY : dia;
+  arranque = sumarDias(arranque, -3);
+  var html = '';
+  for(var i = 0; i < 7; i++){
+    var f = sumarDias(arranque, i);
+    var abierto = esDiaDeAtencion(f);
+    var o = abierto ? ocupacionDe(f) : {ocupados:0, libres:0, total:0};
+    var d = new Date(f + 'T12:00:00');
+    html += '<button class="dcorto' + (f === dia ? ' elegido' : '')
+      + (f === HOY ? ' hoy' : '') + (abierto ? '' : ' cerrado') + '"'
+      + (abierto ? ' onclick="elegirDia(\'' + f + '\')"' : ' disabled') + '>'
+      + '<span class="dsem">' + DIAS_CORTO[d.getDay()] + '</span>'
+      + '<span class="dnum">' + d.getDate() + '</span>'
+      + '<span class="dlib">' + (abierto ? (o.libres ? o.libres + ' libres' : 'lleno') : '—') + '</span>'
+      + '</button>';
+  }
+  document.getElementById('tira').innerHTML = html;
+}
 
 function pintar(){
-  /* ── el calendario ── */
+  pintarTira();
+  /* ── el calendario, solo si esta desplegado ── */
+  if(mesAbierto){
   document.getElementById('nombreMes').textContent = nombreMes(mes);
   document.getElementById('cabSem').innerHTML =
     ['lu','ma','mi','ju','vi','sá','do'].map(function(d){ return '<span>' + d + '</span>'; }).join('');
@@ -141,6 +186,7 @@ function pintar(){
   }).join('');
   document.getElementById('pieMes').textContent =
     ocupadosMes + ' turnos dados este mes · ' + libresMes + ' lugares libres';
+  }
 
   /* ── el dia elegido ── */
   var lista = agendaDe(dia);
@@ -156,7 +202,8 @@ function pintar(){
     ? lista.map(function(t, i){ return filaTurno(t, i); }).join('')
     : '<div class="vacio"><b>Ese día no se atiende</b>Elegí otro en el calendario.</div>';
 
-  if(esKine) pintarHorario();
+  var c = document.getElementById('cajaCfg');
+  if(c) c.style.display = 'none';
 }
 
 function filaTurno(t, i){
@@ -360,35 +407,6 @@ function hacerSerie(){
     + (r.puestos.length < cuantas
         ? ' Faltaron ' + (cuantas - r.puestos.length) + ': esos días ya estaban ocupados.'
         : '') + '</div>';
-  pintar();
-}
-
-/* ── EL HORARIO ─────────────────────────────────────────────────── */
-function pintarHorario(){
-  var h = horario();
-  document.getElementById('cAbre').value = h.abre;
-  document.getElementById('cCierra').value = h.cierra;
-  document.getElementById('cMin').value = h.minutos;
-  document.getElementById('cDias').innerHTML = [1,2,3,4,5,6,0].map(function(d){
-    return '<button class="pest' + (h.dias.indexOf(d) >= 0 ? ' on' : '') + '" data-d="' + d + '">'
-         + DIAS_NOMBRE[d].slice(0, 3) + '</button>';
-  }).join('');
-  document.querySelectorAll('#cDias .pest').forEach(function(b){
-    b.onclick = function(){
-      var d = +b.dataset.d, i = h.dias.indexOf(d);
-      if(i >= 0) h.dias.splice(i, 1); else h.dias.push(d);
-      pintar();
-    };
-  });
-}
-function guardarHorario(){
-  var h = horario();
-  h.abre = document.getElementById('cAbre').value || '08:30';
-  h.cierra = document.getElementById('cCierra').value || '12:30';
-  h.minutos = +document.getElementById('cMin').value || 30;
-  guardar('kine/horario', h);
-  document.getElementById('avisoCfg').innerHTML =
-    '<div class="nota bien">Guardado. Los turnos de todos los días se recalcularon.</div>';
   pintar();
 }
 

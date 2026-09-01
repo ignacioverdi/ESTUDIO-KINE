@@ -27,6 +27,7 @@ var MENU = {
     {id:'historia',   t:'Historias',   ic:'▤', a:'historia.html'},
     {id:'programa',   t:'Programas',   ic:'≡', a:'programa.html'},
     {id:'caja',       t:'Caja',        ic:'◧', a:'caja.html'},
+    {id:'configuracion', t:'Horarios',  ic:'◷', a:'configuracion.html'},
     {id:'perfil',     t:'Mi perfil',   ic:'◉', a:'perfil.html'},
     {id:'cartel',     t:'Cartel',      ic:'▧', a:'cartel.html'},
     {id:'pizarron',   t:'Pizarrón',    ic:'◈', a:'pizarron.html'},
@@ -46,13 +47,22 @@ if(typeof esDemo === 'function' && !esDemo() && typeof vaciarTodo === 'function'
   vaciarTodo();
 }
 
+/* Puerta cerrada: si no entro, no ve. Corre antes que nada.
+   No se lanza un error para cortar: eso queda registrado como falla y
+   ensucia la busqueda de errores de verdad. Se marca y se sale. */
+var SIN_ENTRAR = false;
+if(typeof exigirSesion === 'function'){
+  if(!exigirSesion()) SIN_ENTRAR = true;
+  else if(typeof exigirKine === 'function') exigirKine();
+}
+
 function armarCabecera(){
   var pag = document.body.dataset.pag || '';
-  var r   = rol();
+  var q   = (typeof quienEntro === 'function') ? quienEntro() : null;
+  var r   = q ? (q.tipo === 'kine' ? 'kine' : 'jugador') : rol();
   var items = MENU[r === 'kine' ? 'kine' : 'jugador'];
-  var quien = r === 'kine'
-      ? {ini:'VR', txt:'Vero · kinesióloga'}
-      : {ini:'#' + miDorsal(), txt:nombre(miDorsal())};
+  var quien = q ? {ini:q.ini, txt:q.nombre}
+                : {ini:'?', txt:'sin identificar'};
 
   var top = document.createElement('div');
   top.className = 'top';
@@ -63,7 +73,9 @@ function armarCabecera(){
     + '<div class="quien"><a href="estado.html" title="Estado del portal" '
     + 'style="color:var(--tinta3);text-decoration:none;font-size:10px;letter-spacing:.5px">v'
     + VERSION_PORTAL + '</a>'
-    + '<span class="av">' + quien.ini + '</span>' + quien.txt + '</div>'
+    + '<span class="av">' + quien.ini + '</span>' + quien.txt
+    + '<button class="ayuda-bt" onclick="salir()" title="Salir" aria-label="Salir">&#8629;</button>'
+    + '</div>'
     + '<div class="quien" style="margin-left:0">' + botonAyuda(pag) + '</div>'
     + '</div>';
 
@@ -180,4 +192,12 @@ function pestanias(alCambiar){
 }
 
 function irA(url){ location.href = url; }
-document.addEventListener('DOMContentLoaded', armarCabecera);
+/* La entrada y el alta no llevan encabezado ni menu: quien las abre
+   todavia no entro, o no es paciente todavia. Ponerle el menu del
+   kinesiologo a la pantalla de login es raro y confunde. */
+var SIN_CABECERA = ['index.html', 'alta.html', ''];
+function llevaCabecera(){
+  return SIN_CABECERA.indexOf(location.pathname.split('/').pop()) < 0;
+}
+if(!SIN_ENTRAR && llevaCabecera())
+  document.addEventListener('DOMContentLoaded', armarCabecera);
