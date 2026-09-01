@@ -29,8 +29,9 @@
 | Tocar el turno no hacía nada, sin avisar | La agenda de ejemplo no tenía el paciente |
 | **Cinco horas publicando sin que cambiara nada** | **Un comentario mío adentro de `vercel.json`** |
 | La cuenta correcta era rechazada al entrar | Le pedí el rol a una función que no devuelve datos |
+| Una escritura rechazada se perdía en silencio | El error se tragaba y la copia local disimulaba |
 
-**Diecisiete errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Dieciocho errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---
@@ -117,6 +118,14 @@ tocando la aplicación en un iPhone simulado.
 
 **Fallar en silencio es la peor forma de fallar.** Si algo no puede seguir, tiene
 que decirlo.
+
+Volvió a pasar con la base, y casi se me escapa. Escribí un dato de prueba, lo
+leí de vuelta, y me lo devolvió la copia guardada en el navegador: la escritura
+había fallado y todo parecía funcionar. Solo me di cuenta al intentar borrarlo.
+
+En una historia clínica, creer que quedó asentada una sesión que no existe en
+ningún lado es de los errores más caros que puede haber. Ahora una escritura
+rechazada muestra un cartel rojo que no se va hasta recargar.
 
 ### 6. Antes de reemplazar, verificar que sea único
 

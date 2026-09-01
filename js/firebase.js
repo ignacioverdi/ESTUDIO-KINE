@@ -459,15 +459,53 @@ function _fbArrancar(){
 if(FB_CONFIGURADO && typeof sesion === 'function' && sesion()) _fbArrancar();
 
 /* ── API de siempre, ahora firmada (y con los permisos por rol intactos) ── */
+/* ══════════════════════════════════════════════════════════════════════
+   SI NO SE GUARDA, HAY QUE DECIRLO
+
+   Antes, una escritura rechazada se perdia en silencio: el portal
+   guardaba una copia en el navegador, la volvia a leer de ahi, y todo
+   parecia funcionar. En una historia clinica eso es grave: se cree que
+   quedo asentada una sesion que no existe en ningun lado.
+
+   Casi me lo trago en la verificacion: escribi un dato de prueba, lo
+   lei de vuelta, y me lo devolvio la copia local. Solo me di cuenta al
+   intentar borrarlo.
+
+   Ahora una escritura fallida muestra un cartel rojo arriba de todo,
+   que no se va hasta recargar.
+   ══════════════════════════════════════════════════════════════════════ */
+function _fbAvisarFalloGuardado(path, motivo){
+  try{
+    if(document.getElementById('fb-fallo')) return;   /* uno alcanza */
+    var d = document.createElement('div');
+    d.id = 'fb-fallo';
+    d.className = 'cartel-demo';
+    d.style.background = 'var(--rojo-suave)';
+    d.style.color = 'var(--rojo)';
+    d.style.borderBottomColor = 'var(--rojo-borde)';
+    d.innerHTML = '<span><b>No se pudo guardar.</b> Lo último que cargaste NO quedó '
+      + 'registrado. Revisá tu conexión y volvé a hacerlo.</span>'
+      + '<a href="#" onclick="location.reload();return false">Recargar</a>';
+    if(document.body) document.body.insertBefore(d, document.body.firstChild);
+    console.error('[guardar] fallo en', path, motivo);
+  }catch(e){}
+}
+
 function fbSet(path, value){
   if(vbEdicionBloqueada(path)){ try{ console.warn('[permisos] escritura bloqueada para jugador:', path); }catch(e){} return; }
   try{ localStorage.setItem(fbKey(path), JSON.stringify(value)); }catch(e){}
   _fbArrancar().then(_fbSufijo).then(function(q){
     if(FB_OFF) return;
-    fetch(FB_URL + '/' + path + '.json' + q, {
+    return fetch(FB_URL + '/' + path + '.json' + q, {
       method:'PUT', headers:{'Content-Type':'application/json'},
       body: JSON.stringify(value)
-    }).catch(function(){});
+    }).then(function(r){
+      /* Firebase contesta 200 al guardar. Cualquier otra cosa es un
+         rechazo, y hay que mostrarlo. */
+      if(!r.ok) _fbAvisarFalloGuardado(path, 'la base respondió ' + r.status);
+    });
+  }).catch(function(e){
+    _fbAvisarFalloGuardado(path, (e && e.message) || 'sin conexión');
   });
 }
 
