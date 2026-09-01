@@ -28,8 +28,9 @@
 | El menú del celular estaba al final de la página | Lo probé en el archivo único, no en el real |
 | Tocar el turno no hacía nada, sin avisar | La agenda de ejemplo no tenía el paciente |
 | **Cinco horas publicando sin que cambiara nada** | **Un comentario mío adentro de `vercel.json`** |
+| La cuenta correcta era rechazada al entrar | Le pedí el rol a una función que no devuelve datos |
 
-**Dieciséis errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Diecisiete errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---

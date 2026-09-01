@@ -523,19 +523,56 @@ function fbPush(path, value){
    Devuelve lo mismo que la version sin Firebase, para que la pantalla
    de entrada no tenga que saber cual de las dos esta usando.
    ══════════════════════════════════════════════════════════════════════ */
+/* fbGet avisa por una funcion de respuesta, no devuelve el dato. Pedirle
+   el rol como si devolviera algo daba SIEMPRE "nada", y nada no es
+   "kine": por eso rechazaba a la cuenta correcta. Se lo envuelve. */
+function fbLeer(ruta){
+  return new Promise(function(listo){
+    fbGet(ruta, function(v){ listo(v); });
+  });
+}
+
 function fbEntrarKine(usuario, clave){
   return _fbEntrar(usuario, clave)
     .then(function(){
       /* El rol NO se decide acá: se lee de la base, donde el paciente no
          puede escribir. Si se decidiera acá, cualquiera con una cuenta
-         entraria como kinesiologo. */
-      return fbGet('kine/roles/' + (FB_SES && FB_SES.uid));
+         entraria como kinesiologo.
+
+         Se consulta DIRECTO con la llave recien emitida. Antes se pasaba
+         por el arranque general, que lo primero que hace es renovar la
+         sesion... la misma que se acababa de crear. Si esa renovacion
+         fallaba, quedaba esperando para siempre y la pantalla se colgaba
+         en "Entrando". */
+      var uid = FB_SES && FB_SES.uid;
+      var tok = FB_SES && FB_SES.idToken;
+      if(!uid || !tok) throw new Error('No se pudo abrir la sesión.');
+
+      /* La sesion ya es valida: se marca lista para que el resto del
+         portal no la vuelva a pedir. */
+      _fbListo = Promise.resolve(true);
+
+      return fetch(FB_URL + '/kine/roles/' + uid + '.json?auth=' + encodeURIComponent(tok))
+        .then(function(r){
+          if(r.status === 401) throw new Error('LAS_REGLAS');
+          return r.json();
+        });
     })
     .then(function(rol){
       if(rol !== 'kine'){
-        if(typeof fbLogout === 'function') fbLogout();
-        return {ok:false, motivo:'Esa cuenta no está habilitada como kinesiólogo. '
-          + 'Hay que cargarla en la base, en kine/roles.'};
+        var uid = (FB_SES && FB_SES.uid) || '(sin identificar)';
+        /* Se cierra la sesion SIN recargar: fbLogout recarga la pagina y
+           se lleva puesto el mensaje, dejando la pantalla en blanco sin
+           que nadie sepa que paso. */
+        try{
+          _fbGuardarSes(null);
+          _fbListo = null;
+        }catch(e){}
+        /* Se muestra el identificador: sin el, no hay forma de saber si
+           el problema es que falta cargarlo o que se cargo otro. */
+        return {ok:false, motivo:'La contraseña estaba bien, pero esta cuenta no figura '
+          + 'como kinesiólogo en la base.<br><br>Cargá esto en Firebase, en Realtime '
+          + 'Database:<br><b>kine / roles / ' + uid + '</b> con el valor <b>kine</b>'};
       }
       guardarSesion({tipo:'kine', desde:HOY, uid:FB_SES.uid, email:FB_SES.email});
       return {ok:true, destino:'panel.html',
@@ -546,6 +583,10 @@ function fbEntrarKine(usuario, clave){
       /* "Failed to fetch" no le dice nada a nadie. Se traduce a lo que
          de verdad pasa, que es que no hay internet o el servicio no
          responde. */
+      if(m === 'LAS_REGLAS'){
+        return {ok:false, motivo:'La base rechazó la consulta. Revisá que las reglas '
+          + 'estén publicadas en Firebase, en Realtime Database, pestaña Reglas.'};
+      }
       if(m.indexOf('Failed to fetch') >= 0 || m.indexOf('NetworkError') >= 0){
         return {ok:false, motivo:'No hay conexión con el servidor. '
           + 'Revisá tu internet y volvé a intentar.'};
