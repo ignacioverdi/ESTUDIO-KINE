@@ -184,22 +184,30 @@ var BASE = {
       ]}
   ],
 
+  /* El horario del estudio. De aca salen todos los turnos de todos los
+     dias: no hay fechas escritas a mano. */
+  horario: {
+    dias: [1, 2, 3, 4, 5],
+    abre: '08:30',
+    cierra: '12:30',
+    minutos: 30,
+    cerrado: []
+  },
+
+  /* Solo lo OCUPADO. Los horarios libres se calculan al momento. */
   agenda: {
     '2026-08-28':[
       {h:'08:30', pid:'P07', dorsal:7,  tipo:'Tratamiento', estado:'atendido'},
       {h:'09:00', pid:'P12', dorsal:12, tipo:'Gimnasio',    estado:'atendido'},
-      {h:'09:30', dorsal:null},
       {h:'10:00', pid:'P15', dorsal:15, tipo:'Campo',       estado:'reservado'},
-      {h:'10:30', dorsal:null},
-      {h:'11:00', pid:'P07', dorsal:7,  tipo:'Tratamiento', estado:'reservado'},
-      {h:'11:30', dorsal:null},
-      {h:'12:00', dorsal:null}
+      {h:'11:00', pid:'P07', dorsal:7,  tipo:'Tratamiento', estado:'reservado'}
     ],
     '2026-08-31':[
-      {h:'08:30', dorsal:null}, {h:'09:00', pid:'P12', dorsal:12, tipo:'Gimnasio', estado:'reservado'},
-      {h:'09:30', dorsal:null}, {h:'10:00', dorsal:null},
-      {h:'10:30', pid:'P15', dorsal:15, tipo:'Campo', estado:'reservado'},
-      {h:'11:00', dorsal:null}, {h:'11:30', dorsal:null}, {h:'12:00', dorsal:null}
+      {h:'09:00', pid:'P12', dorsal:12, tipo:'Gimnasio', estado:'reservado'},
+      {h:'10:30', pid:'P15', dorsal:15, tipo:'Campo',    estado:'reservado'}
+    ],
+    '2026-09-02':[
+      {h:'09:30', pid:'P31', dorsal:null, tipo:'Tratamiento', estado:'reservado'}
     ]
   },
 
@@ -389,12 +397,13 @@ var CLAVE_LOCAL = 'estudio_datos';
 
 /* Lo que cambia con el uso. El resto (plantillas, planes, textos) es la
    herramienta y no hace falta guardarlo. */
-var RAMAS = ['pacientes', 'lesiones', 'disponibilidad', 'programas', 'agenda',
+var RAMAS = ['pacientes', 'lesiones', 'disponibilidad', 'programas', 'agenda', 'horario',
              'historia', 'accesos', 'caja', 'mensajes', 'adherencia', 'perfil',
              'ejercicios'];
 
 function persistir(){
   if(typeof fbSet === 'function') return;      /* manda Firebase */
+  if(typeof podarAgenda === 'function') podarAgenda();   /* no guardar dias vacios */
   try{
     var d = {};
     RAMAS.forEach(function(r){ if(BASE[r] !== undefined) d[r] = BASE[r]; });

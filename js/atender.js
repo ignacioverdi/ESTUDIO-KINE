@@ -20,7 +20,7 @@ var AT = null;
 
 function atender(dia, hora){
   var t = null;
-  (BASE.agenda[dia] || []).forEach(function(x){ if(x.h === hora) t = x; });
+  agendaDe(dia).forEach(function(x){ if(x.h === hora) t = x; });
   if(!t) return;
 
   /* Turnos viejos guardados antes de que existiera el padron traen el
@@ -63,7 +63,7 @@ function pintarAtender(){
 function cuerpoAtender(){
   var p = AT.p, L = AT.L, pl = planDe(p), av = avisoCreditos(p);
 
-  var libres = (BASE.agenda[proximoDia()] || []).filter(function(x){ return !x.pid && !x.dorsal; });
+  var libres = agendaDe(proximoDia()).filter(function(x){ return !x.pid && !x.dorsal; });
 
   document.getElementById('cuerpoAtender').innerHTML =
     '<button class="cerrar" onclick="cerrarAtender()" aria-label="Cerrar">&times;</button>'
@@ -150,8 +150,10 @@ function textoBoton(){
 }
 
 function proximoDia(){
-  var d = Object.keys(BASE.agenda).filter(function(x){ return x > AT.dia; }).sort();
-  return d.length ? d[0] : AT.dia;
+  /* El proximo dia que el estudio atiende, exista o no en los datos. */
+  var f = sumarDias(AT.dia, 1), v = 0;
+  while(!esDiaDeAtencion(f) && v < 30){ f = sumarDias(f, 1); v++; }
+  return f;
 }
 
 function confirmarAtencion(){
@@ -203,7 +205,7 @@ function confirmarAtencion(){
   /* 4. el próximo turno */
   if(AT.proximo){
     var d2 = proximoDia();
-    (BASE.agenda[d2] || []).forEach(function(x){
+    agendaDe(d2).forEach(function(x){
       if(x.h === AT.proximo){
         x.pid = p.id; x.dorsal = p.dorsal || null;
         x.tipo = AT.tipo; x.estado = 'reservado';

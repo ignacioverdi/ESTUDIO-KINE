@@ -443,6 +443,22 @@ d.append(Spacer(1, 5 * mm))
 d.append(Paragraph('Ninguna alerta dice solamente que algo anda mal: todas dicen que hacer. '
                    'Un aviso sin accion es ruido.', CHICO))
 
+d.append(Paragraph('La agenda', H2))
+d.append(Paragraph('Arriba hay un calendario del mes. Con las flechas cambias de mes y podes ir '
+                   'todo lo lejos que quieras: los turnos existen para cualquier fecha, sin '
+                   'limite. No hay que "crear" el mes que viene.', P))
+d.append(Paragraph('Cada dia muestra puntitos: uno por cada turno tomado. Sirve para ver como '
+                   'viene la semana de un vistazo, sin entrar dia por dia.', P))
+d.append(Paragraph('Abajo del calendario esta el horario del estudio: a que hora abris, a que '
+                   'hora cerras, cuantos minutos dura cada turno y que dias atendes. De ahi salen '
+                   'todos los turnos. Si lo cambias, se recalcula todo.', P))
+d.append(caja('<b>Reservar varias sesiones de una.</b><br/><br/>'
+              'Quien compra un plan de diez no quiere pedir turno diez veces. Con el boton '
+              '"Reservar una serie" elegis el paciente, los dias de la semana y la hora, y se '
+              'reservan todas juntas. Si alguna fecha esta ocupada, la saltea y te avisa cuantas '
+              'pudo poner.', VERDE, '#EAF4EE'))
+d.append(Spacer(1, 6 * mm))
+
 d.append(Paragraph('El turno', H2))
 d.append(Paragraph('El paciente ahora puede confirmar con "Ahi voy" o avisar que no puede. '
                    'En tu agenda los confirmados salen marcados.', P))

@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="panel">
 <div class="hoja">
@@ -70,7 +70,7 @@ function pintar(){
 /* ── contadores ── */
 var c = {ok:0, limitado:0, baja:0};
 BASE.plantel.forEach(function(j){ c[estadoDe(j.d).estado]++; });
-var turnos = BASE.agenda[HOY] || [];
+var turnos = agendaDe(HOY);
 document.getElementById('kTurnos').textContent = turnos.filter(function(t){ return t.dorsal || t.pid; }).length;
 /* Los indicadores del negocio, no solo los clínicos. */
 var est = estadisticaTurnos(), rc = resumenMes();

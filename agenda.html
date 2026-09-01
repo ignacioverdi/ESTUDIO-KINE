@@ -14,109 +14,229 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/base.js"></script>
+</head>
+<style>
+  /* ── EL CALENDARIO ─────────────────────────────────────────────
+     Cada dia muestra cuantos turnos tiene tomados con puntitos, para
+     ver la semana de un vistazo sin entrar dia por dia.            */
+  .mes-cab{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .mes-cab .nombre{flex:1;font-family:var(--tit);font-size:19px;font-weight:var(--tit-peso);
+    letter-spacing:var(--tit-track);text-transform:var(--tit-caja);text-align:center}
+  .mes-cab button{width:42px;height:42px;border-radius:var(--r);border:var(--borde) solid var(--linea2);
+    background:transparent;color:var(--acc-texto);font-size:17px;cursor:pointer}
+  .mes-cab button:hover{border-color:var(--acc)}
+  .sem{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:5px}
+  .sem span{text-align:center;font-family:var(--dat);font-size:10px;letter-spacing:.8px;
+    text-transform:uppercase;color:var(--tinta3)}
+  .grilla{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .celda{aspect-ratio:1;border:var(--borde) solid var(--linea);border-radius:var(--r);
+    background:var(--sup2);display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:3px;cursor:pointer;font-family:var(--dat);font-size:14px;
+    color:var(--tinta);padding:0;min-height:44px}
+  .celda:hover{border-color:var(--acc)}
+  .celda.vacia{visibility:hidden}
+  .celda.cerrado{background:transparent;color:var(--tinta3);cursor:default;border-style:dashed}
+  .celda.pasado{opacity:.4}
+  .celda.hoy{border-color:var(--acc);border-width:2px}
+  .celda.elegido{background:var(--acc);color:var(--sobre-acc);border-color:var(--acc)}
+  .celda .puntos{display:flex;gap:2px;height:5px}
+  .celda .puntos i{width:4px;height:4px;border-radius:50%;background:var(--acc-texto)}
+  .celda.elegido .puntos i{background:var(--sobre-acc)}
+  .celda.lleno .puntos i{background:var(--ambar)}
+  @media(max-width:400px){ .celda{font-size:13px} }
+</style>
 </head>
 <body data-pag="agenda">
+
 <div class="hoja">
   <h1 class="tit" id="tit">Agenda</h1>
   <p class="bajada" id="baj"></p>
-  <div class="pestanias">
-    <button class="pest on" data-d="2026-08-28">Viernes 28</button>
-    <button class="pest" data-d="2026-08-31">Lunes 31</button>
+
+  <div class="rejilla c2">
+    <div>
+      <div class="tarjeta">
+        <div class="mes-cab">
+          <button onclick="moverMes(-1)" aria-label="Mes anterior">&#9664;</button>
+          <span class="nombre" id="nombreMes"></span>
+          <button onclick="moverMes(1)" aria-label="Mes siguiente">&#9654;</button>
+        </div>
+        <div class="sem" id="cabSem"></div>
+        <div class="grilla" id="grilla"></div>
+        <p style="font-size:13px;color:var(--tinta3);margin-top:12px" id="pieMes"></p>
+        <button class="bt neutro ancho" style="margin-top:8px" onclick="irAHoy()">Volver a hoy</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="tarjeta">
+        <div class="tarjeta-cab"><h2 class="sub" id="subDia"></h2>
+          <span class="eti" id="cuenta"></span></div>
+        <div id="grillaDia"></div>
+      </div>
+
+      <div class="tarjeta" id="cajaSerie">
+        <div class="tarjeta-cab"><h2 class="sub">Reservar varias sesiones</h2>
+          <span class="eti">Para un plan entero</span></div>
+        <p style="color:var(--tinta2);font-size:14px;margin-bottom:12px">
+          Quien compra un plan de diez no quiere pedir turno diez veces. Elegí los días
+          y la hora, y se reservan todas de una.</p>
+        <button class="bt hueco ancho" onclick="abrirSerie()">Reservar una serie</button>
+      </div>
+    </div>
   </div>
-  <div class="tarjeta">
-    <div class="tarjeta-cab"><h2 class="sub" id="subDia"></h2>
-      <span class="eti" id="cuenta"></span></div>
-    <div id="grilla"></div>
-  </div>
+
   <div class="tarjeta" id="cajaCfg">
     <div class="tarjeta-cab"><h2 class="sub">Horario del estudio</h2>
-      <span class="eti">Se aplica a toda la semana</span></div>
+      <span class="eti">De acá salen todos los turnos</span></div>
     <div class="rejilla c3">
-      <label class="campo"><span class="eti">Abre</span><input type="text" value="08:30"></label>
-      <label class="campo"><span class="eti">Cierra</span><input type="text" value="12:30"></label>
-      <label class="campo"><span class="eti">Minutos por turno</span><input type="number" value="30"></label>
+      <label class="campo"><span class="eti">Abre</span><input type="text" id="cAbre"></label>
+      <label class="campo"><span class="eti">Cierra</span><input type="text" id="cCierra"></label>
+      <label class="campo"><span class="eti">Minutos por turno</span><input type="number" id="cMin"></label>
     </div>
-    <button class="bt hueco" onclick="alert('Guardado. La grilla se rearma con estos horarios.')">Guardar horario</button>
+    <label class="campo"><span class="eti">Días que atendés</span>
+      <div class="pestanias" id="cDias" style="margin-bottom:0"></div></label>
+    <div id="avisoCfg"></div>
+    <button class="bt hueco" onclick="guardarHorario()">Guardar horario</button>
   </div>
 </div>
+
 <script>
-var dia = HOY, esKine = rol() === 'kine';
+var esKine = rol() === 'kine';
+var dia = HOY;
+var mes = mesDe(HOY);
+
 if(!esKine){
   document.getElementById('cajaCfg').style.display = 'none';
+  document.getElementById('cajaSerie').style.display = 'none';
   document.getElementById('tit').textContent = 'Mis turnos';
 }
-document.querySelectorAll('.pest[data-d]').forEach(function(b){
-  b.onclick = function(){
-    document.querySelectorAll('.pest[data-d]').forEach(function(x){ x.classList.remove('on'); });
-    b.classList.add('on'); dia = b.dataset.d; pintar();
-  };
-});
+
+function moverMes(n){ mes = sumarMeses(mes, n); pintar(); }
+function irAHoy(){ mes = mesDe(HOY); dia = HOY; pintar(); }
+function elegirDia(f){ dia = f; pintar(); }
+
 function pintar(){
-  var lista = BASE.agenda[dia] || [];
-  var tomados = lista.filter(function(t){ return t.dorsal; }).length;
-  var M = ['viernes 28 de agosto','lunes 31 de agosto'];
-  document.getElementById('subDia').textContent = dia === HOY ? M[0] : M[1];
-  document.getElementById('cuenta').textContent = tomados + ' de ' + lista.length + ' ocupados';
-  document.getElementById('baj').textContent = esKine
-    ? 'Tocá un turno ocupado para abrir la ficha, o uno libre para asignarlo.'
-    : 'Tocá un horario libre para reservarlo. Te llega un aviso una hora antes.';
-  document.getElementById('grilla').innerHTML = lista.map(function(t, i){
-    if(!t.dorsal){
-      return '<button class="fila libre" onclick="reservar(' + i + ')">'
-        + '<span class="hh">' + t.h + '</span>'
-        + '<span class="cu"><b>' + (esKine ? 'Libre — asignar' : 'Libre — reservar') + '</b></span></button>';
-    }
-    if(!esKine && t.dorsal !== miDorsal()){
-      return '<div class="fila libre" style="opacity:.5"><span class="hh">' + t.h + '</span>'
-        + '<span class="cu"><b>Ocupado</b></span></div>';
-    }
-    var L = lesionDe(t.dorsal);
-    var mio = t.dorsal === miDorsal();
-    return '<button class="fila" onclick="' + (esKine && L ? 'irA(\'lesiones.html?f=' + L.id + '\')' : 'void 0') + '">'
-      + '<span class="hh">' + t.h + '</span>'
-      + '<span class="cu"><b>' + (esKine ? (t.pid ? paciente(t.pid).nombre : nombre(t.dorsal)) : 'Tu turno') + '</b>'
-      + '<small>' + t.tipo + (esKine && L ? ' · ' + L.zona.toLowerCase() : ' · con Vero') + '</small></span>'
-      + '<span class="pin ' + (t.confirmado ? 'atendido' : (mio && !esKine ? 'reservado' : t.estado)) + '">'
-      + (t.confirmado ? 'confirmado' : (mio && !esKine ? 'tuyo' : t.estado)) + '</span>'
-      + (esKine && t.estado === 'reservado'
-          ? '<span style="display:flex;gap:5px;flex-wrap:wrap">'
-            + '<button class="bt hueco chico" onclick="event.stopPropagation();atender(dia,\'' + t.h + '\')">Atender</button>'
-            + (t.confirmado ? '' : '<button class="bt neutro chico" '
-                + 'onclick="event.stopPropagation();recordar(' + i + ')">Recordar</button>')
-            + '</span>'
-          : '')
-      + '</button>';
+  /* ── el calendario ── */
+  document.getElementById('nombreMes').textContent = nombreMes(mes);
+  document.getElementById('cabSem').innerHTML =
+    ['lu','ma','mi','ju','vi','sá','do'].map(function(d){ return '<span>' + d + '</span>'; }).join('');
+
+  var celdas = grillaDelMes(mes), ocupadosMes = 0, libresMes = 0;
+  document.getElementById('grilla').innerHTML = celdas.map(function(f){
+    if(!f) return '<div class="celda vacia"></div>';
+    if(!esDiaDeAtencion(f))
+      return '<div class="celda cerrado">' + (+f.slice(8)) + '</div>';
+    var o = ocupacionDe(f);
+    ocupadosMes += o.ocupados; libresMes += o.libres;
+    var cls = 'celda'
+      + (f === dia ? ' elegido' : '')
+      + (f === HOY ? ' hoy' : '')
+      + (f < HOY ? ' pasado' : '')
+      + (o.libres === 0 && o.total ? ' lleno' : '');
+    var puntos = '';
+    for(var i = 0; i < Math.min(o.ocupados, 4); i++) puntos += '<i></i>';
+    return '<button class="' + cls + '" onclick="elegirDia(\'' + f + '\')">'
+      + (+f.slice(8)) + '<span class="puntos">' + puntos + '</span></button>';
   }).join('');
+  document.getElementById('pieMes').textContent =
+    ocupadosMes + ' turnos dados este mes · ' + libresMes + ' lugares libres';
+
+  /* ── el dia elegido ── */
+  var lista = agendaDe(dia);
+  var tomados = lista.filter(function(t){ return t.pid || t.dorsal; }).length;
+  document.getElementById('subDia').textContent = fechaLegible(dia);
+  document.getElementById('cuenta').textContent = lista.length
+    ? tomados + ' de ' + lista.length + ' ocupados' : 'no se atiende';
+  document.getElementById('baj').textContent = esKine
+    ? 'Elegí un día del calendario. Los puntitos muestran cuántos turnos tiene tomados.'
+    : 'Elegí un día libre para reservar. Te avisamos una hora antes.';
+
+  document.getElementById('grillaDia').innerHTML = lista.length
+    ? lista.map(function(t, i){ return filaTurno(t, i); }).join('')
+    : '<div class="vacio"><b>Ese día no se atiende</b>Elegí otro en el calendario.</div>';
+
+  if(esKine) pintarHorario();
 }
-/* Antes esto pedía el dorsal con una ventanita del navegador. No servía:
-   los pacientes particulares no tienen dorsal, y había que acordarse el
-   número de memoria. Ahora se elige del padrón. */
+
+function filaTurno(t, i){
+  var libre = !t.pid && !t.dorsal;
+  if(libre){
+    if(dia < HOY) return '<div class="fila libre"><span class="hh">' + t.h + '</span>'
+      + '<span class="cu"><b>—</b></span></div>';
+    return '<button class="fila libre" onclick="reservar(' + i + ')">'
+      + '<span class="hh">' + t.h + '</span>'
+      + '<span class="cu"><b>' + (esKine ? 'Libre — asignar' : 'Libre — reservar') + '</b></span></button>';
+  }
+  if(!esKine && t.pid !== miPid()){
+    return '<div class="fila libre" style="opacity:.5"><span class="hh">' + t.h + '</span>'
+      + '<span class="cu"><b>Ocupado</b></span></div>';
+  }
+  var p = t.pid ? paciente(t.pid) : null;
+  var nom = esKine ? (p ? p.nombre : nombre(t.dorsal)) : 'Tu turno';
+  var L = t.pid ? lesionDePaciente(t.pid) : null;
+  var pendiente = t.estado === 'reservado';
+  return '<button class="fila" onclick="' + (esKine && L
+            ? 'irA(\'lesiones.html?f=' + L.id + '\')' : 'void 0') + '">'
+    + '<span class="hh">' + t.h + '</span>'
+    + '<span class="cu"><b>' + nom + '</b><small>' + (t.tipo || 'Tratamiento')
+    + (esKine && L ? ' · ' + L.zona.toLowerCase() : '') + '</small></span>'
+    + '<span class="pin ' + (t.confirmado ? 'atendido' : t.estado) + '">'
+    + (t.confirmado ? 'confirmado' : t.estado) + '</span>'
+    + (esKine && pendiente
+        ? '<span style="display:flex;gap:5px;flex-wrap:wrap">'
+          + '<button class="bt hueco chico" onclick="event.stopPropagation();atender(dia,\'' + t.h + '\')">Atender</button>'
+          + (t.confirmado ? '' : '<button class="bt neutro chico" onclick="event.stopPropagation();recordar(\'' + t.h + '\')">Recordar</button>')
+          + '</span>'
+        : '')
+    + '</button>';
+}
+
+function lesionDePaciente(pid){
+  for(var i = 0; i < BASE.lesiones.length; i++)
+    if(BASE.lesiones[i].pid === pid && BASE.lesiones[i].estado === 'activa') return BASE.lesiones[i];
+  return null;
+}
+
+/* El recordatorio: sin avisos push, lo mas directo que funciona hoy. */
+function recordar(hora){
+  var t = null;
+  agendaDe(dia).forEach(function(x){ if(x.h === hora) t = x; });
+  if(!t || !t.pid) return;
+  var p = paciente(t.pid);
+  var txt = 'Hola ' + p.nombre.split(' ')[0] + '. Te recuerdo tu turno en el estudio: '
+          + fechaLegible(dia) + ' a las ' + t.h + '. Si no vas a poder venir, avisame '
+          + 'con tiempo así se lo doy a otra persona. Gracias.';
+  window.open('https://wa.me/' + (p.tel || '').replace(/\D/g, '')
+              + '?text=' + encodeURIComponent(txt), '_blank');
+}
+
+/* ── DAR UN TURNO ───────────────────────────────────────────────── */
 var TURNO = null;
 function reservar(i){
-  var t = (BASE.agenda[dia] || [])[i];
+  var t = agendaDe(dia)[i];
   if(!t) return;
+
   if(!esKine){
-    var p = pacientePorDorsal(miDorsal());
+    var p = pacientePorDorsal(miDorsal()) || paciente(miPid());
     t.pid = p ? p.id : null;
-    t.dorsal = miDorsal(); t.tipo = 'Tratamiento'; t.estado = 'reservado';
+    t.dorsal = miDorsal();
+    t.tipo = 'Tratamiento';
+    t.estado = 'reservado';
     guardar('kine/agenda/turnos/' + dia + '/' + t.h,
-            {pid:t.pid, dorsal:t.dorsal, tipo:t.tipo, estado:'reservado'});
-    if(p) asentar(p.id, 'turno', 'Reservó turno para el ' + fechaLarga(dia) + ' a las ' + t.h + '.');
-    avisarDelTurno(p, dia, t.h);
+            {pid: t.pid, dorsal: t.dorsal, tipo: t.tipo, estado: 'reservado'});
+    if(p) asentar(p.id, 'turno', 'Reservó turno para el ' + fechaLegible(dia) + ' a las ' + t.h + '.');
     pintar();
     return;
   }
-  TURNO = {i: i, hora: t.h, pid: null, tipo: 'Tratamiento'};
+
+  TURNO = {hora: t.h, pid: null, tipo: 'Tratamiento'};
   var caja = document.createElement('div');
-  caja.className = 'ayuda-fondo';
-  caja.id = 'cajaTurno';
-  caja.innerHTML =
-    '<div class="ayuda-caja">'
+  caja.className = 'ayuda-fondo'; caja.id = 'cajaTurno';
+  caja.innerHTML = '<div class="ayuda-caja">'
     + '<button class="cerrar" onclick="cerrarTurno()" aria-label="Cerrar">&times;</button>'
-    + '<span class="eti">Turno nuevo</span>'
-    + '<h2>' + t.h + '</h2>'
-    + '<p>' + (dia === HOY ? 'Viernes 28 de agosto' : 'Lunes 31 de agosto') + '</p>'
+    + '<span class="eti">Turno nuevo</span><h2>' + t.h + '</h2>'
+    + '<p>' + fechaLegible(dia) + '</p>'
     + '<label class="campo"><span class="eti">Quién viene</span>'
     + '<select id="tPac"><option value="">Elegí un paciente</option>'
     + BASE.pacientes.map(function(p){
@@ -131,8 +251,7 @@ function reservar(i){
         return '<button class="pest' + (x === 'Tratamiento' ? ' on' : '') + '" data-t="' + x + '">' + x + '</button>';
       }).join('') + '</div></label>'
     + '<div id="avisoTurno"></div>'
-    + '<button class="bt ancho" onclick="guardarTurno()">Dar el turno</button>'
-    + '</div>';
+    + '<button class="bt ancho" onclick="guardarTurno()">Dar el turno</button></div>';
   caja.addEventListener('click', function(e){ if(e.target === caja) cerrarTurno(); });
   document.body.appendChild(caja);
   document.body.style.overflow = 'hidden';
@@ -143,82 +262,10 @@ function reservar(i){
     };
   });
 }
-/* Cuando un paciente reserva, el kinesiólogo se tiene que enterar.
-   Hasta que estén los avisos push, se le arma el mensaje de WhatsApp y
-   se le ofrece mandarlo: un toque, sin copiar y pegar nada. */
-function avisarDelTurno(p, fecha, hora){
-  if(!p) return;
-  var telKine = (BASE.perfil && BASE.perfil.tel) ? BASE.perfil.tel.replace(/\D/g,'') : '';
-  var txt = 'Turno nuevo: ' + p.nombre + ' reservó para el ' + fechaLarga(fecha)
-          + ' a las ' + hora + '. Teléfono: ' + p.tel + '.';
-  var caja = document.createElement('div');
-  caja.className = 'ayuda-fondo'; caja.id = 'cajaAviso';
-  caja.innerHTML = '<div class="ayuda-caja">'
-    + '<button class="cerrar" onclick="cerrarAviso()" aria-label="Cerrar">&times;</button>'
-    + '<span class="eti">Turno reservado</span>'
-    + '<h2>' + hora + ' · ' + fechaLarga(fecha) + '</h2>'
-    + '<div class="nota bien">Listo. Te va a llegar un recordatorio una hora antes.</div>'
-    + '<p>Si querés, avisale al estudio ahora mismo:</p>'
-    + '<a class="bt ancho" style="text-decoration:none;text-align:center" target="_blank" rel="noopener" '
-    + 'href="https://wa.me/' + telKine + '?text=' + encodeURIComponent(txt) + '">Avisar por WhatsApp</a>'
-    + '<button class="bt neutro ancho" style="margin-top:8px" onclick="cerrarAviso()">Listo</button>'
-    + '</div>';
-  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarAviso(); });
-  document.body.appendChild(caja);
-  document.body.style.overflow = 'hidden';
-}
-function cerrarAviso(){
-  var c = document.getElementById('cajaAviso');
-  if(c) c.remove();
-  document.body.style.overflow = '';
-}
-/* El recordatorio del turno. Sin avisos push, lo mas directo que
-   funciona hoy: se arma el mensaje y se manda por WhatsApp de un toque.
-   El ausentismo en kinesiologia va del 8 al 25%, y cada hueco es una
-   hora que no se recupera. */
-function recordar(i){
-  var t = BASE.agenda[dia][i];
-  if(!t || !t.pid) return;
-  var p = paciente(t.pid);
-  var txt = 'Hola ' + p.nombre.split(' ')[0] + '. Te recuerdo tu turno en el estudio: '
-          + fechaLarga(dia) + ' a las ' + t.h + '. Si no vas a poder venir, avisame '
-          + 'con tiempo asi se lo doy a otra persona. Gracias.';
-  window.open('https://wa.me/' + (p.tel || '').replace(/\D/g,'')
-              + '?text=' + encodeURIComponent(txt), '_blank');
-}
-
-function lesionDePaciente(pid){
-  for(var i=0;i<BASE.lesiones.length;i++)
-    if(BASE.lesiones[i].pid === pid && BASE.lesiones[i].estado === 'activa') return BASE.lesiones[i];
-  return null;
-}
 function cerrarTurno(){
   var c = document.getElementById('cajaTurno');
   if(c) c.remove();
   document.body.style.overflow = '';
-}
-/* Marcar atendido descuenta el crédito y anota el cobro si paga por
-   sesión. Es el único momento en que se toca la plata: si se cobrara al
-   reservar, una cancelación a tiempo generaría una discusión. */
-function marcarAtendido(i){
-  var t = BASE.agenda[dia][i];
-  if(!t || !t.pid) return;
-  t.estado = 'atendido';
-  var p = paciente(t.pid), pl = planDe(p);
-  consumirCredito(t.pid);
-  if(pl.sesiones === 1 && pl.precio > 0){
-    anotarMovimiento({tipo:'ingreso', concepto:'Sesión suelta — ' + p.nombre,
-                      monto:pl.precio, pid:t.pid, categoria:'sesiones'});
-  }
-  guardar('kine/agenda/turnos/' + dia + '/' + t.h + '/estado', 'atendido');
-  pintar();
-}
-function marcarAusente(i){
-  var t = BASE.agenda[dia][i];
-  if(!t || !t.pid) return;
-  t.estado = 'ausente';
-  guardar('kine/agenda/turnos/' + dia + '/' + t.h + '/estado', 'ausente');
-  pintar();
 }
 function guardarTurno(){
   var pid = document.getElementById('tPac').value;
@@ -227,32 +274,124 @@ function guardarTurno(){
       '<div class="nota aviso">Elegí a quién le das el turno.</div>';
     return;
   }
-  var p = paciente(pid), t = BASE.agenda[dia][TURNO.i];
+  var p = paciente(pid), t = null;
+  agendaDe(dia).forEach(function(x){ if(x.h === TURNO.hora) t = x; });
+  if(!t) return;
   t.pid = pid; t.dorsal = p.dorsal || null; t.tipo = TURNO.tipo; t.estado = 'reservado';
   guardar('kine/agenda/turnos/' + dia + '/' + t.h,
-          {pid:pid, dorsal:t.dorsal, tipo:t.tipo, estado:'reservado'});
-  cerrarTurno();
+          {pid: pid, dorsal: t.dorsal, tipo: t.tipo, estado: 'reservado'});
+  asentar(pid, 'turno', 'Turno para el ' + fechaLegible(dia) + ' a las ' + t.h + '.');
+  cerrarTurno(); pintar();
+}
+
+/* ── UNA SERIE ENTERA ───────────────────────────────────────────── */
+var SERIE = {pid:'', dias:[2, 4], hora:'', cuantas:10};
+function abrirSerie(){
+  SERIE.hora = SERIE.hora || (horariosDe(HOY)[0] || '09:00');
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo'; caja.id = 'cajaSerieM';
+  caja.innerHTML = '<div class="ayuda-caja"><div id="cuerpoSerie"></div></div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarSerie(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+  pintarSerie();
+}
+function pintarSerie(){
+  document.getElementById('cuerpoSerie').innerHTML =
+    '<button class="cerrar" onclick="cerrarSerie()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Una serie de turnos</span><h2>Reservar varias sesiones</h2>'
+    + '<p>Se buscan hacia adelante los días que elijas y se reservan de una.</p>'
+    + '<label class="campo"><span class="eti">Para quién</span>'
+    + '<select id="sPac"><option value="">Elegí un paciente</option>'
+    + BASE.pacientes.map(function(p){
+        var pl = typeof planDe === 'function' ? planDe(p) : null;
+        return '<option value="' + p.id + '"' + (p.id === SERIE.pid ? ' selected' : '') + '>'
+             + p.nombre + (pl && pl.sesiones && pl.sesiones < 90 ? ' — le quedan ' + (p.creditos || 0) : '')
+             + '</option>';
+      }).join('') + '</select></label>'
+    + '<label class="campo"><span class="eti">Qué días</span>'
+    + '<div class="pestanias" id="sDias" style="margin-bottom:0">'
+    + [1,2,3,4,5,6].map(function(d){
+        return '<button class="pest' + (SERIE.dias.indexOf(d) >= 0 ? ' on' : '') + '" data-d="' + d + '">'
+             + DIAS_CORTO[d] + '</button>';
+      }).join('') + '</div></label>'
+    + '<label class="campo"><span class="eti">A qué hora</span>'
+    + '<select id="sHora">' + horariosDe(HOY).map(function(h){
+        return '<option' + (h === SERIE.hora ? ' selected' : '') + '>' + h + '</option>';
+      }).join('') + '</select></label>'
+    + '<label class="campo"><span class="eti">Cuántas sesiones</span>'
+    + '<input type="number" id="sCuantas" value="' + SERIE.cuantas + '" min="1" max="60"></label>'
+    + '<div id="avisoSerie"></div>'
+    + '<button class="bt ancho" onclick="hacerSerie()">Reservar</button>';
+
+  document.querySelectorAll('#sDias .pest').forEach(function(b){
+    b.onclick = function(){
+      var d = +b.dataset.d, i = SERIE.dias.indexOf(d);
+      if(i >= 0) SERIE.dias.splice(i, 1); else SERIE.dias.push(d);
+      SERIE.pid = document.getElementById('sPac').value;
+      SERIE.hora = document.getElementById('sHora').value;
+      SERIE.cuantas = +document.getElementById('sCuantas').value;
+      pintarSerie();
+    };
+  });
+}
+function cerrarSerie(){
+  var c = document.getElementById('cajaSerieM');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+function hacerSerie(){
+  var pid = document.getElementById('sPac').value;
+  var hora = document.getElementById('sHora').value;
+  var cuantas = +document.getElementById('sCuantas').value;
+  var av = document.getElementById('avisoSerie');
+  if(!pid || !SERIE.dias.length || !cuantas){
+    av.innerHTML = '<div class="nota aviso">Elegí el paciente, al menos un día y cuántas sesiones.</div>';
+    return;
+  }
+  var r = reservarSerie(pid, SERIE.dias, hora, cuantas);
+  if(!r.puestos.length){
+    av.innerHTML = '<div class="nota reserva">No se pudo reservar ninguna: '
+      + 'esos días a esa hora ya están tomados.</div>';
+    return;
+  }
+  av.innerHTML = '<div class="nota bien"><b>' + r.puestos.length + ' sesiones reservadas</b>, '
+    + 'del ' + fechaCorta(r.puestos[0]) + ' al ' + fechaCorta(r.puestos[r.puestos.length - 1]) + '.'
+    + (r.puestos.length < cuantas
+        ? ' Faltaron ' + (cuantas - r.puestos.length) + ': esos días ya estaban ocupados.'
+        : '') + '</div>';
   pintar();
 }
-pintar();
-</script>
-<script>
-/* Desinstala cualquier programa que haya quedado de versiones anteriores.
-   Uno viejo guardaba el portal para funcionar sin internet y rompia
-   Safari: la pagina directamente no abria. Como ademas quedaba instalado
-   en el telefono, el arreglo no llegaba nunca. */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(r){
-    if(!r.length) return;
-    Promise.all(r.map(function(x){ return x.unregister(); }))
-      .then(function(){ return caches.keys(); })
-      .then(function(c){ return Promise.all(c.map(function(k){ return caches.delete(k); })); })
-      .then(function(){
-        if(!sessionStorage.getItem('limpio')){
-          sessionStorage.setItem('limpio','1'); location.reload();
-        }
-      }).catch(function(){});
-  }).catch(function(){});
+
+/* ── EL HORARIO ─────────────────────────────────────────────────── */
+function pintarHorario(){
+  var h = horario();
+  document.getElementById('cAbre').value = h.abre;
+  document.getElementById('cCierra').value = h.cierra;
+  document.getElementById('cMin').value = h.minutos;
+  document.getElementById('cDias').innerHTML = [1,2,3,4,5,6,0].map(function(d){
+    return '<button class="pest' + (h.dias.indexOf(d) >= 0 ? ' on' : '') + '" data-d="' + d + '">'
+         + DIAS_NOMBRE[d].slice(0, 3) + '</button>';
+  }).join('');
+  document.querySelectorAll('#cDias .pest').forEach(function(b){
+    b.onclick = function(){
+      var d = +b.dataset.d, i = h.dias.indexOf(d);
+      if(i >= 0) h.dias.splice(i, 1); else h.dias.push(d);
+      pintar();
+    };
+  });
 }
+function guardarHorario(){
+  var h = horario();
+  h.abre = document.getElementById('cAbre').value || '08:30';
+  h.cierra = document.getElementById('cCierra').value || '12:30';
+  h.minutos = +document.getElementById('cMin').value || 30;
+  guardar('kine/horario', h);
+  document.getElementById('avisoCfg').innerHTML =
+    '<div class="nota bien">Guardado. Los turnos de todos los días se recalcularon.</div>';
+  pintar();
+}
+
+pintar();
 </script>
 </body></html>

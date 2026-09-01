@@ -54,15 +54,15 @@ var AYUDA = {
 
   agenda: {
     titulo: 'La agenda',
-    que_es: 'Los turnos del estudio. La misma pantalla sirve para el kinesiólogo y para el jugador, pero cada uno ve cosas distintas.',
+    que_es: 'El calendario del estudio. Los turnos existen para cualquier fecha, sin límite.',
     pasos: [
-      ['Elegí el día', 'Con las pestañas de arriba.'],
-      ['Un turno ocupado', 'Si sos el kine, se abre la ficha. Si sos jugador, solo ves el tuyo.'],
-      ['Un turno libre', 'El kine lo asigna a un dorsal. El jugador lo reserva para él.'],
-      ['El horario del estudio', 'Abajo, solo para el kine. Cambia la grilla de toda la semana.'],
-      ['Recordarle el turno', 'Botón "Recordar": arma el mensaje y lo manda por WhatsApp de un toque. Los que ya confirmaron no lo muestran.']
+      ['Elegí el día en el calendario', 'Con las flechas cambiás de mes. Podés ir todo lo lejos que quieras: no hay que crear nada antes.'],
+      ['Mirá los puntitos', 'Cada punto es un turno tomado ese día. Sirve para ver la semana de un vistazo sin entrar día por día.'],
+      ['Un horario libre', 'El kine lo asigna a un paciente. El paciente lo reserva para él.'],
+      ['Reservar varias sesiones', 'Para quien compró un plan: elegís los días de la semana y la hora, y se reservan todas de una.'],
+      ['El horario del estudio', 'Abajo. De ahí salen todos los turnos de todos los días. Si lo cambiás, se recalcula todo.']
     ],
-    ojo: 'El jugador ve "ocupado" en los turnos de otros, nunca de quién son. No tiene por qué saber quién más se está tratando.'
+    ojo: 'Los horarios libres no se guardan: se calculan al momento a partir del horario del estudio. Por eso podés dar un turno para dentro de seis meses sin haber creado esa fecha antes, y por eso cambiar el horario reordena la agenda entera.'
   },
 
   mi: {
