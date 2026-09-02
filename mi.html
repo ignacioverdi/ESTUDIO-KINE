@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/estudios.js"></script><script src="js/ejercicio.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="mi">
 <div class="hoja angosta" id="todo"></div>
@@ -89,18 +89,19 @@ function pintar(){
     + '<span class="eti" id="cuenta">0 de ' + prog.length + '</span></div>'
     + (prog.length
         ? prog.map(function(e, i){
-            return '<div class="fila" style="align-items:flex-start;cursor:pointer" onclick="marcar(' + i + ')" id="ej' + i + '">'
-              + '<input type="checkbox" style="width:19px;height:19px;accent-color:var(--azul);margin-top:3px" '
-              + 'onclick="event.stopPropagation();marcar(' + i + ')">'
+            var hechas = seriesDe(miPid(), HOY, e.n) || {};
+            var cuantas = Object.keys(hechas).length;
+            var total = +(e.series || 3);
+            return '<button class="fila" style="align-items:flex-start" '
+              + 'onclick="verEjercicioCompleto(' + i + ')">'
+              + '<span class="hh">' + (cuantas >= total ? '&#10003;' : (i + 1)) + '</span>'
               + '<span class="cu"><b>' + e.n + '</b>'
               + '<small class="mono" style="color:var(--acc-texto)">' + dosis(e) + '</small>'
-              + '<small>' + e.nota + '</small></span>'
-              + '<span class="pin ' + (e.video ? 'reservado' : 'gris') + '" '
-              + 'onclick="event.stopPropagation();verEjercicio(' + i + ')">'
-              + (e.video ? 'Ver video' : 'Sin video') + '</span>'
-              + '<span class="pin gris" style="margin-top:5px;display:inline-block" '
-              + 'onclick="event.stopPropagation();consultar(' + i + ')">Consultar</span>'
-              + '</div>';
+              + (e.nota ? '<small>' + e.nota + '</small>' : '') + '</span>'
+              + '<span class="pin ' + (cuantas >= total ? 'atendido'
+                  : cuantas ? 'limitado' : 'gris') + '">'
+              + (cuantas >= total ? 'listo' : cuantas ? cuantas + '/' + total
+                  : (e.video ? 'ver' : 'abrir')) + '</span></button>';
           }).join('')
         : '<div class="vacio"><b>Todavía no hay programa</b>Vero lo carga después de tu próximo turno.</div>')
     + (prog.length

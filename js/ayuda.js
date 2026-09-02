@@ -92,6 +92,9 @@ var AYUDA = {
     titulo: 'Tu recuperación',
     que_es: 'Todo lo tuyo en una pantalla: en qué fase estás, cuándo es tu turno y qué te toca hacer hoy.',
     pasos: [
+      ['Abrí cada ejercicio', 'Se abre con el video arriba y una fila por serie.'],
+      ['Anotá el peso que usaste', 'Serie por serie, con las repeticiones que te salieron. No hace falta tildar nada aparte: con anotar ya queda hecho.'],
+      ['Usá el descanso', 'El botón entre serie y serie cuenta 60 segundos y avisa con una vibración.'],
       ['Dónde estás', 'La barra de cinco tramos. Abajo dice exactamente qué te falta para pasar a la siguiente.'],
       ['Tu turno', 'El próximo que tenés reservado. Se cambia desde la agenda.'],
       ['Tus ejercicios', 'Tildá cada uno cuando lo hacés. Si no te acordás cómo era, tocá "ver video".'],
@@ -198,9 +201,10 @@ var AYUDA = {
       ['Cada actuación es un asiento', 'Con número correlativo, fecha, hora y quién lo hizo. No se puede editar el pasado: corregir es agregar una rectificación.'],
       ['Verificá la integridad', 'El cartel de arriba dice si alguien tocó algo. Cada asiento guarda la huella del anterior, así que alterar uno se nota.'],
       ['Descargala en PDF', 'El paciente es el titular de su historia y puede pedir copia cuando quiera. Por ley hay 48 horas para dársela.'],
+      ['Estudios complementarios', 'Ecografías, resonancias, informes. Lo mejor es una foto del estudio o un recorte de la imagen que importa: se ve al instante y pesa poco.'],
       ['Mirá quién la vio', 'Abajo está la lista de accesos. Restringir sin registrar deja la mitad del trabajo hecho.']
     ],
-    ojo: 'La Ley 26.529 pide integridad, autenticidad, inalterabilidad, perdurabilidad y recuperabilidad. Un sistema que sobrescribe registros no cumple ninguna de las cinco. Por eso acá nunca se borra nada.'
+    ojo: 'Los PDF de resonancia pesan entre 5 y 60 megas: guardarlos adentro haría el portal lento y caro. Si el archivo es grande, el portal te avisa y te ofrece pegar un enlace. Una foto de la imagen concreta suele ser más útil que las trescientas imágenes del estudio completo. La Ley 26.529 pide integridad, autenticidad, inalterabilidad, perdurabilidad y recuperabilidad. Un sistema que sobrescribe registros no cumple ninguna de las cinco. Por eso acá nunca se borra nada.'
   },
 
   cartel: {

@@ -280,6 +280,42 @@ label.campo>.eti{display:block;margin-bottom:5px}
   border-radius:9px;background:var(--rojo);color:var(--sobre-rojo);font-family:var(--dat);font-size:10px;
   font-weight:700;display:flex;align-items:center;justify-content:center}
 
+/* ── LA PANTALLA DE UN EJERCICIO ────────────────────────────────
+   Video arriba con el nombre, y debajo una fila por serie con el peso
+   y las repeticiones que hizo de verdad.                            */
+.ej-caja{padding:0!important;overflow:hidden}
+.ej-caja>div{padding:0 22px 22px}
+.ej-video{position:relative;padding-top:56.25%;background:var(--negro);margin:0 -22px 0;width:calc(100% + 44px)}
+.ej-video iframe,.ej-video video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.ej-sinvideo{padding-top:0;height:110px;display:flex;align-items:center;justify-content:center}
+.ej-sinvideo span{font-family:var(--dat);font-size:11px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--tinta3)}
+.ej-nombre{font-family:var(--tit);font-size:22px;font-weight:var(--tit-peso);
+  letter-spacing:var(--tit-track);text-transform:var(--tit-caja);margin:16px 0 3px;line-height:1.15}
+.ej-dosis{font-family:var(--dat);font-size:13px;color:var(--acc-texto);
+  letter-spacing:.5px;margin-bottom:14px}
+
+.ej-tabla{border:var(--borde) solid var(--linea);border-radius:var(--r);overflow:hidden}
+.ej-cab{display:grid;grid-template-columns:52px 1fr 1fr;gap:8px;padding:10px 12px;
+  background:var(--sup2);border-bottom:var(--borde) solid var(--linea)}
+.ej-cab span{font-family:var(--dat);font-size:10px;letter-spacing:1.4px;
+  text-transform:uppercase;color:var(--tinta3);text-align:center}
+.ej-cab span:first-child{text-align:left}
+.ej-fila{display:grid;grid-template-columns:52px 1fr 1fr;gap:8px;padding:9px 12px;
+  align-items:center;border-bottom:var(--borde) solid var(--linea)}
+.ej-fila.hecha{background:var(--verde-suave)}
+.ej-fila .ej-n{font-family:var(--dat);font-size:17px;font-weight:600;color:var(--tinta2)}
+.ej-fila.hecha .ej-n{color:var(--verde)}
+.ej-fila input{text-align:center;font-family:var(--dat);font-size:16px;min-height:46px}
+
+.ej-descanso{display:block;width:100%;border:none;border-bottom:var(--borde) solid var(--linea);
+  background:var(--acc-suave);color:var(--acc-texto);font-family:var(--dat);font-size:12.5px;
+  font-weight:600;letter-spacing:1.2px;text-transform:uppercase;padding:13px;cursor:pointer;
+  min-height:46px}
+.ej-descanso:hover{background:var(--acc);color:var(--sobre-acc)}
+.ej-descanso.corriendo{background:var(--acc);color:var(--sobre-acc);font-size:16px}
+.ej-descanso.listo{background:var(--verde-suave);color:var(--verde)}
+
 /* ── PANEL DE AYUDA ─────────────────────────────────────────────── */
 .ayuda-fondo{position:fixed;inset:0;background:var(--velo-fondo);z-index:90;
   display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}

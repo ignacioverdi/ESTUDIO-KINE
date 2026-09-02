@@ -21,4 +21,5 @@
   --fulgor:none; --trama:none; --velo-fondo:rgba(15,25,34,.45);
   --brillo:rgba(15,25,34,.14);
   --sombra-acc:rgba(29,62,110,.20);
+  --negro:#000000;   /* el fondo de un video o una ecografia */
 }

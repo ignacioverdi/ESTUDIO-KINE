@@ -353,6 +353,50 @@ function fechaLarga(f){
 }
 /* La dosis escrita en una línea, a partir de las tres partes. Antes era
    un texto suelto; separado se puede editar, filtrar y comparar. */
+/* ── EL PESO QUE LEVANTO DE VERDAD ───────────────────────────────────
+   El kinesiologo indica una carga; el paciente levanta la que puede. Esa
+   diferencia es la que muestra si progresa, y hasta ahora no se anotaba
+   en ningun lado.
+
+   Se guarda por serie, no una sola por ejercicio: hacer 3 series de 12
+   con 8 kilos no es lo mismo que hacer 12 con 10, 12 con 8 y 8 con 6.
+   La segunda dice que se quedo sin fuerza, y eso importa.
+   ─────────────────────────────────────────────────────────────────── */
+function seriesDe(pid, fecha, ejercicio){
+  var r = (BASE.adherencia || {})[pid];
+  if(!r || !r[fecha] || !r[fecha].series) return null;
+  return r[fecha].series[ejercicio] || null;
+}
+
+function anotarSerie(pid, fecha, ejercicio, nro, campo, valor){
+  if(!BASE.adherencia) BASE.adherencia = {};
+  if(!BASE.adherencia[pid]) BASE.adherencia[pid] = {};
+  if(!BASE.adherencia[pid][fecha]) BASE.adherencia[pid][fecha] = {hechos:{}, series:{}};
+  var d = BASE.adherencia[pid][fecha];
+  if(!d.series) d.series = {};
+  if(!d.series[ejercicio]) d.series[ejercicio] = {};
+  if(!d.series[ejercicio][nro]) d.series[ejercicio][nro] = {};
+  d.series[ejercicio][nro][campo] = valor;
+  guardar('kine/adherencia/' + pid + '/' + fecha + '/series/' + ejercicio + '/' + nro, 
+          d.series[ejercicio][nro]);
+}
+
+/* Lo que hizo la ultima vez, para que no tenga que acordarse. */
+function ultimaVezQueLoHizo(pid, ejercicio){
+  var r = (BASE.adherencia || {})[pid] || {};
+  var fechas = Object.keys(r).sort().reverse();
+  for(var i = 0; i < fechas.length; i++){
+    if(fechas[i] === HOY) continue;
+    var s = r[fechas[i]].series && r[fechas[i]].series[ejercicio];
+    if(s){
+      var pesos = Object.keys(s).map(function(k){ return s[k].peso; })
+                    .filter(function(x){ return x; });
+      if(pesos.length) return {fecha: fechas[i], pesos: pesos};
+    }
+  }
+  return null;
+}
+
 function dosis(e){
   if(e.d) return e.d;                       /* ejercicios viejos */
   var p = [];

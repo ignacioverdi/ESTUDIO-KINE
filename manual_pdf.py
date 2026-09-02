@@ -333,6 +333,19 @@ d.append(Paragraph('Corregir algo no borra lo anterior: agrega una rectificacion
 d.append(Paragraph('Arriba de la historia hay un cartel que dice si esta integra. Si alguien '
                    'modificara un asiento viejo, el sistema lo detecta y lo avisa.', P))
 
+d.append(Paragraph('Los estudios complementarios', H2))
+d.append(Paragraph('Ecografias, resonancias, radiografias, informes. Van pegados a la historia '
+                   'clinica, que es donde corresponde.', P))
+d.append(Paragraph('<b>Lo mejor es una foto del estudio</b> o un recorte de la imagen que '
+                   'importa: se achica sola, pesa poco y se ve al instante. Un PDF sirve si es '
+                   'un informe de texto.', P))
+d.append(caja('Un PDF de resonancia pesa entre 5 y 60 megas. Guardarlos adentro haria el portal '
+              'lento y caro, asi que si el archivo es grande el portal te avisa y te ofrece '
+              'pegar un enlace: el archivo queda donde ya esta y el portal guarda la direccion.'
+              '<br/><br/>De todas formas, una foto de la imagen concreta suele ser mas util que '
+              'las trescientas imagenes del estudio completo.', AMBAR, '#FBF3E6'))
+d.append(Spacer(1, 5 * mm))
+
 d.append(Paragraph('El paciente puede pedirte una copia', H2))
 d.append(Paragraph('Por ley el paciente es el titular de su historia clinica y podes tener '
                    'que darsela dentro de las 48 horas. En el portal es un boton: '
@@ -400,6 +413,17 @@ d.append(tabla(['Pantalla', 'Que hace ahi'], [
 
 d.append(Spacer(1, 6 * mm))
 d.append(Paragraph('Los ejercicios y el registro', H2))
+d.append(Paragraph('Cada ejercicio se abre entero: el <b>video arriba</b> con su nombre, y debajo '
+                   '<b>una fila por serie</b> donde el paciente anota el peso que uso de verdad y '
+                   'las repeticiones que le salieron. Entre serie y serie hay un boton de '
+                   'descanso que cuenta 60 segundos.', P))
+d.append(caja('<b>Por que el peso se anota por serie y no una sola vez.</b><br/><br/>'
+              'Tres series de 12 con 8 kilos no es lo mismo que 12 con 10, 12 con 8 y 8 con 6. '
+              'La segunda te dice que se quedo sin fuerza en la ultima, y que la carga esta al '
+              'limite. Con un solo numero esa informacion se pierde.<br/><br/>'
+              'Ademas le mostramos que uso la vez anterior, asi no tiene que acordarse.',
+              VERDE, '#EAF4EE'))
+d.append(Spacer(1, 4 * mm))
 d.append(Paragraph('El paciente tilda cada ejercicio a medida que lo hace, y al final marca '
                    'cuanto le dolio y que tan exigente le resulto. Eso te llega a vos.', P))
 d.append(Paragraph('Es el dato que te dice si el estancamiento es del tratamiento o de que '

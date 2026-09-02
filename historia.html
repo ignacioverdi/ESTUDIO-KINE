@@ -15,9 +15,22 @@
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script>
-<script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script>
+<script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/estudios.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script>
 <script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
 <style>
+  .estudios{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px}
+  .est{border:var(--borde) solid var(--linea);border-radius:var(--r);background:var(--sup2);
+    padding:0;overflow:hidden;cursor:pointer;text-align:left;color:inherit;font-family:inherit}
+  .est:hover{border-color:var(--acc)}
+  .est-ver{display:block;height:96px;background:var(--negro);overflow:hidden;
+    display:flex;align-items:center;justify-content:center}
+  .est-ver img{width:100%;height:96px;object-fit:cover;display:block}
+  .est-ico{font-family:var(--dat);font-size:15px;font-weight:700;color:var(--acc-texto);
+    letter-spacing:1px}
+  .est-txt{display:block;padding:10px 11px}
+  .est-txt b{display:block;font-size:14px}
+  .est-txt small{display:block;color:var(--tinta3);font-size:12px;font-family:var(--dat)}
+  @media print{ .estudios{grid-template-columns:repeat(3,1fr)} }
   /* En pantalla se ve con los colores del portal. Impresa sale en blanco
      y negro: es un documento legal, no una captura de pantalla. */
   .asiento{border-left:2px solid var(--linea2);padding:0 0 18px 16px;position:relative;margin-left:8px}
@@ -129,6 +142,29 @@ function pintar(){
           + 'No se pueden registrar datos clínicos nuevos.</div>')
     + '</div>'
     + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Estudios complementarios</h2>'
+    + '<span class="eti">' + estudiosDe(pid).length + ' cargados</span></div>'
+    + (estudiosDe(pid).length
+        ? '<div class="estudios">' + estudiosDe(pid).map(function(e){
+            return '<button class="est" onclick="abrirEstudio(\'' + pid + '\',\'' + e.id + '\')">'
+              + '<span class="est-ver">'
+              + (e.formato === 'imagen'
+                  ? '<img src="' + e.dato + '" alt="">'
+                  : '<span class="est-ico">' + (e.formato === 'pdf' ? 'PDF' : 'WEB') + '</span>')
+              + '</span>'
+              + '<span class="est-txt"><b>' + e.tipo + '</b>'
+              + '<small>' + (e.fecha ? fechaCorta(e.fecha) : fechaCorta(e.cargado))
+              + (e.peso ? ' · ' + pesoLegible(e.peso) : '') + '</small></span></button>';
+          }).join('') + '</div>'
+        : '<div class="vacio"><b>Sin estudios cargados</b>'
+          + 'Una ecografía, una resonancia o un informe.</div>')
+    + (esKine
+        ? '<button class="bt hueco ancho" style="margin-top:12px" onclick="agregarEstudio()">'
+          + 'Agregar un estudio</button>'
+        : '')
+    + '</div>'
+
+    + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Evolución</h2>'
     + '<span class="eti">' + h.length + ' asientos</span></div>'
     + (h.length
@@ -168,6 +204,137 @@ function dato(l, v){
   return '<div style="margin-bottom:12px"><span class="eti">' + l + '</span>'
        + '<div class="mono" style="font-size:15px;margin-top:3px">' + v + '</div></div>';
 }
+/* ── CARGAR UN ESTUDIO ───────────────────────────────────────────── */
+var EST = {tipo:'Ecografía', fecha:'', nota:'', archivo:null, enlace:''};
+
+function agregarEstudio(){
+  EST = {tipo:'Ecografía', fecha:'', nota:'', archivo:null, enlace:''};
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo'; caja.id = 'cajaNuevoEst';
+  caja.innerHTML = '<div class="ayuda-caja"><div id="cuerpoEst"></div></div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarNuevoEst(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+  pintarNuevoEst();
+}
+
+function pintarNuevoEst(){
+  document.getElementById('cuerpoEst').innerHTML =
+    '<button class="cerrar" onclick="cerrarNuevoEst()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Estudio complementario</span>'
+    + '<h2>Agregar un estudio</h2>'
+
+    + '<label class="campo"><span class="eti">Qué es</span>'
+    + '<div class="pestanias" id="eTipo" style="margin-bottom:0">'
+    + TIPOS_ESTUDIO.map(function(t){
+        return '<button class="pest' + (t === EST.tipo ? ' on' : '') + '" data-t="' + t + '">'
+             + t + '</button>';
+      }).join('') + '</div></label>'
+
+    + '<label class="campo"><span class="eti">Fecha del estudio</span>'
+    + '<input type="date" id="eFecha" value="' + (EST.fecha || '') + '"></label>'
+
+    + '<div class="nota info">Lo más práctico es una <b>foto del estudio</b> o un recorte de '
+    + 'la imagen que importa: se ve al instante y pesa poco. Un PDF sirve si es un informe '
+    + 'de texto; las resonancias completas suelen ser demasiado pesadas.</div>'
+
+    + '<input type="file" id="eArchivo" accept="image/*,application/pdf" style="display:none" '
+    + 'onchange="elegirArchivo(this)">'
+    + '<button class="bt hueco ancho" onclick="document.getElementById(\'eArchivo\').click()">'
+    + (EST.archivo ? 'Cambiar el archivo' : 'Elegir foto o PDF') + '</button>'
+
+    + '<div id="estVista">' + (EST.archivo ? vistaPrevia() : '') + '</div>'
+
+    + '<label class="campo" style="margin-top:14px"><span class="eti">O pegá un enlace</span>'
+    + '<input type="text" id="eEnlace" value="' + (EST.enlace || '') + '" '
+    + 'placeholder="https://... del centro de imágenes o de un Drive"></label>'
+
+    + '<label class="campo"><span class="eti">Qué dice, en una línea (opcional)</span>'
+    + '<input type="text" id="eNota" value="' + (EST.nota || '') + '" '
+    + 'placeholder="Rotura parcial del supraespinoso"></label>'
+
+    + '<div id="avisoEst"></div>'
+    + '<button class="bt ancho" onclick="guardarNuevoEst()">Agregar a la historia</button>';
+
+  document.querySelectorAll('#eTipo .pest').forEach(function(b){
+    b.onclick = function(){
+      EST.fecha = document.getElementById('eFecha').value;
+      EST.enlace = document.getElementById('eEnlace').value;
+      EST.nota = document.getElementById('eNota').value;
+      EST.tipo = b.dataset.t; pintarNuevoEst();
+    };
+  });
+}
+
+function vistaPrevia(){
+  var a = EST.archivo;
+  if(!a) return '';
+  return '<div class="nota bien" style="margin-top:12px">'
+    + '<b>' + a.nombre + '</b> — ' + pesoLegible(a.peso)
+    + (a.formato === 'imagen' ? ', achicada para que pese poco.' : '') + '</div>'
+    + (a.formato === 'imagen'
+        ? '<img src="' + a.dato + '" style="width:100%;border-radius:var(--r);'
+          + 'background:var(--negro);margin-top:10px;display:block">'
+        : '');
+}
+
+function elegirArchivo(input){
+  var av = document.getElementById('avisoEst');
+  av.innerHTML = '<div class="nota info">Preparando el archivo…</div>';
+  prepararEstudio(input.files && input.files[0], function(listo, motivo){
+    if(!listo){
+      if(motivo && motivo.indexOf('PESADO:') === 0){
+        av.innerHTML = '<div class="nota aviso"><b>Ese PDF pesa '
+          + motivo.split(':')[1] + ' y es demasiado.</b><br>'
+          + 'Subilo a un Drive y pegá el enlace acá abajo, o sacale una foto a la '
+          + 'imagen que te interesa: suele ser más útil que las trescientas '
+          + 'imágenes de la resonancia completa.</div>';
+      }else{
+        av.innerHTML = '<div class="nota reserva">' + motivo + '</div>';
+      }
+      return;
+    }
+    av.innerHTML = '';
+    EST.fecha = document.getElementById('eFecha').value;
+    EST.enlace = document.getElementById('eEnlace').value;
+    EST.nota = document.getElementById('eNota').value;
+    EST.archivo = listo;
+    pintarNuevoEst();
+  });
+}
+
+function guardarNuevoEst(){
+  var av = document.getElementById('avisoEst');
+  var enlace = (document.getElementById('eEnlace').value || '').trim();
+  if(!EST.archivo && !enlace){
+    av.innerHTML = '<div class="nota aviso">Elegí un archivo o pegá un enlace.</div>';
+    return;
+  }
+  var est = {
+    tipo: EST.tipo,
+    fecha: document.getElementById('eFecha').value || '',
+    nota: (document.getElementById('eNota').value || '').trim()
+  };
+  if(EST.archivo){
+    est.formato = EST.archivo.formato;
+    est.dato = EST.archivo.dato;
+    est.nombre = EST.archivo.nombre;
+    est.peso = EST.archivo.peso;
+  }else{
+    est.formato = 'enlace';
+    est.enlace = enlace;
+  }
+  guardarEstudio(pid, est);
+  cerrarNuevoEst();
+  pintar();
+}
+
+function cerrarNuevoEst(){
+  var c = document.getElementById('cajaNuevoEst');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
 function agregarNota(){
   var t = prompt('¿Qué querés dejar asentado?');
   if(!t || !t.trim()) return;
