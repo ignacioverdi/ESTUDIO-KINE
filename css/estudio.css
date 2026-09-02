@@ -334,6 +334,19 @@ label.campo>.eti{display:block;margin-bottom:5px}
 .ayuda-paso b{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
 .ayuda-paso span{color:var(--tinta2);font-size:14px}
 
+/* El "?" tiene que verse como algo que se toca, no como adorno.
+   Estuvo al lado de un boton identico de salir y nadie lo encontraba. */
+.ayuda-bt{border-color:var(--acc-borde);background:var(--acc-suave);color:var(--acc-texto)}
+.ayuda-bt:hover{background:var(--acc);color:var(--sobre-acc);border-color:var(--acc)}
+
+.version{color:var(--tinta3);text-decoration:none;font-family:var(--dat);font-size:9.5px;
+  letter-spacing:.5px;white-space:nowrap;opacity:.7}
+.version:hover{color:var(--acc-texto);opacity:1}
+@media(max-width:420px){ .version{display:none} }
+
+.nav-in .salir{margin-left:auto;color:var(--tinta3)}
+.menu-lista a.salir{color:var(--tinta3);border-top:var(--borde) solid var(--linea2)}
+
 /* ── MENU DEL CELULAR ────────────────────────────────────────────
    La fila de once secciones no entra en una pantalla angosta: hay que
    barrer de costado y las del final no se ven. Abajo de 860px la fila

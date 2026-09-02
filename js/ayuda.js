@@ -16,14 +16,15 @@
 var AYUDA = {
 
   inicio: {
-    titulo: 'La puerta de entrada',
-    que_es: 'Desde acá se entra al portal. El kinesiólogo ve el panel del estudio; el jugador ve solo lo suyo.',
+    titulo: 'La entrada',
+    que_es: 'Dos puertas distintas: una para el paciente y otra para el kinesiólogo.',
     pasos: [
-      ['Elegí cómo entrar', 'El kinesiólogo va al panel. El jugador va a su ficha, su turno y sus ejercicios.'],
-      ['Si entrás como jugador, elegí cuál', 'Los tres primeros de la lista tienen una lesión abierta cargada.'],
-      ['Los números de arriba', 'Cuántos están disponibles, limitados y de baja, en este momento.']
+      ['Si sos paciente', 'Entrás con tu documento y tu fecha de nacimiento, los mismos que cargaste al darte de alta. No hay contraseña que recordar.'],
+      ['Si sos el kinesiólogo', 'Entrás con tu correo y tu contraseña, que se cambian en Mi perfil.'],
+      ['Primera vez en el estudio', 'El enlace de abajo te lleva a cargar tus datos. Tarda dos minutos y se hace una sola vez.'],
+      ['Para tenerlo a mano', 'Instalalo como aplicación: en Chrome, los tres puntitos y "Instalar". En iPhone, Compartir y "Agregar a inicio".']
     ],
-    ojo: 'Esta pantalla de elegir rol existe solo para probar. En el portal publicado el rol viene de la cuenta y nadie lo elige.'
+    ojo: 'Documento más fecha de nacimiento no es tan fuerte como una contraseña, y es a propósito: si le pedimos al paciente crear una, la mitad no vuelve a entrar nunca. Para compensar, cada paciente ve SOLO lo suyo y cada ingreso queda registrado.'
   },
 
   panel: {
@@ -52,16 +53,6 @@ var AYUDA = {
     ojo: 'Alguien que se operó hace 90 días pero empezó la rehabilitación hace 10 no está atrasado: recién empieza. Con un solo número eso no se ve, y es la diferencia entre apurar a un paciente o entenderlo. Si la espera entre la lesión y la primera sesión fue larga, el portal te lo avisa. Los dos valores de dolor son obligatorios y la nota no: la diferencia entre el dolor al llegar y al terminar es el dato que muestra si la sesión sirvió. Al pasar de fase, los criterios se vacían y aparecen los de la fase nueva. Es a propósito: cada fase se gana de nuevo.'
   },
 
-  inicio: {
-    titulo: 'La entrada',
-    que_es: 'Dos puertas distintas para dos personas distintas.',
-    pasos: [
-      ['El paciente', 'Entra con su documento y su fecha de nacimiento. Sin contraseña que recordar.'],
-      ['El kinesiólogo', 'Entra con correo y contraseña, que se cambian en Mi perfil.'],
-      ['Primera vez', 'Si nunca se dio de alta, el enlace de abajo lo lleva a cargar sus datos.']
-    ],
-    ojo: 'Documento más fecha de nacimiento no es tan fuerte como una contraseña, y es a propósito: la alternativa real no es una contraseña fuerte, es que el paciente no entre nunca. Para compensar, cada paciente ve SOLO lo suyo y cada ingreso queda registrado. Si querés exigirle contraseña a alguien, se puede.'
-  },
 
   configuracion: {
     titulo: 'Tus horarios',
@@ -85,7 +76,7 @@ var AYUDA = {
       ['Reservar varias sesiones', 'Para quien compró un plan: elegís los días de la semana y la hora, y se reservan todas de una.'],
       ['El horario del estudio', 'Abajo. De ahí salen todos los turnos de todos los días. Si lo cambiás, se recalcula todo.']
     ],
-    ojo: 'Los horarios libres no se guardan: se calculan al momento a partir del horario del estudio. Por eso podés dar un turno para dentro de seis meses sin haber creado esa fecha antes, y por eso cambiar el horario reordena la agenda entera.'
+    ojo: 'Si sos paciente, ves el mismo calendario para elegir cuándo venir, pero no ves de quién son los otros turnos: solo dice ocupado. Y podés confirmar con "Ahí voy" o avisar que no vas a poder. Los horarios libres no se guardan: se calculan al momento a partir del horario del estudio, y por eso podés dar un turno para dentro de seis meses sin haber creado esa fecha antes.'
   },
 
   mi: {
@@ -201,6 +192,7 @@ var AYUDA = {
       ['Cada actuación es un asiento', 'Con número correlativo, fecha, hora y quién lo hizo. No se puede editar el pasado: corregir es agregar una rectificación.'],
       ['Verificá la integridad', 'El cartel de arriba dice si alguien tocó algo. Cada asiento guarda la huella del anterior, así que alterar uno se nota.'],
       ['Descargala en PDF', 'El paciente es el titular de su historia y puede pedir copia cuando quiera. Por ley hay 48 horas para dársela.'],
+      ['Si sos paciente', 'Ves tu historia entera y la podés descargar. Es tuya: por ley sos el titular.'],
       ['Estudios complementarios', 'Ecografías, resonancias, informes. Lo mejor es una foto del estudio o un recorte de la imagen que importa: se ve al instante y pesa poco.'],
       ['Mirá quién la vio', 'Abajo está la lista de accesos. Restringir sin registrar deja la mitad del trabajo hecho.']
     ],

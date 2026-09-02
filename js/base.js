@@ -70,12 +70,10 @@ function armarCabecera(){
     '<div class="top-in">'
     + '<a class="marca" href="index.html"><span class="sig"></span>'
     + '<span><b>ESTUDIO</b><span>Kinesiología del club</span></span></a>'
-    + '<div class="quien"><a href="estado.html" title="Estado del portal" '
-    + 'style="color:var(--tinta3);text-decoration:none;font-size:10px;letter-spacing:.5px">v'
-    + VERSION_PORTAL + '</a>'
-    + '<span class="av">' + quien.ini + '</span>' + quien.txt
-    + '<button class="ayuda-bt" onclick="salir()" title="Salir" aria-label="Salir">&#8629;</button>'
-    + '</div>'
+    + '<div class="quien"><a class="version" href="estado.html" '
+    + 'title="Versión ' + VERSION_PORTAL + ' — estado del portal">v'
+    + VERSION_PORTAL.slice(5) + '</a>'
+    + '<span class="av">' + quien.ini + '</span>' + quien.txt + '</div>'
     + '<div class="quien" style="margin-left:0">' + botonAyuda(pag) + '</div>'
     + '</div>';
 
@@ -83,7 +81,8 @@ function armarCabecera(){
   nav.className = 'nav';
   nav.innerHTML = '<div class="nav-in">' + items.map(function(i){
       return '<a href="' + i.a + '"' + (i.id === pag ? ' class="on"' : '') + '>' + i.t + '</a>';
-    }).join('') + '</div>';
+    }).join('')
+    + '<a href="#" onclick="salir();return false" class="salir">Salir</a></div>';
 
   /* En el celular la fila de once secciones no entra: hay que barrer de
      costado para encontrar las del final. Se reemplaza por un boton que
@@ -102,6 +101,10 @@ function armarCabecera(){
              + '<span class="ic">' + i.ic + '</span>' + i.t
              + (i.id === pag ? '<span class="tilde">&#10003;</span>' : '') + '</a>';
       }).join('')
+    /* Salir vive acá, no arriba: al lado del "?" eran dos círculos
+       iguales y nadie distinguía cuál era cuál. */
+    + '<a href="#" onclick="salir();return false" class="salir">'
+    + '<span class="ic">&#8629;</span>Salir</a>'
     + '</div>';
 
   /* El orden importa y se arma de atras para adelante, porque cada uno
