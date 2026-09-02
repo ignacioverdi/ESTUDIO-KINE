@@ -760,39 +760,178 @@ if(!FB_CONFIGURADO){
    vuelve a dibujar la pantalla. Es una sola consulta por pantalla, no
    una por dato.
    ══════════════════════════════════════════════════════════════════════ */
-var RAMAS_ESTUDIO = ['pacientes','lesiones','disponibilidad','programas','agenda',
+/* ══════════════════════════════════════════════════════════════════════
+   FIREBASE NO GUARDA FILAS, GUARDA LISTAS CON NOMBRE
+
+   El portal trabaja con BASE.pacientes como una fila: se recorre, se
+   cuenta, se filtra. Pero al guardar cada paciente en su propia rama
+   (kine/pacientes/P34), Firebase lo devuelve como una lista con nombre:
+
+       {P34:{...}, P35:{...}}   en vez de   [{...}, {...}]
+
+   Volcarlo tal cual dejaba el portal sin poder recorrerlo: el paciente
+   estaba guardado y no aparecía en ningún lado. Paso de verdad, con un
+   paciente real.
+
+   Esto lo convierte de vuelta a fila cuando corresponde.
+   ══════════════════════════════════════════════════════════════════════ */
+var RAMAS_FILA = ['pacientes', 'lesiones', 'caja', 'accesos', 'instituciones', 'faq', 'ejercicios'];
+
+function acomodar(rama, valor){
+  if(RAMAS_FILA.indexOf(rama) < 0) return valor;      /* esa va como esta */
+  if(Array.isArray(valor)) return valor;
+  if(!valor || typeof valor !== 'object') return [];
+  /* Se recorre por clave y se arma la fila. La clave es el id, asi que
+     si el objeto no lo trae adentro, se le pone. */
+  return Object.keys(valor).map(function(k){
+    var x = valor[k];
+    if(x && typeof x === 'object' && x.id === undefined) x.id = k;
+    return x;
+  }).filter(function(x){ return x; });
+}
+
+var RAMAS_ESTUDIO = ['vaciado', 'pacientes','lesiones','disponibilidad','programas','agenda',
                      'historia','accesos','caja','mensajes','adherencia','perfil',
                      'ejercicios','wellness'];
 
 function fbCargarTodo(){
   if(!FB_CONFIGURADO || typeof BASE === 'undefined') return;
+  var ses = (typeof sesion === 'function') ? sesion() : null;
+  if(!ses) return;                       /* sin entrar no hay nada que traer */
 
-  /* Si los datos no llegan, el portal muestra los de ejemplo y nadie se
-     entera de que esta viendo algo que no es real. Eso es peligroso en
-     una historia clinica: mejor decirlo. */
-  var llego = false;
-  setTimeout(function(){
-    if(llego || !document.body) return;
+  /* Hay que ESPERAR a que la sesion este lista. Antes se leia FB_SES en
+     el momento, y como todavia estaba vacia la funcion se iba sin pedir
+     nada: el kinesiologo veia siempre los datos de ejemplo. */
+  _fbArrancar().then(function(){
+    /* Si el paciente cerro y volvio a abrir, su sesion de Firebase pudo
+       vencer. Sin token no puede leer ni lo suyo, y la pantalla le queda
+       con datos que no son de el. En ese caso se lo manda a entrar de
+       nuevo en vez de mostrarle cualquier cosa. */
+    if(!(FB_SES && FB_SES.idToken)){
+      if(ses.tipo === 'paciente' && typeof salir === 'function') salir();
+      return;
+    }
+    _fbTraerRamas(ses);
+  }).catch(function(){});
+}
+
+function _fbTraerRamas(ses){
+  var tok = (FB_SES && FB_SES.idToken) || '';
+  var uid = (FB_SES && FB_SES.uid) || '';
+  if(!tok) return;
+
+  /* ══════════════════════════════════════════════════════════════════
+     LOS DATOS DE EJEMPLO NO CONVIVEN CON LOS REALES
+
+     Con la base conectada, lo unico valido es lo que esta en la base.
+     Si ademas se dejan los pacientes de ejemplo del archivo, quedan los
+     dos mezclados y nadie sabe cual es cual: Marcela Rios inventada al
+     lado de un paciente de verdad, en la misma lista.
+
+     En una historia clinica eso no se puede permitir. Se vacian antes de
+     pedir. Si la consulta falla, la pantalla queda vacia y aparece el
+     cartel rojo: mejor vacia y avisando que llena de mentiras.
+     ══════════════════════════════════════════════════════════════════ */
+  BASE.pacientes = [];
+  BASE.lesiones = [];
+  BASE.disponibilidad = {};
+  BASE.historia = {};
+  BASE.mensajes = [];
+  BASE.caja = [];
+  BASE.estudios = {};
+  BASE.adherencia = {};
+  BASE.wellness = {};
+  BASE.programas = {};
+
+  /* ══════════════════════════════════════════════════════════════════
+     RAMA POR RAMA, NO TODO DE UNA
+
+     Antes esto pedia /kine.json, o sea la rama entera de un saque.
+     Firebase exige permiso sobre EXACTAMENTE lo que se pide, y las
+     reglas dan permiso rama por rama: pacientes, lesiones, caja. Sobre
+     "kine" entero no hay ninguna, asi que rechazaba la consulta y no
+     cargaba NADA.
+
+     Resultado: el kinesiologo cargaba un paciente, se guardaba bien en
+     la base, y en la pantalla seguia viendo los datos de ejemplo. El
+     paciente "desaparecia".
+
+     Ahora se pide cada rama por separado. Si uno falla, los demas
+     llegan igual.
+     ══════════════════════════════════════════════════════════════════ */
+  var esKine = ses.tipo === 'kine';
+
+  /* El paciente solo puede leer lo suyo: pedirle la lista completa le
+     daria un rechazo en cada pantalla. */
+  var ramas = esKine
+    ? ['pacientes','lesiones','disponibilidad','programas','agenda','historia',
+       'caja','mensajes','adherencia','wellness','estudios','perfil','horario',
+       'instituciones','faq','avisados','accesos','ejercicios']
+    : ['lesiones','programas','agenda','perfil','horario','instituciones','faq',
+       'pacientes/' + uid, 'historia/' + uid, 'mensajes/' + uid,
+       'adherencia/' + uid, 'wellness/' + uid, 'estudios/' + uid];
+
+  var pendientes = ramas.length, fallaron = [];
+
+  ramas.forEach(function(r){
+    fetch(FB_URL + '/kine/' + r + '.json?auth=' + encodeURIComponent(tok))
+      .then(function(resp){
+        if(!resp.ok) throw new Error(resp.status);
+        return resp.json();
+      })
+      .then(function(d){
+        if(d === null || d === undefined) return;
+        var partes = r.split('/');
+        if(partes.length === 2){
+          /* Una rama propia del paciente: se mete en su lugar. */
+          if(partes[0] === 'pacientes'){
+            if(!BASE.pacientes.some(function(x){ return x.id === partes[1]; })){
+              d.id = partes[1];
+              BASE.pacientes.push(d);
+            }
+          }else{
+            if(!BASE[partes[0]]) BASE[partes[0]] = {};
+            BASE[partes[0]][partes[1]] = d;
+          }
+        }else{
+          /* Las listas vienen como objeto y el portal las usa como lista. */
+          if(['pacientes','lesiones','caja','accesos','mensajes','instituciones','faq'].indexOf(r) >= 0
+             && d && !Array.isArray(d)){
+            BASE[r] = Object.keys(d).map(function(k){
+              var v = d[k];
+              if(v && typeof v === 'object' && !v.id) v.id = k;
+              return v;
+            });
+          }else{
+            BASE[r] = d;
+          }
+        }
+      })
+      .catch(function(e){ fallaron.push(r + ' (' + e.message + ')'); })
+      .then(function(){
+        if(--pendientes > 0) return;
+        if(typeof pintar === 'function'){ try{ pintar(); }catch(e){} }
+        if(fallaron.length) _fbAvisarLectura(fallaron);
+      });
+  });
+}
+
+/* Si alguna rama no llega, hay que decirlo: mostrar datos viejos como si
+   fueran actuales es peligroso en una historia clinica. */
+function _fbAvisarLectura(fallaron){
+  try{
+    console.warn('[base] no se pudieron leer:', fallaron.join(', '));
+    if(document.getElementById('fb-lectura')) return;
     var d = document.createElement('div');
+    d.id = 'fb-lectura';
     d.className = 'cartel-demo';
     d.style.background = 'var(--rojo-suave)';
     d.style.color = 'var(--rojo)';
-    d.innerHTML = '<span><b>No se pudieron traer los datos.</b> Lo que ves puede no estar '
-      + 'actualizado. Revisá tu conexión y recargá.</span>';
-    document.body.insertBefore(d, document.body.firstChild);
-  }, 9000);
-
-  fbGet('kine', function(d){
-    llego = true;
-    if(!d) return;
-    RAMAS_ESTUDIO.forEach(function(r){
-      if(d[r] !== undefined) BASE[r] = d[r];
-    });
-    /* Cada pantalla define su pintar(); asi se redibuja con lo que llego. */
-    if(typeof pintar === 'function'){
-      try{ pintar(); }catch(e){}
-    }
-  });
+    d.innerHTML = '<span><b>No se pudieron traer todos los datos.</b> Lo que ves puede estar '
+      + 'incompleto. Revisá tu conexión y recargá.</span>'
+      + '<a href="#" onclick="location.reload();return false">Recargar</a>';
+    if(document.body) document.body.insertBefore(d, document.body.firstChild);
+  }catch(e){}
 }
 
 if(FB_CONFIGURADO){

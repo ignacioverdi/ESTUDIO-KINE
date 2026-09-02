@@ -30,7 +30,20 @@ var HOY = '2026-08-28';
    Al conectar Firebase esto se apaga solo: si la base trae pacientes de
    verdad, se usan esos y los inventados no se cargan nunca.
    ══════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════
+   VACIAR TIENE QUE VALER PARA TODOS
+
+   Antes la marca de "ya vacié" vivia en el navegador de quien la toco.
+   Resultado: el kinesiologo vaciaba en su computadora y vaciaba de
+   verdad, pero desde otro aparato seguian apareciendo los seis pacientes
+   inventados encima de los reales. Un desastre de confusion.
+
+   Ahora la marca vive en la base, junto a los datos. Se vacia una vez y
+   vale para todos los aparatos, siempre.
+   ══════════════════════════════════════════════════════════════════════ */
 function esDemo(){
+  /* Con la base conectada manda la base. */
+  if(BASE && BASE.vaciado) return false;
   try{ return localStorage.getItem('estudio_vaciado') !== 'si'; }catch(e){ return true; }
 }
 
@@ -51,13 +64,21 @@ function vaciarTodo(){
       delete t.pid; delete t.dorsal; delete t.tipo; delete t.estado;
     });
   }
+  BASE.vaciado = HOY;
   try{
     localStorage.setItem('estudio_vaciado', 'si');
     localStorage.removeItem('estudio_pid');
     localStorage.removeItem('estudio_datos');
   }catch(e){}
   if(typeof persistir === 'function') persistir();
-  guardar('kine/_vaciado', {fecha: HOY, por: 'el estudio'});
+  /* En la base, para que valga desde cualquier aparato. */
+  guardar('kine/vaciado', HOY);
+  /* Y se borran de la base las ramas de ejemplo, no solo de la memoria:
+     si no, al recargar volvian a bajar. */
+  ['pacientes','lesiones','disponibilidad','programas','historia',
+   'accesos','caja','mensajes','adherencia','wellness','estudios'].forEach(function(r){
+    guardar('kine/' + r, null);
+  });
 }
 
 
@@ -542,7 +563,7 @@ var CLAVE_LOCAL = 'estudio_datos';
 /* Lo que cambia con el uso. El resto (plantillas, planes, textos) es la
    herramienta y no hace falta guardarlo. */
 var RAMAS = ['pacientes', 'lesiones', 'disponibilidad', 'programas', 'agenda', 'horario',
-             'instituciones', 'faq', 'avisados',
+             'instituciones', 'faq', 'avisados', 'vaciado',
              'historia', 'accesos', 'caja', 'mensajes', 'adherencia', 'perfil',
              'ejercicios'];
 

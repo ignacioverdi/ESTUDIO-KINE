@@ -42,7 +42,22 @@ var MENU = {
 };
 
 /* Si el estudio ya vació la demostración, los datos inventados no se
-   vuelven a cargar nunca. Esto corre antes que cualquier pantalla. */
+   vuelven a cargar nunca. Esto corre antes que cualquier pantalla.
+
+   Con la base conectada la marca llega DESPUES, así que se vuelve a
+   revisar cuando los datos bajan: sin eso, aparecían los inventados
+   por un segundo y encima se mezclaban con los reales. */
+function limpiarSiYaVacio(){
+  if(typeof esDemo === 'function' && !esDemo() && typeof BASE !== 'undefined'){
+    /* Se limpia la memoria, no la base: la base ya se vació una vez. */
+    BASE.pacientes = BASE.pacientes || [];
+    if(BASE.vaciado){
+      ['lesiones','caja','accesos'].forEach(function(r){
+        if(!Array.isArray(BASE[r])) BASE[r] = [];
+      });
+    }
+  }
+}
 if(typeof esDemo === 'function' && !esDemo() && typeof vaciarTodo === 'function'){
   vaciarTodo();
 }

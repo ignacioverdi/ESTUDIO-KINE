@@ -30,8 +30,10 @@
 | **Cinco horas publicando sin que cambiara nada** | **Un comentario mío adentro de `vercel.json`** |
 | La cuenta correcta era rechazada al entrar | Le pedí el rol a una función que no devuelve datos |
 | Una escritura rechazada se perdía en silencio | El error se tragaba y la copia local disimulaba |
+| El kinesiólogo no veía los pacientes cargados | Pedía la rama entera y las reglas dan permiso por rama |
+| Los datos de ejemplo se mezclaban con los reales | Nunca los borré al conectar la base |
 
-**Dieciocho errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Veinte errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---
