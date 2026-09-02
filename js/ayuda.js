@@ -147,6 +147,7 @@ var AYUDA = {
       ['Buscá por nombre o documento', 'Con el buscador de arriba de la lista.'],
       ['Abrí una ficha', 'Tocá el paciente y desde ahí le abrís una lesión o le das turno.'],
       ['Los contadores de arriba', 'Uno por institución: cuántos pacientes te manda cada una. Tocá uno para ver solo esos, y tocalo de nuevo para volver a todos.'],
+      ['Borrar a alguien', 'Desde su ficha, botón Borrar. Se lleva su historia, sus lesiones y libera sus turnos. La caja no se toca: si pagó, ese ingreso queda.'],
       ['Si alguien no puede entrar', 'Casi siempre es que se equivocó al cargar su documento o su fecha de nacimiento. Con "Corregir sus datos" lo arreglás y ya puede entrar.'],
       ['Abrir una lesión', 'Elegís zona, lado y gravedad. Los criterios de cada fase y la fecha estimada de alta se completan solos.']
     ],
@@ -173,7 +174,8 @@ var AYUDA = {
       ['Subí tu foto', 'Se achica sola antes de guardarse, así no pesa.'],
       ['Subí el logo', 'Sale en el cartel del QR y en el encabezado.'],
       ['Completá la matrícula', 'Va impresa en la historia clínica: es un documento profesional.'],
-      ['Contá quién sos', 'Escribilo como se lo contarías a alguien en la sala de espera, no como un currículum.']
+      ['Contá quién sos', 'Escribilo como se lo contarías a alguien en la sala de espera, no como un currículum.'],
+      ['Borrar todo', 'Abajo de todo. Borra TODOS los pacientes. Para sacar a uno solo, andá a su ficha en Pacientes.']
     ],
     ojo: 'Abajo de todo está el botón para vaciar los datos de demostración. Usalo ANTES de cargar el primer paciente de verdad: si no, en un mes no vas a saber cuál es real y cuál inventado. No se puede deshacer, por eso pide escribir una palabra.'
   },

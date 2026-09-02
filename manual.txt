@@ -63,6 +63,11 @@ En Pacientes, arriba, el boton "+ Nuevo paciente" abre la misma ficha para compl
 Arriba de Pacientes hay un contador por institucion: cuantos te manda cada una. Es el numero que dice de donde te llega el trabajo y de quien dependes.
 Tocando uno se filtra la lista para ver solo esos, y tocandolo de nuevo volves a todos.
 La lista de instituciones se edita en Horarios, abajo de todo. Si entra un club nuevo, lo agregas ahi y aparece solo en el alta y en el padron.
+##Borrar un paciente
+Desde su ficha en Pacientes, boton Borrar. Pide escribir la palabra BORRAR.
+Se lleva su ficha, su historia clinica, sus lesiones y libera sus turnos futuros.
+%AMBAR|La caja NO se toca. Si esa persona pago, ese ingreso queda en la contabilidad: borrar a alguien no puede hacer desaparecer plata que entro.
+Para borrar TODOS de una (por ejemplo, despues de probar el portal), esta el boton de Mi perfil, abajo de todo.
 ##Si un paciente no puede entrar
 Es el problema mas comun y tiene una sola causa: se equivoco al cargar su documento o su fecha de nacimiento, que es con lo que entra.
 %ROJO|El portal le dice "no encontramos a nadie con esos datos", sin aclarar cual de los dos esta mal. Eso es a proposito: si dijera "ese documento no esta", cualquiera podria averiguar quien es paciente del estudio probando documentos. Pero significa que el paciente no puede resolverlo solo. Lo resolves vos: en Pacientes, abris su ficha y tocas "Corregir sus datos". Ahi cambias el documento o la fecha, y ya puede entrar. La correccion queda asentada en su historia clinica.
@@ -245,6 +250,7 @@ Lo unico que hay que recordar todos los dias.
 |Responderle un mensaje|Pacientes, boton Mensajes.
 |Cambiar las preguntas frecuentes|Mi perfil, abajo.
 |Que alguien no puede entrar|Pacientes, boton Corregir sus datos.
+|Borrar un paciente|Pacientes, abri su ficha, boton Borrar.
 |Entender una pantalla|El boton con el signo de pregunta, arriba.
 @@ANCHOS 58 107
 ##Las cuatro cosas que no hay que olvidarse

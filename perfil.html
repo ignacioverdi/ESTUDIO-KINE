@@ -125,14 +125,21 @@ function pintar(){
     /* Vaciar es lo último de la pantalla y no se puede deshacer. Va
        separado, explicado, y pide escribir una palabra: un botón suelto
        que borra todo se toca sin querer. */
-    + (esDemo()
-        ? '<div class="tarjeta" style="margin-top:26px;border-color:var(--ambar-borde)">'
-          + '<div class="tarjeta-cab"><h2 class="sub">Empezar de cero</h2>'
-          + '<span class="eti">Una sola vez</span></div>'
-          + '<p style="color:var(--tinta2);margin-bottom:14px">El portal viene con pacientes '
-          + 'inventados para que se vea andando: Marcela Ríos, Diego Sosa y los demás no existen. '
-          + '<b>Antes de cargar el primer paciente de verdad, vaciá todo.</b> Si no, dentro de un '
-          + 'mes no vas a saber cuál es real y cuál no.</p>'
+    /* Antes esta tarjeta desaparecia despues de usarla una vez, y era la
+       unica forma de borrar. Si alguien cargaba diez pacientes de prueba
+       para probar el portal, se quedaba con ellos para siempre. */
+    + ('<div class="tarjeta" style="margin-top:26px;border-color:var(--ambar-borde)">'
+          + '<div class="tarjeta-cab"><h2 class="sub">'
+          + (esDemo() ? 'Empezar de cero' : 'Borrar todo y empezar de cero') + '</h2>'
+          + '</div>'
+          + '<p style="color:var(--tinta2);margin-bottom:14px">'
+          + (esDemo()
+              ? 'El portal viene con pacientes inventados para que se vea andando: Marcela Ríos, '
+                + 'Diego Sosa y los demás no existen. <b>Antes de cargar el primer paciente de '
+                + 'verdad, vaciá todo.</b> Si no, dentro de un mes no vas a saber cuál es real.'
+              : 'Borra <b>todos</b> los pacientes con sus historias, lesiones y turnos. '
+                + 'Para sacar a uno solo, andá a su ficha en Pacientes y usá el botón Borrar.')
+          + '</p>'
           + '<p style="color:var(--tinta2);margin-bottom:14px">Se borran los pacientes, las '
           + 'lesiones, las historias, los turnos y la caja. <b>No</b> se borran las plantillas de '
           + 'lesión, la biblioteca de ejercicios, tu perfil ni el horario del estudio: eso es la '
@@ -142,9 +149,7 @@ function pintar(){
           + '<input type="text" id="cVaciar" placeholder="VACIAR"></label>'
           + '<button class="bt ancho" style="background:var(--rojo);border-color:var(--rojo)" '
           + 'onclick="confirmarVaciado()">Vaciar y empezar de cero</button>'
-          + '</div>'
-        : '<div class="nota bien" style="margin-top:26px">El portal está limpio. Los datos de '
-          + 'demostración se borraron y no vuelven.</div>');
+          + '</div>');
 }
 function campo(k, l){
   var P = perfil();

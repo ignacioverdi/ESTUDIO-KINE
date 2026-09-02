@@ -190,6 +190,7 @@ function abrir(id){
     + (L ? '<a class="bt" href="lesiones.html?f=' + L.id + '" style="text-decoration:none">Ver su ficha</a>'
          : '<button class="bt" onclick="abrirLesion(\'' + p.id + '\')">Abrir una lesión</button>')
     + '<button class="bt hueco" onclick="corregirDatos(\'' + p.id + '\')">Corregir sus datos</button>'
+    + '<button class="bt neutro" onclick="borrarPaciente(\'' + p.id + '\')">Borrar</button>'
     + '<button class="bt hueco" onclick="abrirConversacion(\'' + p.id + '\')">Mensajes'
     + (sinLeer(p.id) ? ' (' + sinLeer(p.id) + ' sin leer)' : '') + '</button>'
     + '<a class="bt neutro" href="agenda.html" style="text-decoration:none">Darle un turno</a>'
@@ -364,6 +365,115 @@ function guardarLesion(){
    La correccion queda asentada en la historia clinica, como corresponde:
    se cambio un dato de identificacion y tiene que constar quien y cuando.
    ══════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════
+   BORRAR UN PACIENTE
+
+   Hasta ahora la unica forma de sacar a alguien era vaciar el portal
+   entero, y ese boton desaparece despues de usarlo una vez. O sea: un
+   paciente cargado por error se quedaba para siempre.
+
+   Se borra desde su ficha, que es donde uno esta cuando se da cuenta.
+
+   QUE SE BORRA Y QUE NO
+   ---------------------
+   Se borra la ficha, sus lesiones, su historia, sus mensajes y sus
+   registros. Y se liberan sus turnos futuros, que si no quedan ocupados
+   por alguien que ya no existe.
+
+   NO se toca la caja: si pago, ese dinero entro, y borrar a la persona
+   no puede hacer desaparecer un ingreso de la contabilidad.
+
+   Pide escribir BORRAR, como el vaciado. Un boton suelto que borra una
+   historia clinica se toca sin querer una vez y ya esta.
+   ══════════════════════════════════════════════════════════════════════ */
+function borrarPaciente(pid){
+  var p = paciente(pid);
+  if(!p) return;
+  var L = [];
+  BASE.lesiones.forEach(function(x){ if(x.pid === pid) L.push(x); });
+  var turnos = 0;
+  Object.keys(BASE.agenda || {}).forEach(function(d){
+    (BASE.agenda[d] || []).forEach(function(t){ if(t.pid === pid && d >= HOY) turnos++; });
+  });
+
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo'; caja.id = 'cajaBorrar';
+  caja.innerHTML = '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarBorrar()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Borrar</span><h2>' + p.nombre + '</h2>'
+    + '<div class="nota reserva">Esto no se puede deshacer.</div>'
+    + '<p style="color:var(--tinta2);font-size:14px">Se van a borrar:</p>'
+    + '<div class="fila" style="cursor:default"><span class="cu">Su ficha y sus datos</span></div>'
+    + '<div class="fila" style="cursor:default"><span class="cu">Su historia clínica</span>'
+    + '<span class="pin gris">' + (historiaDe(pid) || []).length + ' asientos</span></div>'
+    + '<div class="fila" style="cursor:default"><span class="cu">Sus lesiones</span>'
+    + '<span class="pin gris">' + L.length + '</span></div>'
+    + '<div class="fila" style="cursor:default"><span class="cu">Sus turnos futuros</span>'
+    + '<span class="pin gris">' + turnos + ' se liberan</span></div>'
+    + '<div class="nota info">La caja NO se toca: si pagó, ese ingreso queda. '
+    + 'Borrar a una persona no puede hacer desaparecer plata de la contabilidad.</div>'
+    + '<label class="campo"><span class="eti">Escribí BORRAR para confirmar</span>'
+    + '<input type="text" id="cBorrar" placeholder="BORRAR"></label>'
+    + '<div id="avisoBorrar"></div>'
+    + '<button class="bt ancho" style="background:var(--rojo);border-color:var(--rojo)" '
+    + 'onclick="confirmarBorrado(\'' + pid + '\')">Borrar definitivamente</button>'
+    + '<button class="bt neutro ancho" style="margin-top:8px" onclick="cerrarBorrar()">Cancelar</button>'
+    + '</div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarBorrar(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarBorrar(){
+  var c = document.getElementById('cajaBorrar');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
+function confirmarBorrado(pid){
+  var t = (document.getElementById('cBorrar').value || '').trim().toUpperCase();
+  if(t !== 'BORRAR'){
+    document.getElementById('avisoBorrar').innerHTML =
+      '<div class="nota aviso">Escribí BORRAR para confirmar.</div>';
+    return;
+  }
+  var p = paciente(pid);
+
+  /* Sus turnos futuros quedan libres. Los pasados se dejan: son parte
+     de lo que ocurrió y de las estadísticas del mes. */
+  Object.keys(BASE.agenda || {}).forEach(function(d){
+    (BASE.agenda[d] || []).forEach(function(x){
+      if(x.pid === pid && d >= HOY){
+        delete x.pid; delete x.dorsal; delete x.tipo; delete x.confirmado;
+        x.estado = null;
+        guardar('kine/agenda/turnos/' + d + '/' + x.h, null);
+      }
+    });
+  });
+
+  BASE.lesiones.filter(function(x){ return x.pid === pid; }).forEach(function(x){
+    guardar('kine/lesiones/' + x.id, null);
+  });
+  BASE.lesiones = BASE.lesiones.filter(function(x){ return x.pid !== pid; });
+
+  if(p && p.dorsal){
+    delete BASE.disponibilidad[p.dorsal];
+    guardar('kine/disponibilidad/' + p.dorsal, null);
+  }
+
+  ['historia','mensajes','adherencia','wellness','estudios'].forEach(function(r){
+    if(BASE[r]) delete BASE[r][pid];
+    guardar('kine/' + r + '/' + pid, null);
+  });
+
+  BASE.pacientes = BASE.pacientes.filter(function(x){ return x.id !== pid; });
+  guardar('kine/pacientes/' + pid, null);
+
+  cerrarBorrar();
+  abierta = null;
+  pintar();
+}
+
 function corregirDatos(pid){
   var p = paciente(pid);
   if(!p) return;
