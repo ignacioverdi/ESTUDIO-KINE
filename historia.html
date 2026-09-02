@@ -107,7 +107,7 @@ function pintar(){
     + dato('Teléfono', p.tel)
     + dato('Correo', p.email || '—')
     + dato('Condición', p.tipo === 'plantel' ? 'Plantel del club, camiseta ' + (p.dorsal || '?')
-                                             : (p.obra_social || 'Particular'))
+                                             : institucionDe(p))
     + dato('En el padrón desde', fechaLarga(p.alta))
     + '</div>'
     + '</div>'

@@ -280,6 +280,12 @@ label.campo>.eti{display:block;margin-bottom:5px}
   border-radius:9px;background:var(--rojo);color:var(--sobre-rojo);font-family:var(--dat);font-size:10px;
   font-weight:700;display:flex;align-items:center;justify-content:center}
 
+/* Un contador que ademas filtra: tiene que verse que se toca. */
+button.dato{cursor:pointer;font-family:inherit;text-align:left;width:100%}
+button.dato:hover{border-color:var(--acc)}
+button.dato.elegido{border-color:var(--acc);border-width:2px;background:var(--acc-suave)}
+button.dato.elegido .v{color:var(--acc-texto)}
+
 /* ── LA PANTALLA DE UN EJERCICIO ────────────────────────────────
    Video arriba con el nombre, y debajo una fila por serie con el peso
    y las repeticiones que hizo de verdad.                            */
@@ -377,6 +383,9 @@ label.campo>.eti{display:block;margin-bottom:5px}
   .rejilla.c2,.rejilla.c3,.rejilla.c4{grid-template-columns:1fr 1fr}
   h1.tit{font-size:calc(var(--tit-tam) * .82)}
 }
+@media(max-width:860px){
+  #porInst{grid-template-columns:1fr 1fr}
+}
 @media(max-width:640px){
   /* Una sola columna. Con dos, las filas de turnos no entran y la
      pagina se desborda hacia el costado. */
@@ -395,6 +404,10 @@ label.campo>.eti{display:block;margin-bottom:5px}
    salen 33px y hay que barrer de costado para leerlos. */
 @media(max-width:400px){
   .rejilla.c3,.rejilla.c4{grid-template-columns:1fr}
+  /* Los contadores por institución son cortos: en una sola columna
+     ocupan media pantalla y hay que bajar para verlos. Van de a dos. */
+  #porInst{grid-template-columns:1fr 1fr!important}
+  #porInst .v{font-size:22px}
   .dato .v{font-size:26px}
   .hoja{padding:16px 12px}
   .tarjeta{padding:14px}

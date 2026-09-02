@@ -55,11 +55,13 @@ function pintar(){
     + '</p>'
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Quién sos</h2></div>'
-    + '<label class="campo"><span class="eti">' + vos('¿Sos del plantel del club?', '¿Es del plantel del club?') + '</span>'
-    + '<div class="pestanias" id="tipo" style="margin-bottom:0">'
-    + '<button class="pest" data-t="plantel">' + vos('Sí, juego en el club', 'Sí, del plantel') + '</button>'
-    + '<button class="pest" data-t="particular">' + vos('No, vengo por mi cuenta', 'No, particular') + '</button>'
-    + '</div></label>'
+    + '<label class="campo"><span class="eti">'
+    + vos('¿De dónde venís?', '¿De dónde viene?') + '</span>'
+    + '<select id="f_inst"><option value="">Elegí una opción</option>'
+    + instituciones().map(function(i){
+        return '<option value="' + i.nombre + '"'
+             + (F.institucion === i.nombre ? ' selected' : '') + '>' + i.nombre + '</option>';
+      }).join('') + '</select></label>'
     + '<div id="camposTipo"></div>'
     + '<div style="display:flex;gap:16px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'
     + (F.foto ? '<img src="' + F.foto + '" style="width:86px;height:86px;border-radius:50%;'
@@ -155,17 +157,13 @@ function pintar(){
       b.classList.add('on'); F.frecuencia = b.dataset.f;
     };
   });
-  document.querySelectorAll('#tipo .pest').forEach(function(b){
-    b.onclick = function(){
-      document.querySelectorAll('#tipo .pest').forEach(function(x){ x.classList.remove('on'); });
-      b.classList.add('on'); F.tipo = b.dataset.t; pintarTipo();
-    };
-  });
-  if(F.tipo){
-    var sel = document.querySelector('#tipo .pest[data-t=' + F.tipo + ']');
-    if(sel) sel.classList.add('on');
+  var si = document.getElementById('f_inst');
+  if(si) si.onchange = function(){
+    F.institucion = si.value;
+    F.tipo = usaDorsal(si.value) ? 'plantel' : 'particular';
     pintarTipo();
-  }
+  };
+  pintarTipo();
   ['nombre','doc','nac','tel','mail','motivo','ocupacion','deporte','antecedentes','objetivos'].forEach(function(k){
     var e = document.getElementById('f_' + k);
     if(e && F[k]) e.value = F[k];
@@ -175,18 +173,16 @@ function pintar(){
 }
 function pintarTipo(){
   var c = document.getElementById('camposTipo');
-  if(F.tipo === 'plantel'){
-    c.innerHTML = '<label class="campo"><span class="eti">Tu número de camiseta</span>'
+  /* El numero de camiseta solo se pide donde existe. Antes se preguntaba
+     la obra social, que no se usaba para nada. */
+  if(F.institucion && usaDorsal(F.institucion)){
+    c.innerHTML = '<label class="campo"><span class="eti">'
+      + (LOCARGA_EL_KINE ? 'Su número de camiseta' : 'Tu número de camiseta')
+      + ' <small style="color:var(--tinta3)">(si no tenés, dejalo vacío)</small></span>'
       + '<input type="number" id="f_dorsal" inputmode="numeric" placeholder="Ej: 7"></label>';
     var e = document.getElementById('f_dorsal');
     if(F.dorsal) e.value = F.dorsal;
     e.oninput = function(){ F.dorsal = e.value; };
-  }else if(F.tipo === 'particular'){
-    c.innerHTML = '<label class="campo"><span class="eti">Obra social o prepaga</span>'
-      + '<input type="text" id="f_obra" placeholder="Si no tenés, poné Particular"></label>';
-    var o = document.getElementById('f_obra');
-    if(F.obra) o.value = F.obra;
-    o.oninput = function(){ F.obra = o.value; };
   }else{
     c.innerHTML = '';
   }
@@ -252,7 +248,7 @@ function enviar(){
   F.tel      = leer('f_tel');
   F.motivo   = leer('f_motivo');
   F.dorsal   = leer('f_dorsal');
-  F.obra     = leer('f_obra');
+  F.institucion = leer('f_inst') || F.institucion;
   F.tutor    = leer('f_tutor');
   F.tutortel = leer('f_tutortel');
   F.vinculo  = leer('f_vinculo');
@@ -260,7 +256,7 @@ function enviar(){
   F.deporte      = leer('f_deporte');
   F.antecedentes = leer('f_antecedentes');
   F.objetivos    = leer('f_objetivos');
-  if(!F.tipo)             falta.push('si sos del plantel o venís por tu cuenta');
+  if(!F.institucion)      falta.push('de dónde venís');
   if(F.nombre.length < 4) falta.push('tu nombre y apellido');
   if(F.doc.length < 6)    falta.push('tu documento');
   if(!F.nac)              falta.push('tu fecha de nacimiento');
@@ -305,8 +301,9 @@ function enviar(){
     foto: F.foto || null,
     consentimiento: {aceptado:true, fecha:HOY}
   };
-  if(F.tipo === 'plantel' && F.dorsal) nuevo.dorsal = +F.dorsal;
-  if(F.tipo === 'particular') nuevo.obra_social = F.obra || 'Particular';
+  if(F.dorsal) nuevo.dorsal = +F.dorsal;
+  nuevo.institucion = F.institucion || 'Particulares';
+  nuevo.tipo = usaDorsal(nuevo.institucion) ? 'plantel' : 'particular';
   if(esMenor(F.nac)) nuevo.tutor = {nombre:F.tutor, tel:F.tutortel || F.tel, vinculo:F.vinculo || '—'};
   /* Con la base conectada se le crea la cuenta invisible, y su ficha se
      guarda con ese identificador como clave. Asi las reglas pueden decir

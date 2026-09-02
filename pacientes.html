@@ -21,12 +21,14 @@
   <h1 class="tit">Pacientes</h1>
   <p class="bajada">Todos los que pasaron por el estudio. Se dan de alta solos desde el
   enlace de abajo: vos no cargás datos a mano, solo atendés.</p>
-  <div class="rejilla c4" style="margin-bottom:20px">
+  <div class="rejilla c2" style="margin-bottom:12px">
     <div class="dato"><div class="v" id="kTotal">—</div><div class="l">En el padrón</div></div>
-    <div class="dato"><div class="v" id="kPlantel">—</div><div class="l">Del plantel</div></div>
-    <div class="dato"><div class="v" id="kPart">—</div><div class="l">Particulares</div></div>
     <div class="dato"><div class="v" id="kPend" style="color:var(--ambar)">—</div><div class="l">Sin atender</div></div>
   </div>
+
+  <!-- Uno por institución. Se arman solos desde la lista, y se tocan
+       para filtrar la tabla de abajo. -->
+  <div class="rejilla c4" id="porInst" style="margin-bottom:20px"></div>
   <div class="tarjeta">
     <div class="tarjeta-cab"><h2 class="sub">Sumar un paciente</h2>
       <span class="eti">Dos formas</span></div>
@@ -103,16 +105,35 @@ document.querySelectorAll('.pest[data-f]').forEach(function(b){
   };
 });
 document.getElementById('buscar').oninput = pintar;
+function filtrarPor(inst){
+  filtro = (filtro === inst) ? null : inst;
+  pintar();
+}
+
 function pintar(){
   var q = (document.getElementById('buscar').value || '').toLowerCase().trim();
   var todos = BASE.pacientes;
-  document.getElementById('kTotal').textContent   = todos.length;
-  document.getElementById('kPlantel').textContent = todos.filter(function(p){ return p.tipo === 'plantel'; }).length;
-  document.getElementById('kPart').textContent    = todos.filter(function(p){ return p.tipo === 'particular'; }).length;
-  document.getElementById('kPend').textContent    = todos.filter(function(p){ return p.estado === 'pendiente'; }).length;
+  document.getElementById('kTotal').textContent = todos.length;
+  document.getElementById('kPend').textContent  = todos.filter(function(p){ return p.estado === 'pendiente'; }).length;
+
+  /* Un contador por institución, armados desde la lista: si mañana se
+     agrega otra, el contador aparece solo. Es el número que dice de
+     dónde le llega el trabajo al estudio. Tocando uno se filtra abajo. */
+  var cuenta = porInstitucion();
+  document.getElementById('porInst').innerHTML =
+    '<button class="dato' + (filtro ? '' : ' elegido') + '" onclick="filtrarPor(null)">'
+    + '<div class="v">' + todos.length + '</div><div class="l">Todos</div></button>'
+    + instituciones().map(function(i){
+        return '<button class="dato' + (filtro === i.nombre ? ' elegido' : '') + '" '
+          + 'onclick="filtrarPor(\'' + i.nombre.replace(/'/g, '') + '\')">'
+          + '<div class="v">' + (cuenta[i.nombre] || 0) + '</div>'
+          + '<div class="l">' + i.nombre + '</div></button>';
+      }).join('');
+
+  var nombresInst = instituciones().map(function(i){ return i.nombre; });
   var l = todos.filter(function(p){
     if(filtro === 'pendiente' && p.estado !== 'pendiente') return false;
-    if((filtro === 'plantel' || filtro === 'particular') && p.tipo !== filtro) return false;
+    if(filtro && nombresInst.indexOf(filtro) >= 0 && institucionDe(p) !== filtro) return false;
     if(q && (p.nombre + ' ' + p.doc).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
@@ -131,7 +152,7 @@ function pintar(){
               : '<span class="hh">' + (p.tipo === 'plantel' ? '#' + (p.dorsal || '?') : 'P') + '</span>')
           + '<span class="cu"><b>' + p.nombre + '</b><small>'
           + (edad(p.nacimiento) !== null ? edad(p.nacimiento) + ' años · ' : '')
-          + (p.tipo === 'plantel' ? 'plantel del club' : (p.obra_social || 'particular'))
+          + institucionDe(p)
           + '</small></span>' + marca + '</button>';
       }).join('')
     : '<div class="vacio"><b>Nadie con ese filtro</b>Probá con otro, o borrá la búsqueda.</div>';
@@ -160,8 +181,7 @@ function abrir(id){
     + '<div class="rejilla c2">'
     + campo('Documento', p.doc) + campo('Edad', edad(p.nacimiento) + ' años')
     + campo('Teléfono', p.tel) + campo('Correo', p.email || '—')
-    + campo(p.tipo === 'plantel' ? 'Camiseta' : 'Obra social',
-            p.tipo === 'plantel' ? '#' + (p.dorsal || '?') : (p.obra_social || 'Particular'))
+    + campo('De dónde viene', institucionDe(p) + (p.dorsal ? ' · camiseta ' + p.dorsal : ''))
     + campo('En el padrón desde', fechaCorta(p.alta))
     + '</div>'
     + (p.motivo ? '<label class="campo"><span class="eti">Por qué vino, en sus palabras</span>'
@@ -207,7 +227,7 @@ function pintarLesion(){
     '<button class="cerrar" onclick="cerrarLesion()" aria-label="Cerrar">&times;</button>'
     + '<span class="eti">Lesión nueva</span>'
     + '<h2>' + p.nombre + '</h2>'
-    + '<p>' + (p.tipo === 'plantel' ? 'Plantel · camiseta ' + (p.dorsal || '?') : (p.obra_social || 'Particular'))
+    + '<p>' + institucionDe(p) + (p.dorsal ? ' · camiseta ' + p.dorsal : '')
     + ' · ' + edad(p.nacimiento) + ' años</p>'
     + '<label class="campo"><span class="eti">Zona</span>'
     + '<div class="pestanias" id="lZona" style="margin-bottom:0">'

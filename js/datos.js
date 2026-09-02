@@ -102,22 +102,22 @@ var BASE = {
              'pendiente' se dio de alta solo y el kine todavía no lo vio
      ──────────────────────────────────────────────────────────────── */
   pacientes: [
-    {id:'P07', plan:'club', creditos:0, tipo:'plantel', dorsal:7,  nombre:'Tomás Duarte',
+    {id:'P07', plan:'club', creditos:0, institucion:'Boca Juniors', tipo:'plantel', dorsal:7,  nombre:'Tomás Duarte',
      nacimiento:'2003-04-12', doc:'44987123', tel:'11 5555 0107',
      email:'tduarte@mail.com', estado:'activo', alta:'2026-08-11',
      consentimiento:{aceptado:true, fecha:'2026-08-11'}},
-    {id:'P12', plan:'club', creditos:0, tipo:'plantel', dorsal:12, nombre:'Nicolás Ibarra',
+    {id:'P12', plan:'club', creditos:0, institucion:'Boca Juniors', tipo:'plantel', dorsal:12, nombre:'Nicolás Ibarra',
      nacimiento:'2001-09-30', doc:'43112876', tel:'11 5555 0112',
      email:'nibarra@mail.com', estado:'activo', alta:'2026-08-20',
      consentimiento:{aceptado:true, fecha:'2026-08-20'}},
-    {id:'P15', plan:'club', creditos:0, tipo:'plantel', dorsal:15, nombre:'Julián Vera',
+    {id:'P15', plan:'club', creditos:0, institucion:'Beyond', tipo:'plantel', dorsal:15, nombre:'Julián Vera',
      nacimiento:'2004-01-18', doc:'45330091', tel:'11 5555 0115',
      email:'jvera@mail.com', estado:'activo', alta:'2026-08-24',
      consentimiento:{aceptado:true, fecha:'2026-08-24'}},
 
     {id:'P31', tipo:'particular', nombre:'Marcela Ríos',
      nacimiento:'1988-06-05', doc:'33772109', tel:'11 4444 8890',
-     email:'mrios@mail.com', obra_social:'OSDE 210', estado:'activo',
+     email:'mrios@mail.com', institucion:'Fénix', estado:'activo',
      alta:'2026-08-19', motivo:'Dolor de hombro al nadar',
      ocupacion:'Arquitecta', deporte:'Natación', frecuencia:'3 veces por semana',
      antecedentes:'Cirugía de menisco izquierdo en 2019.',
@@ -126,7 +126,7 @@ var BASE = {
      consentimiento:{aceptado:true, fecha:'2026-08-19'}},
     {id:'P32', tipo:'particular', nombre:'Diego Sosa',
      nacimiento:'1975-11-22', doc:'24551038', tel:'11 3333 7712',
-     email:'dsosa@mail.com', obra_social:'Swiss Medical', estado:'activo',
+     email:'dsosa@mail.com', institucion:'Particulares', estado:'activo',
      alta:'2026-08-22', motivo:'Lumbalgia por trabajo de oficina',
      ocupacion:'Contador', deporte:'Ninguno', frecuencia:'Sedentario',
      antecedentes:'Hernia de disco L4-L5 diagnosticada en 2021, sin cirugía.',
@@ -135,7 +135,7 @@ var BASE = {
      consentimiento:{aceptado:true, fecha:'2026-08-22'}},
     {id:'P33', tipo:'particular', nombre:'Camila Ferreyra',
      nacimiento:'2011-03-14', doc:'56920014', tel:'11 6666 2231',
-     email:'flia.ferreyra@mail.com', obra_social:'Particular', estado:'pendiente',
+     email:'flia.ferreyra@mail.com', institucion:'Particulares', estado:'pendiente',
      alta:'2026-08-28', motivo:'Esguince de rodilla jugando al hockey',
      ocupacion:'Estudiante', deporte:'Hockey', frecuencia:'4 veces por semana',
      antecedentes:'Sin antecedentes.', objetivos:'Volver a jugar el torneo de primavera.',
@@ -198,6 +198,23 @@ var BASE = {
         {f:'2026-08-27', t:'Campo',       pre:1, post:1, nota:'Entrenó parcial. Sin dolor.'},
         {f:'2026-08-25', t:'Tratamiento', pre:4, post:2, nota:'Descontracturante y activación de glúteo.'}
       ]}
+  ],
+
+  /* ── DE DONDE VIENE CADA PACIENTE ──────────────────────────────────
+     Reemplaza a la obra social, que no se usaba para nada. Con esto el
+     estudio ve cuantos pacientes le manda cada institucion, que es el
+     numero que importa para saber de que vive.
+
+     La lista se edita en Horarios: si mañana entra otro club, se agrega
+     sin tocar el codigo.
+
+     "usa_dorsal" marca las que tienen numero de camiseta. Un particular
+     no tiene, y por eso el portal nunca se lo pide.                    */
+  instituciones: [
+    {nombre:'Boca Juniors', usa_dorsal:true},
+    {nombre:'Beyond',       usa_dorsal:true},
+    {nombre:'Fénix',        usa_dorsal:true},
+    {nombre:'Particulares', usa_dorsal:false}
   ],
 
   /* El horario del estudio. De aca salen todos los turnos de todos los
@@ -465,6 +482,41 @@ function diasDeEspera(L){
   return Math.max(0, Math.round((new Date(i) - new Date(L.cirugia || L.fecha)) / 86400000));
 }
 
+/* ── INSTITUCIONES ──────────────────────────────────────────────── */
+function instituciones(){
+  if(!BASE.instituciones || !BASE.instituciones.length){
+    BASE.instituciones = [{nombre:'Particulares', usa_dorsal:false}];
+  }
+  return BASE.instituciones;
+}
+
+function institucionDe(p){
+  if(!p) return 'Particulares';
+  if(p.institucion) return p.institucion;
+  /* Fichas viejas: las del plantel eran del club, el resto particulares. */
+  return p.tipo === 'plantel' ? (instituciones()[0] || {}).nombre || 'Particulares'
+                              : 'Particulares';
+}
+
+function usaDorsal(nombre){
+  var r = false;
+  instituciones().forEach(function(i){ if(i.nombre === nombre) r = !!i.usa_dorsal; });
+  return r;
+}
+
+/* Cuantos pacientes tiene cada una. Es el numero que dice de que vive
+   el estudio y de quien depende. */
+function porInstitucion(){
+  var cuenta = {};
+  instituciones().forEach(function(i){ cuenta[i.nombre] = 0; });
+  BASE.pacientes.forEach(function(p){
+    var n = institucionDe(p);
+    if(cuenta[n] === undefined) cuenta[n] = 0;
+    cuenta[n]++;
+  });
+  return cuenta;
+}
+
 function programaDe(L){
   var p = BASE.programas[L.id];
   return (p && p[L.fase]) ? p[L.fase] : [];
@@ -490,6 +542,7 @@ var CLAVE_LOCAL = 'estudio_datos';
 /* Lo que cambia con el uso. El resto (plantillas, planes, textos) es la
    herramienta y no hace falta guardarlo. */
 var RAMAS = ['pacientes', 'lesiones', 'disponibilidad', 'programas', 'agenda', 'horario',
+             'instituciones',
              'historia', 'accesos', 'caja', 'mensajes', 'adherencia', 'perfil',
              'ejercicios'];
 

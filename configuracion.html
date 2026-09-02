@@ -103,6 +103,27 @@ function pintar(){
         : '<p style="color:var(--tinta3);font-size:14px">Ninguno cargado.</p>')
     + '</div>'
 
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">De dónde vienen tus pacientes</h2>'
+    + '<span class="eti">Clubes e instituciones</span></div>'
+    + '<p style="color:var(--tinta2);font-size:14px;margin-bottom:14px">'
+    + 'Es lo que se le pregunta al paciente cuando se da de alta, y con eso el padrón '
+    + 'te muestra cuántos te manda cada uno. Si entra un club nuevo, agregalo acá.</p>'
+    + instituciones().map(function(i, n){
+        return '<div class="fila" style="cursor:default;gap:8px;flex-wrap:wrap">'
+          + '<input type="text" value="' + i.nombre.replace(/"/g,'&quot;') + '" '
+          + 'style="flex:1;min-width:140px" onchange="renombrarInst(' + n + ',this.value)">'
+          + '<label class="crit" style="margin:0;flex:0 0 auto">'
+          + '<input type="checkbox"' + (i.usa_dorsal ? ' checked' : '')
+          + ' onchange="dorsalInst(' + n + ',this.checked)">'
+          + '<span style="font-size:13px">Usan camiseta</span></label>'
+          + '<button class="bt neutro chico" onclick="quitarInst(' + n + ')">Quitar</button>'
+          + '</div>';
+      }).join('')
+    + '<button class="bt hueco ancho" style="margin-top:10px" onclick="sumarInst()">'
+    + '+ Agregar una institución</button>'
+    + '<div id="avisoInst"></div></div>'
+
     + '<div id="aviso"></div>'
     + '<button class="bt ancho" onclick="guardarTodo()">Guardar</button>'
     + '<a class="bt neutro ancho" href="agenda.html" style="text-decoration:none;text-align:center;margin-top:8px">Ver la agenda</a>';
@@ -173,6 +194,56 @@ function abrirDia(f){
   pintar();
 }
 
+/* ── LAS INSTITUCIONES ────────────────────────────────────────────
+   Se editan acá para no tener que tocar el código cuando entra un club
+   nuevo. Renombrar una NO deja huérfanos a los pacientes: se les
+   actualiza la ficha en el momento. */
+function sumarInst(){
+  instituciones().push({nombre:'Nueva institución', usa_dorsal:true});
+  pintar();
+}
+function renombrarInst(n, valor){
+  var v = (valor || '').trim();
+  if(!v) return;
+  var antes = instituciones()[n].nombre;
+  instituciones()[n].nombre = v;
+  var movidos = 0;
+  BASE.pacientes.forEach(function(p){
+    if(institucionDe(p) === antes){ p.institucion = v; movidos++;
+      guardar('kine/pacientes/' + p.id + '/institucion', v); }
+  });
+  guardar('kine/instituciones', instituciones());
+  if(movidos){
+    document.getElementById('avisoInst').innerHTML =
+      '<div class="nota bien">Se actualizaron ' + movidos + ' pacientes que estaban en "'
+      + antes + '".</div>';
+  }
+  pintar();
+}
+function dorsalInst(n, si){
+  instituciones()[n].usa_dorsal = si;
+  guardar('kine/instituciones', instituciones());
+  pintar();
+}
+function quitarInst(n){
+  var i = instituciones()[n];
+  var cuantos = BASE.pacientes.filter(function(p){ return institucionDe(p) === i.nombre; }).length;
+  if(cuantos){
+    document.getElementById('avisoInst').innerHTML =
+      '<div class="nota reserva">No se puede quitar "' + i.nombre + '": hay ' + cuantos
+      + ' pacientes ahí. Movelos primero o renombrala.</div>';
+    return;
+  }
+  if(instituciones().length <= 1){
+    document.getElementById('avisoInst').innerHTML =
+      '<div class="nota aviso">Tiene que quedar al menos una.</div>';
+    return;
+  }
+  instituciones().splice(n, 1);
+  guardar('kine/instituciones', instituciones());
+  pintar();
+}
+
 function guardarTodo(){
   var h = horario();
   /* Un dia con la hora de cierre antes que la de apertura no genera
@@ -191,6 +262,7 @@ function guardarTodo(){
   }
   BASE.agenda = BASE.agenda || {};
   guardar('kine/horario', h);
+  guardar('kine/instituciones', instituciones());
   document.getElementById('aviso').innerHTML =
     '<div class="nota bien">Guardado. Los turnos de todos los días se recalcularon solos.</div>';
 }

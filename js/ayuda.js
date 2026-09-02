@@ -62,7 +62,8 @@ var AYUDA = {
       ['Cuánto dura cada turno', 'Arriba. Cambiarlo recalcula la agenda entera.'],
       ['Tu semana', 'Cada día con sus franjas. Podés poner mañana y tarde por separado, o cerrar el día.'],
       ['Abrir un día', 'El botón lo enciende con un horario sugerido, que después ajustás.'],
-      ['Feriados y vacaciones', 'Abajo. Cierran ese día puntual aunque sea día de atención.']
+      ['Feriados y vacaciones', 'Abajo. Cierran ese día puntual aunque sea día de atención.'],
+      ['De dónde vienen tus pacientes', 'Abajo de todo. La lista de clubes e instituciones que se le ofrece al paciente al darse de alta. Si entra un club nuevo, agregalo ahí.']
     ],
     ojo: 'No hace falta crear los meses: los turnos existen para cualquier fecha. Si cambiás el horario, la agenda de todos los días se recalcula sola, incluidos los meses que todavía no miraste.'
   },
@@ -144,6 +145,7 @@ var AYUDA = {
       ['Mirá los que dicen "sin atender"', 'Son los que se dieron de alta y todavía no viste. Pasan a activo con la primera sesión.'],
       ['Buscá por nombre o documento', 'Con el buscador de arriba de la lista.'],
       ['Abrí una ficha', 'Tocá el paciente y desde ahí le abrís una lesión o le das turno.'],
+      ['Los contadores de arriba', 'Uno por institución: cuántos pacientes te manda cada una. Tocá uno para ver solo esos, y tocalo de nuevo para volver a todos.'],
       ['Si alguien no puede entrar', 'Casi siempre es que se equivocó al cargar su documento o su fecha de nacimiento. Con "Corregir sus datos" lo arreglás y ya puede entrar.'],
       ['Abrir una lesión', 'Elegís zona, lado y gravedad. Los criterios de cada fase y la fecha estimada de alta se completan solos.']
     ],
