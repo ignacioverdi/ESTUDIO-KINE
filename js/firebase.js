@@ -974,6 +974,7 @@ if(FB_CONFIGURADO){
       },
 
       "historia": {
+        ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
         "$pid": {
           ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
           ".write": "auth != null"
@@ -981,6 +982,7 @@ if(FB_CONFIGURADO){
       },
 
       "estudios": {
+        ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
         "$pid": {
           ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
           ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'"
@@ -988,6 +990,7 @@ if(FB_CONFIGURADO){
       },
 
       "mensajes": {
+        ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
         "$pid": {
           ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
           ".write": "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')"
@@ -995,6 +998,7 @@ if(FB_CONFIGURADO){
       },
 
       "adherencia": {
+        ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
         "$pid": {
           ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
           ".write": "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')"
@@ -1002,11 +1006,20 @@ if(FB_CONFIGURADO){
       },
 
       "wellness": {
+        ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
         "$pid": {
           ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
           ".write": "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')"
         }
       },
+
+      "sesiones":      { ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
+                         ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
+      "vaciado":       { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
+      "instituciones": { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
+      "faq":           { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
+      "avisados":      { ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
+                         ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
 
       "agenda":     { ".read": "auth != null", ".write": "auth != null" },
       "accesos":    { ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'", ".write": "auth != null" },

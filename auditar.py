@@ -161,6 +161,41 @@ def archivos_huerfanos():
             AVISO.append('%s no lo usa ninguna pantalla' % barras(f))
 
 
+def ramas_sin_regla():
+    """Cada rama que el portal escribe tiene que estar en las reglas.
+
+    Si falta una, Firebase la rechaza y salta el cartel rojo de "no se
+    pudo guardar". Paso con kine/vaciado y con otras cinco: se agregaron
+    funciones nuevas y nadie se acordo de tocar las reglas.
+
+    Esto lo compara solo.
+    """
+    escritas = set()
+    for p in PANTALLAS + glob.glob('js/*.js'):
+        if not os.path.exists(p):
+            continue
+        for m in re.findall(r"guardar\(\s*'kine/([\w-]+)", leer(p)):
+            escritas.add(m)
+        for m in re.findall(r"fbSet\(\s*'kine/([\w-]+)", leer(p)):
+            escritas.add(m)
+
+    if not os.path.exists('js/firebase.js'):
+        return
+    fb = leer('js/firebase.js')
+    try:
+        i = fb.index('\n{\n  "rules"')
+        j = fb.index('\n}\n', fb.index('"perfil"')) + 2
+        reglas = fb[i:j]
+    except ValueError:
+        AVISO.append('no se encontraron las reglas dentro de js/firebase.js')
+        return
+
+    faltan = sorted(r for r in escritas if ('"%s"' % r) not in reglas)
+    if faltan:
+        ROTO.append('estas ramas se escriben pero NO estan en las reglas de Firebase: %s. '
+                    'La base las va a rechazar.' % ', '.join(faltan))
+
+
 def config_de_vercel():
     """vercel.json no acepta propiedades que no conoce.
 
@@ -239,7 +274,7 @@ def lo_que_falta_hacer():
 def main():
     for f in [enlaces_rotos, archivos_que_pide_cada_pantalla, todas_cargan_lo_comun,
               cada_pantalla_tiene_ayuda, componentes_sin_color_propio, temas_completos,
-              archivos_huerfanos, sobras, config_de_vercel, secretos_a_la_vista, js_balanceado,
+              archivos_huerfanos, sobras, ramas_sin_regla, config_de_vercel, secretos_a_la_vista, js_balanceado,
               lo_que_falta_hacer]:
         f()
 
