@@ -199,12 +199,31 @@ function confirmarVaciado(){
     return;
   }
   var P = perfil();
-  vaciarTodo();
-  BASE.perfil = P;
-  guardar('kine/perfil', P);
+  document.getElementById('aviso').innerHTML =
+    '<div class="nota info">Borrando… no cierres esta pantalla.</div>';
+
+  /* Se espera a que la base termine de verdad. Antes se mostraba "listo"
+     al instante, aunque el borrado hubiera fallado. */
+  vaciarLaBase().then(function(r){
+    vaciarLocal();
+    BASE.perfil = P;
+    guardar('kine/perfil', P);
+    if(r && r.fallaron && r.fallaron.length){
+      document.getElementById('aviso').innerHTML =
+        '<div class="nota reserva"><b>Quedaron ' + r.fallaron.length + ' cosas sin borrar.</b> '
+        + 'Se borraron ' + r.borrados + '. Recargá y probá de nuevo.</div>';
+      return;
+    }
+    mostrarVaciado(r);
+  });
+  return;
+}
+
+function mostrarVaciado(r){
   document.getElementById('todo').innerHTML =
     '<div class="tarjeta" style="margin-top:40px"><div class="vacio">'
     + '<b>Listo. El portal está en cero.</b>'
+    + ((r && r.borrados) ? 'Se borraron ' + r.borrados + ' registros de la base. ' : '')
     + 'Ya podés cargar tu primer paciente de verdad. El cartel amarillo desapareció.</div>'
     + '<a class="bt ancho" href="cartel.html" style="text-decoration:none;text-align:center">'
     + 'Ver el cartel con el QR para repartir</a>'

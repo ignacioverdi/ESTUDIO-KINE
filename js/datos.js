@@ -50,7 +50,27 @@ function esDemo(){
 /* Deja el portal en cero: sin pacientes, sin lesiones, sin turnos
    ocupados, sin caja. Conserva el horario, las plantillas de lesión y la
    biblioteca de ejercicios, que son la herramienta y no los datos. */
-function vaciarTodo(){
+/* ══════════════════════════════════════════════════════════════════════
+   VACIAR
+
+   Estaba mal de dos formas, y entre las dos hicieron desaparecer un
+   paciente cargado de verdad:
+
+   1. Borraba ramas ENTERAS de la base (kine/pacientes de un saque). Las
+      reglas dan permiso por paciente, no sobre la rama completa, asi que
+      Firebase lo rechazaba y saltaba el cartel de "no se pudo guardar".
+
+   2. Y eso corria en CADA carga de pantalla, no solo al apretar el
+      boton: alcanzaba con abrir el portal para que intentara borrar
+      todo otra vez y fallara otra vez.
+
+   Ahora son dos cosas separadas. Limpiar la memoria no toca la base.
+   Borrar de la base pasa SOLO cuando alguien aprieta el boton, y va
+   paciente por paciente, que es como lo permiten las reglas.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Solo la memoria de este aparato. No escribe nada. */
+function vaciarLocal(){
   BASE.pacientes = [];
   BASE.lesiones = [];
   BASE.disponibilidad = {};
@@ -58,10 +78,14 @@ function vaciarTodo(){
   BASE.historia = {};
   BASE.accesos = [];
   BASE.caja = [];
+  BASE.mensajes = [];
+  BASE.estudios = {};
+  BASE.adherencia = {};
+  BASE.wellness = {};
   BASE.ejercicios = [];
   for(var d in BASE.agenda){
-    BASE.agenda[d].forEach(function(t){
-      delete t.pid; delete t.dorsal; delete t.tipo; delete t.estado;
+    (BASE.agenda[d] || []).forEach(function(t){
+      delete t.pid; delete t.dorsal; delete t.tipo; delete t.estado; delete t.confirmado;
     });
   }
   BASE.vaciado = HOY;
@@ -70,15 +94,41 @@ function vaciarTodo(){
     localStorage.removeItem('estudio_pid');
     localStorage.removeItem('estudio_datos');
   }catch(e){}
-  if(typeof persistir === 'function') persistir();
-  /* En la base, para que valga desde cualquier aparato. */
-  guardar('kine/vaciado', HOY);
-  /* Y se borran de la base las ramas de ejemplo, no solo de la memoria:
-     si no, al recargar volvian a bajar. */
-  ['pacientes','lesiones','disponibilidad','programas','historia',
-   'accesos','caja','mensajes','adherencia','wellness','estudios'].forEach(function(r){
-    guardar('kine/' + r, null);
+}
+
+/* Borra de la base, hijo por hijo. Devuelve una promesa para poder
+   avisar cuando termino de verdad y no antes. */
+function vaciarLaBase(){
+  if(typeof FB_URL === 'undefined' || typeof FB_SES === 'undefined'
+     || !FB_SES || !FB_SES.idToken){
+    return Promise.resolve({sinBase: true});
+  }
+  var tok = encodeURIComponent(FB_SES.idToken);
+  var ramas = ['pacientes','lesiones','disponibilidad','programas','historia',
+               'accesos','caja','mensajes','adherencia','wellness','estudios',
+               'agenda','avisados'];
+  var borrados = 0, fallaron = [];
+
+  return Promise.all(ramas.map(function(r){
+    return fetch(FB_URL + '/kine/' + r + '.json?auth=' + tok)
+      .then(function(x){ return x.ok ? x.json() : null; })
+      .then(function(d){
+        if(!d) return;
+        var hijos = Object.keys(d);
+        return Promise.all(hijos.map(function(h){
+          return fetch(FB_URL + '/kine/' + r + '/' + h + '.json?auth=' + tok, {method:'DELETE'})
+            .then(function(x){ x.ok ? borrados++ : fallaron.push(r + '/' + h); });
+        }));
+      })
+      .catch(function(){ fallaron.push(r); });
+  })).then(function(){
+    return {borrados: borrados, fallaron: fallaron};
   });
+}
+
+/* Se deja el nombre viejo para no romper nada que lo llame. */
+function vaciarTodo(){
+  vaciarLocal();
 }
 
 

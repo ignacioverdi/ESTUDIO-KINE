@@ -58,8 +58,12 @@ function limpiarSiYaVacio(){
     }
   }
 }
-if(typeof esDemo === 'function' && !esDemo() && typeof vaciarTodo === 'function'){
-  vaciarTodo();
+/* Si ya se vacio, se limpia la memoria de este aparato y NADA MAS.
+   Antes esto llamaba al vaciado completo, que intentaba borrar ramas de
+   la base en cada carga de pantalla: fallaba siempre y tapaba con un
+   cartel rojo los avisos que si importaban. */
+if(typeof esDemo === 'function' && !esDemo() && typeof vaciarLocal === 'function'){
+  vaciarLocal();
 }
 
 /* Puerta cerrada: si no entro, no ve. Corre antes que nada.

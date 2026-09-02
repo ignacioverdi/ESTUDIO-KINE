@@ -32,8 +32,9 @@
 | Una escritura rechazada se perdía en silencio | El error se tragaba y la copia local disimulaba |
 | El kinesiólogo no veía los pacientes cargados | Pedía la rama entera y las reglas dan permiso por rama |
 | Los datos de ejemplo se mezclaban con los reales | Nunca los borré al conectar la base |
+| Un paciente cargado desaparecía | El vaciado corría en CADA carga y borraba ramas enteras |
 
-**Veinte errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Veintiún errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---
