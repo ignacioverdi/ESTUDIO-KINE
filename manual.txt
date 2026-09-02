@@ -8,15 +8,15 @@ Manual completo. No hace falta leerlo entero: cada seccion es una tarea suelta. 
 |Saber que hace cada seccion del menu|2
 |Preparar el portal el primer dia|3
 |Sumar pacientes|4
-|Atender a alguien: el dia a dia|5
-|Dar turnos y reservar un plan entero|7
-|Abrir una lesion y manejar las fases|8
-|Cargarle los ejercicios|10
-|La historia clinica y los estudios|11
-|Cobrar, los planes y los gastos|12
-|Saber que ve el paciente|13
-|Dibujar circuitos en la cancha|14
-|Una hoja para tener a mano|15
+|Avisar turnos y atender: el dia a dia|6
+|Dar turnos y reservar un plan entero|8
+|Abrir una lesion y manejar las fases|9
+|Cargarle los ejercicios|11
+|La historia clinica y los estudios|12
+|Cobrar, los planes y los gastos|13
+|Saber que ve el paciente|14
+|Dibujar circuitos en la cancha|16
+|Una hoja para tener a mano|17
 @@ANCHOS 110 55
 @SALTO
 
@@ -48,7 +48,7 @@ Cuatro cosas, una sola vez. Despues no se vuelven a hacer.
 1|Borrar los pacientes de prueba|El portal viene con pacientes inventados para que se vea funcionando. En Mi perfil, abajo de todo, hay un boton para vaciar. Pide escribir la palabra VACIAR.
 %ROJO|Hacelo ANTES de cargar tu primer paciente de verdad. Si no, dentro de un mes no vas a saber cual es real y cual inventado, y en una historia clinica eso no se puede permitir. No se borran tus horarios, tu perfil, la biblioteca de ejercicios ni las plantillas de lesion: eso es la herramienta, no los datos.
 2|Cargar tus datos|En la misma pantalla de Mi perfil: tu nombre, tu matricula, tu foto y el logo del estudio. Cambia la contraseña de fabrica. El telefono es al que llegan los avisos de WhatsApp cuando alguien reserva turno.
-3|Cargar tus horarios|En Horarios. Ver la pagina 7.
+3|Cargar tus horarios|En Horarios. Ver la pagina 8.
 4|Imprimir el cartel|En Cartel, boton Imprimir. Pegalo donde entra la gente: es lo que hace que no tengas que cargar datos de pacientes nunca mas.
 @SALTO
 
@@ -228,6 +228,7 @@ Despues numeras las postas y escribis que se hace en cada una. Se guarda en la b
 Lo unico que hay que recordar todos los dias.
 @DIRECCION
 |Quiero...|Anda a...
+|Avisarles el turno de mañana|Panel, arriba de todo.
 |Atender a alguien que llego|Panel, toca su turno.
 |Sumar un paciente nuevo|Que escanee el QR del Cartel.
 |Dar un turno|Agenda, elegi el dia y toca un horario libre.
@@ -242,6 +243,7 @@ Lo unico que hay que recordar todos los dias.
 |Darle su historia clinica|Historias, Descargar en PDF.
 |Saber cuanto gane este mes|Panel, arriba de todo.
 |Responderle un mensaje|Pacientes, boton Mensajes.
+|Cambiar las preguntas frecuentes|Mi perfil, abajo.
 |Que alguien no puede entrar|Pacientes, boton Corregir sus datos.
 |Entender una pantalla|El boton con el signo de pregunta, arriba.
 @@ANCHOS 58 107
