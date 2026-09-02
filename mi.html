@@ -19,7 +19,9 @@
 <body data-pag="mi">
 <div class="hoja angosta" id="todo"></div>
 <script>
-var L = lesionDe(miDorsal());
+/* Por ficha, nunca por dorsal: un particular no tiene dorsal y antes
+   terminaba viendo la lesion de otro. */
+var L = lesionDePid(miPid()) || lesionDe(miDorsal());
 var hechos = {}, dolor = null, esfuerzo = null;
 if(!L){
   document.getElementById('todo').innerHTML =
@@ -34,7 +36,8 @@ function pintar(){
   var prog = programaDe(L);
   var prox = null;
   (BASE.agenda[HOY] || []).concat(BASE.agenda['2026-08-31'] || []).forEach(function(t){
-    if(!prox && t.dorsal === miDorsal() && t.estado === 'reservado') prox = t;
+    if(!prox && (t.pid === miPid() || (t.dorsal && t.dorsal === miDorsal()))
+       && t.estado === 'reservado') prox = t;
   });
   document.getElementById('todo').innerHTML =
     '<h1 class="tit">' + L.zona + ' ' + (L.lado === '—' ? '' : L.lado) + '</h1>'
@@ -184,7 +187,7 @@ function enviar(){
   if(dolor === null || esfuerzo === null){
     alert('Marcá cuánto te dolió y qué tan exigente te resultó.'); return;
   }
-  guardar('kine/adherencia/' + miDorsal() + '/' + HOY,
+  guardar('kine/adherencia/' + miPid() + '/' + HOY,
           {hechos:hechos, dolor:dolor, esfuerzo:esfuerzo});
   document.getElementById('listo').style.display = 'block';
 }

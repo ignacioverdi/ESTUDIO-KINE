@@ -95,11 +95,18 @@ function autorActual(){
 }
 
 function miPid(){
+  /* Primero la sesion: es lo unico confiable. Despues el pid guardado.
+     El dorsal va ultimo y solo si existe: buscar por dorsal cuando no
+     hay uno propio hacia que un paciente cayera en la ficha de otro. */
   try{
+    var s = (typeof sesion === 'function') ? sesion() : null;
+    if(s && s.tipo === 'paciente' && s.pid) return s.pid;
     var g = localStorage.getItem('estudio_pid');
     if(g) return g;
   }catch(e){}
-  var p = pacientePorDorsal(miDorsal());
+  var d = miDorsal();
+  if(!d) return null;
+  var p = pacientePorDorsal(d);
   return p ? p.id : null;
 }
 

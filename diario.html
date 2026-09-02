@@ -74,7 +74,9 @@ document.getElementById('historial').innerHTML = HISTORIAL.map(function(h){
 }).join('');
 function enviar(){
   if(Object.keys(resp).length < 5){ alert('Contestá las cinco antes de guardar.'); return; }
-  guardar('kine/wellness/' + miDorsal() + '/' + HOY, resp);
+  /* Bajo la ficha, no bajo el dorsal: un particular no tiene dorsal y
+     lo que cargaba se guardaba en un lugar que no era de nadie. */
+  guardar('kine/wellness/' + miPid() + '/' + HOY, resp);
   document.getElementById('listo').style.display = 'block';
 }
 </script>

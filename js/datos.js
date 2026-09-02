@@ -274,8 +274,21 @@ function rol(){
   try{ return localStorage.getItem('estudio_rol') || 'kine'; }catch(e){ return 'kine'; }
 }
 function ponerRol(r){ try{ localStorage.setItem('estudio_rol', r); }catch(e){} }
+/* ══════════════════════════════════════════════════════════════════════
+   NUNCA DEVOLVER UN DORSAL QUE NO ES
+
+   Esto devolvia 7 cuando el paciente no tenia dorsal propio. Y 7 es un
+   jugador de verdad: un paciente particular entraba y veia la lesion de
+   OTRA PERSONA, con su diagnostico.
+
+   Era el peor error posible en este portal. Ahora, si no hay dorsal, se
+   devuelve null y cada pantalla decide que mostrar; ninguna adivina.
+   ══════════════════════════════════════════════════════════════════════ */
 function miDorsal(){
-  try{ return +(localStorage.getItem('estudio_dorsal') || 7); }catch(e){ return 7; }
+  try{
+    var d = localStorage.getItem('estudio_dorsal');
+    return d ? +d : null;
+  }catch(e){ return null; }
 }
 function ponerDorsal(d){ try{ localStorage.setItem('estudio_dorsal', d); }catch(e){} }
 
@@ -332,8 +345,19 @@ function lesionPorId(id){
   return null;
 }
 function lesionDe(d){
+  if(d === null || d === undefined) return null;   /* sin dorsal no se adivina */
   for(var i=0;i<BASE.lesiones.length;i++)
     if(BASE.lesiones[i].dorsal===d && BASE.lesiones[i].estado==='activa') return BASE.lesiones[i];
+  return null;
+}
+
+/* La forma correcta de buscar la lesion de alguien: por su ficha, que es
+   lo unico que identifica a todos. El dorsal solo lo tienen los del
+   plantel, y ahi empezo el problema. */
+function lesionDePid(pid){
+  if(!pid) return null;
+  for(var i=0;i<BASE.lesiones.length;i++)
+    if(BASE.lesiones[i].pid===pid && BASE.lesiones[i].estado==='activa') return BASE.lesiones[i];
   return null;
 }
 function estadoDe(d){ return (BASE.disponibilidad[d] || {estado:'ok'}); }

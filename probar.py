@@ -288,10 +288,38 @@ def main():
         problemas += e4[:2]
         ctx.close()
 
+        print('\n  1g. QUE NADIE VEA LO DE OTRO')
+        # Un paciente particular no tiene dorsal. El portal buscaba por
+        # dorsal con un valor por defecto y le mostraba la lesion de OTRA
+        # PERSONA, con su diagnostico. Es el peor error posible aca.
+        ctx = b.new_context(**pw.devices['iPhone 14 Pro'])
+        pg = ctx.new_page()
+        e5 = []
+        pg.on('pageerror', lambda x: e5.append(str(x)))
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+        pg.evaluate("localStorage.clear()")
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+        # P31 es particular: no tiene dorsal ni lesion abierta
+        pg.evaluate("guardarSesion({tipo:'paciente', pid:'P31', desde:HOY})")
+        pg.goto(base + 'mi.html'); pg.wait_for_timeout(900)
+        ajena = pg.evaluate("(typeof L !== 'undefined' && L) ? (L.pid !== miPid()) : false")
+        sin_dorsal = pg.evaluate("miDorsal() === null")
+        pid_ok = pg.evaluate("miPid()") == 'P31'
+        print('     sin dorsal no inventa uno    :', sin_dorsal)
+        print('     no muestra la lesion de otro :', not ajena)
+        print('     se identifica por su ficha   :', pid_ok)
+        if ajena:      problemas.append('UN PACIENTE VE LA LESION DE OTRO')
+        if not sin_dorsal: problemas.append('miDorsal inventa un dorsal ajeno')
+        if not pid_ok: problemas.append('el paciente no se identifica bien')
+        problemas += e5[:2]
+        ctx.close()
+
         print('\n  2. CODIGOS QR')
         try:
             import cv2
             pg = b.new_page(viewport={'width': 900, 'height': 900})
+            pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+            pg.evaluate("localStorage.clear()")
             pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
             entrarComoKine(pg)
             pg.goto(base + 'cartel.html')
