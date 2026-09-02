@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/estudios.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/estudios.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/recordatorios.js"></script><script src="js/asistente.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="panel">
 <div class="hoja">
@@ -37,6 +37,8 @@
     <div class="dato"><div class="v" id="kLim" style="color:var(--ambar)">—</div><div class="l">Limitados</div></div>
     <div class="dato"><div class="v" id="kBaja" style="color:var(--rojo)">—</div><div class="l">De baja</div></div>
   </div>
+  <div class="tarjeta" id="cajaManana"></div>
+
   <div class="tarjeta" id="cajaAlertas">
     <div class="tarjeta-cab"><h2 class="sub">Para mirar hoy</h2>
       <span class="eti" id="cuentaAlertas"></span></div>
@@ -66,6 +68,61 @@
   </div>
 </div>
 <script>
+function pintarManana(){
+  var caja = document.getElementById('cajaManana');
+  var f = proximoDiaConTurnos(HOY);
+  if(!f){
+    caja.style.display = 'none';
+    return;
+  }
+  caja.style.display = '';
+  var t = turnosDelDia(f);
+  var faltan = t.filter(function(x){ return !yaAvisado(f, x.h); });
+  var confirmados = t.filter(function(x){ return x.confirmado; }).length;
+
+  caja.innerHTML =
+    '<div class="tarjeta-cab"><h2 class="sub">Avisarles el turno</h2>'
+    + '<span class="eti">' + fechaLegible(f) + '</span></div>'
+    + '<p style="color:var(--tinta2);font-size:14px;margin-bottom:12px">'
+    + t.length + (t.length === 1 ? ' turno' : ' turnos') + ' · '
+    + confirmados + ' ya confirmaron · '
+    + (faltan.length ? '<b>' + faltan.length + ' sin avisar</b>' : 'todos avisados')
+    + '</p>'
+    + t.map(function(x){
+        var p = paciente(x.pid);
+        if(!p) return '';
+        var avisado = yaAvisado(f, x.h);
+        return '<div class="fila" style="cursor:default">'
+          + '<span class="hh">' + x.h + '</span>'
+          + '<span class="cu"><b>' + p.nombre + '</b><small>'
+          + (p.tel || 'sin teléfono') + '</small></span>'
+          + (x.confirmado
+              ? '<span class="pin atendido">confirmó</span>'
+              : '<button class="bt ' + (avisado ? 'neutro' : 'hueco') + ' chico" '
+                + 'onclick="avisar(\'' + f + '\',\'' + x.h + '\')"'
+                + (p.tel ? '' : ' disabled')
+                + '>' + (avisado ? 'Avisar de nuevo' : 'Avisar') + '</button>')
+          + '</div>';
+      }).join('')
+    + (faltan.length > 1
+        ? '<p style="font-size:13px;color:var(--tinta3);margin-top:10px">'
+          + 'Se abre WhatsApp con el mensaje escrito. Mandás, volvés y seguís con el siguiente.</p>'
+        : '');
+}
+
+function avisar(fecha, hora){
+  var t = null;
+  agendaDe(fecha).forEach(function(x){ if(x.h === hora) t = x; });
+  if(!t || !t.pid) return;
+  var p = paciente(t.pid);
+  if(!abrirWhatsapp(p, fecha, hora)){
+    alert('Ese paciente no tiene teléfono cargado. Cargáselo desde su ficha.');
+    return;
+  }
+  asentar(p.id, 'turno', 'Se le recordó el turno del ' + fechaLegible(fecha) + ' a las ' + hora + '.');
+  pintarManana();
+}
+
 function pintar(){
 /* ── contadores ── */
 var c = {ok:0, limitado:0, baja:0};
@@ -85,6 +142,10 @@ document.getElementById('kAus').textContent  = est.porcentajeAusencia + '%';
 
 /* Las señales cruzadas: dolor, adherencia y mensajes sin responder.
    Antes vivían en tres pantallas distintas y había que acordarse. */
+/* Los turnos de mañana, para avisarles hoy. Es lo que baja el
+   ausentismo, y son treinta segundos una vez por día. */
+pintarManana();
+
 var al = alertas();
 document.getElementById('alertas').innerHTML = alertasHTML();
 document.getElementById('cuentaAlertas').textContent =

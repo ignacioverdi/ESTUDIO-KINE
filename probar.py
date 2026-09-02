@@ -314,6 +314,44 @@ def main():
         problemas += e5[:2]
         ctx.close()
 
+        print('\n  1h. RECORDATORIOS Y ASISTENTE')
+        ctx = b.new_context(**pw.devices['iPhone 14 Pro'])
+        pg = ctx.new_page()
+        e6 = []
+        pg.on('pageerror', lambda x: e6.append(str(x)))
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+        pg.evaluate("localStorage.clear()")
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
+        entrarComoKine(pg)
+        pg.goto(base + 'panel.html'); pg.wait_for_timeout(1100)
+        hay_manana = 'Avisarles el turno' in pg.evaluate("document.documentElement.textContent")
+        con_fecha = pg.evaluate(
+            "(function(){var f=proximoDiaConTurnos(HOY);"
+            "if(!f) return false; var t=turnosDelDia(f)[0]; if(!t) return false;"
+            "return textoRecordatorio(paciente(t.pid), f, t.h).indexOf('a las') > 0;})()")
+        print('     recordatorios de mañana      :', hay_manana)
+        print('     el mensaje sale armado       :', con_fecha)
+
+        # El asistente NO puede contestar nada clinico: un texto automatico
+        # diciendo que un dolor es normal puede hacer daño de verdad.
+        entrarComoPaciente(pg)
+        pg.goto(base + 'mi.html'); pg.wait_for_timeout(1000)
+        clinicas = pg.evaluate(
+            "['me duele','puedo entrenar','es normal esto']"
+            ".every(function(f){ return pareceClinico(f); })")
+        admin = pg.evaluate(
+            "['donde queda','a que hora abren','como cancelo']"
+            ".every(function(f){ return !pareceClinico(f); })")
+        print('     lo clinico va al kinesiologo :', clinicas)
+        print('     lo administrativo lo contesta:', admin)
+        for cond, t3 in [(hay_manana, 'no aparecen los recordatorios de mañana'),
+                         (con_fecha, 'el mensaje de recordatorio sale mal'),
+                         (clinicas, 'EL ASISTENTE CONTESTARIA ALGO CLINICO'),
+                         (admin, 'el asistente manda al kine cosas administrativas')]:
+            if not cond: problemas.append(t3)
+        problemas += e6[:2]
+        ctx.close()
+
         print('\n  2. CODIGOS QR')
         try:
             import cv2

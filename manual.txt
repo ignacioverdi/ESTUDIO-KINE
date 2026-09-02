@@ -95,6 +95,9 @@ Arriba del Panel. Cruzan solos el dolor de las sesiones, los ejercicios que hizo
 |Te escribio y no le respondiste|Responderle.
 |Se quedo sin sesiones del plan|Renovarselo.
 @@ANCHOS 78 87
+##Avisarles el turno del dia siguiente
+Arriba del Panel. Junta los turnos del proximo dia, arma el mensaje de cada uno y los manda por WhatsApp de a uno con un toque. Lleva la cuenta de a quien ya le mandaste y quien confirmo.
+%AMBAR|No se mandan solos, y no es un olvido. El portal corre en el navegador: no hay nada encendido a las ocho de la noche que pueda mandar un mensaje. Para eso haria falta un servidor propio y la API de WhatsApp Business, que cuesta y necesita aprobacion de Meta. Mandarlos de a uno son treinta segundos una vez por dia, y encima el mensaje sale de tu numero y no de uno desconocido: la gente lo lee y te contesta ahi mismo.
 ##Atender a alguien que llega
 1|Toca su turno en el Panel|Se abre todo en una sola pantalla. No hay que ir a ningun otro lado.
 2|Completa mientras atendes|Si vino o falto. Que tipo de sesion. Cuanto le dolia al llegar y al terminar. Que se hizo. Y de una vez, el proximo turno.
@@ -202,6 +205,10 @@ Es a proposito: si le pedimos crear una contraseña, la mitad no vuelve a entrar
 |Como estoy|Cinco preguntas diarias: sueño, cansancio, dolor muscular, animo y estres. Medio minuto.
 |Mi historia|Su historia clinica completa. La puede descargar.
 @@ANCHOS 36 129
+##Las preguntas frecuentes
+Cuando el paciente va a escribirte, primero ve una lista de preguntas con respuesta inmediata: donde queda, que llevar, como cancelar, que pasa si falta. Las de siempre se contestan solas y no te llegan.
+Las respuestas las escribis vos en Mi perfil, una sola vez.
+%ROJO|El portal NO contesta nada clinico. Ni "me duele aca", ni "puedo entrenar", ni "es normal esto". Todo eso te llega a vos.<br/><br/>Un texto automatico diciendole a alguien que su dolor es normal puede hacer daño de verdad, y encima lo dice sin haber visto nada. Por eso contesta lo administrativo y nada mas.
 ##El paciente te puede escribir
 Al lado de cada ejercicio tiene un boton de consultar, y lo que escribe queda pegado a ESE ejercicio, asi sabes exactamente de cual habla. Lo ves en el aviso del Panel, en el padron con un cartelito rojo, y desde la ficha.
 %AMBAR|El portal le dice que respondes antes de su proximo turno, y que esto no es una guardia. Sin eso, un chat es una trampa: el paciente escribe a las tres de la mañana creyendo que alguien lo lee.

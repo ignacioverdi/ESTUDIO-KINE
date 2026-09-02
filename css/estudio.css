@@ -286,6 +286,20 @@ button.dato:hover{border-color:var(--acc)}
 button.dato.elegido{border-color:var(--acc);border-width:2px;background:var(--acc-suave)}
 button.dato.elegido .v{color:var(--acc-texto)}
 
+/* ── PREGUNTAS FRECUENTES ────────────────────────────────────────
+   Un acordeon: se ve la lista entera de un vistazo y se abre la que
+   interesa. Con todas las respuestas desplegadas nadie encuentra nada. */
+.faq{border:var(--borde) solid var(--linea);border-radius:var(--r);overflow:hidden}
+.faq-item{border-bottom:var(--borde) solid var(--linea)}
+.faq-item:last-child{border-bottom:none}
+.faq-p{width:100%;text-align:left;background:transparent;border:none;color:var(--tinta);
+  font-family:inherit;font-size:15px;padding:14px 13px;cursor:pointer;display:flex;
+  align-items:center;gap:10px;min-height:50px}
+.faq-p span{margin-left:auto;color:var(--acc-texto);font-size:19px;line-height:1}
+.faq-p:hover{background:var(--sup2)}
+.faq-item.abierta .faq-p{color:var(--acc-texto);font-weight:600}
+.faq-r{padding:0 13px 15px;color:var(--tinta2);font-size:14.5px;line-height:1.5}
+
 /* ── LA PANTALLA DE UN EJERCICIO ────────────────────────────────
    Video arriba con el nombre, y debajo una fila por serie con el peso
    y las repeticiones que hizo de verdad.                            */

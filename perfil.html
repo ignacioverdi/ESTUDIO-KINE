@@ -16,7 +16,7 @@
 <script src="js/firebase.js" onerror="void 0"></script>
 <script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script>
 <script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/estudios.js"></script>
-<script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script>
+<script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/recordatorios.js"></script><script src="js/asistente.js"></script>
 <script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
 <style>
   .retrato{width:120px;height:120px;border-radius:50%;object-fit:cover;
@@ -96,6 +96,30 @@ function pintar(){
     + 'oninput="tocar(\'presentacion\',this.value)">' + (P.presentacion || '') + '</textarea>'
     + '<p style="font-size:13px;color:var(--tinta3);margin-top:8px">Escribilo como se lo '
     + 'contarías a alguien en la sala de espera, no como un currículum.</p></div>'
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Preguntas frecuentes</h2>'
+    + '<span class="eti">Las contesta el portal</span></div>'
+    + '<p style="color:var(--tinta2);font-size:14px;margin-bottom:14px">'
+    + 'Cuando un paciente va a escribirte, primero ve estas preguntas y sus respuestas. '
+    + 'Las de siempre se contestan solas y no te llegan.</p>'
+    + '<div class="nota aviso">Son preguntas <b>administrativas</b>: dónde queda, qué llevar, '
+    + 'cómo cancelar. Nada clínico. Si el paciente pregunta si puede entrenar o si un dolor es '
+    + 'normal, eso te llega a vos: un texto automático no puede contestar eso sin haber visto '
+    + 'nada.</div>'
+    + preguntasFrecuentes().map(function(f, n){
+        return '<div style="border:var(--borde) solid var(--linea);border-radius:var(--r);'
+          + 'padding:12px;margin-bottom:9px">'
+          + '<label class="campo"><span class="eti">Pregunta</span>'
+          + '<input type="text" value="' + f.p.replace(/"/g,'&quot;') + '" '
+          + 'onchange="editarFaq(' + n + ',\'p\',this.value)"></label>'
+          + '<label class="campo" style="margin-bottom:0"><span class="eti">Respuesta</span>'
+          + '<textarea onchange="editarFaq(' + n + ',\'r\',this.value)">' + f.r + '</textarea></label>'
+          + '<button class="bt neutro chico" style="margin-top:8px" onclick="quitarFaq(' + n + ')">'
+          + 'Quitar</button></div>';
+      }).join('')
+    + '<button class="bt hueco ancho" onclick="sumarFaq()">+ Agregar una pregunta</button>'
+    + '</div>'
+
     + '<div id="aviso"></div>'
     + '<button class="bt ancho" onclick="guardarPerfil()">Guardar</button>'
     /* Vaciar es lo último de la pantalla y no se puede deshacer. Va
@@ -152,6 +176,20 @@ function subirImagen(input, destino, lado){
   lector.readAsDataURL(f);
 }
 function borrar(k){ perfil()[k] = null; pintar(); }
+function sumarFaq(){
+  preguntasFrecuentes().push({p:'Nueva pregunta', r:'La respuesta.'});
+  pintar();
+}
+function editarFaq(n, campo, valor){
+  preguntasFrecuentes()[n][campo] = valor;
+  guardar('kine/faq', preguntasFrecuentes());
+}
+function quitarFaq(n){
+  preguntasFrecuentes().splice(n, 1);
+  guardar('kine/faq', preguntasFrecuentes());
+  pintar();
+}
+
 function confirmarVaciado(){
   var t = (document.getElementById('cVaciar').value || '').trim().toUpperCase();
   if(t !== 'VACIAR'){
@@ -178,6 +216,7 @@ function confirmarVaciado(){
 }
 function guardarPerfil(){
   guardar('kine/perfil', perfil());
+  guardar('kine/faq', preguntasFrecuentes());
   document.getElementById('aviso').innerHTML =
     '<div class="nota bien">Guardado. Ya se ve en el portal y en el cartel.</div>';
 }

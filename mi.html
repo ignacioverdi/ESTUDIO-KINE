@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/estudios.js"></script><script src="js/ejercicio.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/estudios.js"></script><script src="js/ejercicio.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/recordatorios.js"></script><script src="js/asistente.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
 </head>
 <body data-pag="mi">
 <div class="hoja angosta" id="todo"></div>
@@ -56,14 +56,18 @@ function pintar(){
     + '.</div></div>'
     /* mensajes */
     + '<div class="tarjeta">'
-    + '<div class="tarjeta-cab"><h2 class="sub">Hablar con Vero</h2>'
+    + '<div class="tarjeta-cab"><h2 class="sub">Hablar con ' + ((BASE.perfil||{}).nombre||'tu kinesiólogo').split(' ')[0] + '</h2>'
     + (sinLeerPaciente(miPid())
         ? '<span class="pin ausente">' + sinLeerPaciente(miPid()) + ' sin leer</span>'
         : '<span class="eti">Responde antes de tu turno</span>') + '</div>'
     + '<p style="color:var(--tinta2);font-size:14px;margin-bottom:12px">'
-    + 'Si algo te duele o no entendés un ejercicio, escribile. También podés consultar '
+    + 'Las preguntas de siempre (dónde queda, qué llevar, cómo cancelar) te las contesto al '
+    + 'instante. Si algo te duele o no entendés un ejercicio, eso te lo responde tu kinesiólogo. '
+    + 'También podés consultar '
     + 'sobre un ejercicio puntual, con el botón que está al lado de cada uno.</p>'
-    + '<button class="bt hueco ancho" onclick="abrirConversacion(miPid())">Escribirle a Vero'
+    + '<button class="bt hueco ancho" style="margin-bottom:8px" onclick="abrirAsistente()">'
+    + 'Preguntas frecuentes</button>'
+    + '<button class="bt hueco ancho" onclick="abrirConversacion(miPid())">Escribirle a ' + ((BASE.perfil||{}).nombre||'tu kinesiólogo').split(' ')[0] + ''
     + (mensajesDe(miPid()).length ? ' (' + mensajesDe(miPid()).length + ')' : '') + '</button></div>'
 
     /* turno */

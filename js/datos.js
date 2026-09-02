@@ -542,7 +542,7 @@ var CLAVE_LOCAL = 'estudio_datos';
 /* Lo que cambia con el uso. El resto (plantillas, planes, textos) es la
    herramienta y no hace falta guardarlo. */
 var RAMAS = ['pacientes', 'lesiones', 'disponibilidad', 'programas', 'agenda', 'horario',
-             'instituciones',
+             'instituciones', 'faq', 'avisados',
              'historia', 'accesos', 'caja', 'mensajes', 'adherencia', 'perfil',
              'ejercicios'];
 

@@ -32,12 +32,13 @@ var AYUDA = {
     titulo: 'El panel del estudio',
     que_es: 'Lo primero que abrís a la mañana: qué hay que resolver hoy y cómo está el plantel.',
     pasos: [
+      ['Avisarles el turno', 'Arriba de todo. Junta los turnos del próximo día y te deja mandarles el recordatorio por WhatsApp de a uno. Lleva la cuenta de a quién ya le mandaste.'],
       ['Para mirar hoy', 'Lo primero de la pantalla. Cruza el dolor, los ejercicios que hizo y los mensajes sin responder. Cada aviso dice qué hacer, no solo qué pasa.'],
       ['Turnos de hoy', 'Los del día en orden. Tocá uno pendiente y se abre todo el flujo de atención.'],
       ['En tratamiento', 'Las lesiones abiertas, con la barra de fase y cuántos criterios lleva cumplidos.'],
       ['Parte médico', 'El plantel entero con su semáforo. Verde disponible, ámbar limitado, rojo de baja.']
     ],
-    ojo: 'Las alertas se calculan solas con lo que ya se carga todos los días. Si el dolor de alguien sube tres sesiones seguidas, te enterás antes de que te lo cuente. El parte médico es lo ÚNICO que ve el cuerpo técnico. El diagnóstico no aparece ahí a propósito: es un dato de salud y el entrenador no lo necesita para armar el equipo.'
+    ojo: 'Los recordatorios NO se mandan solos, y no es un olvido: el portal corre en el navegador y no hay nada encendido de noche que pueda mandar un mensaje. Para eso haría falta un servidor y la API de WhatsApp Business, que cuesta. Mandarlos de a uno son treinta segundos, y encima el mensaje sale de tu número, no de uno desconocido. Las alertas se calculan solas con lo que ya se carga todos los días. Si el dolor de alguien sube tres sesiones seguidas, te enterás antes de que te lo cuente. El parte médico es lo ÚNICO que ve el cuerpo técnico. El diagnóstico no aparece ahí a propósito: es un dato de salud y el entrenador no lo necesita para armar el equipo.'
   },
 
   ficha: {
