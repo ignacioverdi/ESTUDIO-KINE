@@ -69,6 +69,7 @@
   <div class="tarjeta">
     <label class="campo"><span class="eti">Buscar</span>
       <input type="text" id="buscar" placeholder="Nombre o documento"></label>
+    <div id="avisoBorrado"></div>
     <div id="lista"></div>
   </div>
   <div id="detalle"></div>
@@ -396,6 +397,9 @@ function borrarPaciente(pid){
     turnosDe(d).forEach(function(t){ if(t.pid === pid && d >= HOY) turnos++; });
   });
 
+  var asientos = (historiaDe(pid) || []).length;
+  var tieneCosas = asientos > 2 || L.length > 0 || turnos > 0;
+
   var caja = document.createElement('div');
   caja.className = 'ayuda-fondo'; caja.id = 'cajaBorrar';
   caja.innerHTML = '<div class="ayuda-caja">'
@@ -412,11 +416,17 @@ function borrarPaciente(pid){
     + '<span class="pin gris">' + turnos + ' se liberan</span></div>'
     + '<div class="nota info">La caja NO se toca: si pagó, ese ingreso queda. '
     + 'Borrar a una persona no puede hacer desaparecer plata de la contabilidad.</div>'
-    + '<label class="campo"><span class="eti">Escribí BORRAR para confirmar</span>'
-    + '<input type="text" id="cBorrar" placeholder="BORRAR"></label>'
+    /* Escribir la palabra se pide SOLO si hay algo que perder. Un
+       paciente recien cargado, sin historia ni lesiones, se borra
+       confirmando y listo: pedir mas es molestar sin proteger nada. */
+    + (tieneCosas
+        ? '<label class="campo"><span class="eti">Escribí BORRAR para confirmar</span>'
+          + '<input type="text" id="cBorrar" placeholder="BORRAR"></label>'
+        : '')
     + '<div id="avisoBorrar"></div>'
     + '<button class="bt ancho" style="background:var(--rojo);border-color:var(--rojo)" '
-    + 'onclick="confirmarBorrado(\'' + pid + '\')">Borrar definitivamente</button>'
+    + 'onclick="confirmarBorrado(\'' + pid + '\')">'
+    + (tieneCosas ? 'Borrar definitivamente' : 'Sí, borrarlo') + '</button>'
     + '<button class="bt neutro ancho" style="margin-top:8px" onclick="cerrarBorrar()">Cancelar</button>'
     + '</div>';
   caja.addEventListener('click', function(e){ if(e.target === caja) cerrarBorrar(); });
@@ -431,11 +441,15 @@ function cerrarBorrar(){
 }
 
 function confirmarBorrado(pid){
-  var t = (document.getElementById('cBorrar').value || '').trim().toUpperCase();
-  if(t !== 'BORRAR'){
-    document.getElementById('avisoBorrar').innerHTML =
-      '<div class="nota aviso">Escribí BORRAR para confirmar.</div>';
-    return;
+  var nombre = (paciente(pid) || {}).nombre || 'El paciente';
+  var campo = document.getElementById('cBorrar');
+  if(campo){
+    var t = (campo.value || '').trim().toUpperCase();
+    if(t !== 'BORRAR'){
+      document.getElementById('avisoBorrar').innerHTML =
+        '<div class="nota aviso">Escribí BORRAR para confirmar.</div>';
+      return;
+    }
   }
   var p = paciente(pid);
 
@@ -469,9 +483,19 @@ function confirmarBorrado(pid){
   BASE.pacientes = BASE.pacientes.filter(function(x){ return x.id !== pid; });
   guardar('kine/pacientes/' + pid, null);
 
+  /* La variable se llama "abierto", no "abierta". Escrito mal, esto
+     creaba una variable nueva y la ficha quedaba abierta mostrando a
+     alguien que ya no existe: habia que tocar Cerrar a mano. */
   cerrarBorrar();
-  abierta = null;
+  cerrar();
   pintar();
+
+  /* Se avisa arriba de la lista, que es donde queda la vista. */
+  var av = document.getElementById('avisoBorrado');
+  if(av){
+    av.innerHTML = '<div class="nota bien"><b>' + nombre + '</b> se borró del padrón.</div>';
+    setTimeout(function(){ if(av) av.innerHTML = ''; }, 6000);
+  }
 }
 
 function corregirDatos(pid){

@@ -391,6 +391,12 @@ def main():
             pg.evaluate("localStorage.clear()")
             pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
             entrarComoKine(pg)
+            # Cada bloque arranca de cero: los anteriores borran pacientes
+            # y cambian la sesion, y eso hacia fallar a este sin motivo.
+            pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
+            pg.evaluate("localStorage.clear()")
+            pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
+            entrarComoKine(pg)
             pg.goto(base + 'cartel.html')
             # Con Firebase configurado la pantalla tarda mas en dibujarse:
             # se espera al codigo, no un tiempo fijo.

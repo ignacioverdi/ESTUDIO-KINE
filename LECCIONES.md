@@ -34,8 +34,9 @@
 | Los datos de ejemplo se mezclaban con los reales | Nunca los borré al conectar la base |
 | Un paciente cargado desaparecía | El vaciado corría en CADA carga y borraba ramas enteras |
 | El botón de borrar no abría nada | Firebase guarda las listas como objetos, y un objeto no tiene `forEach` |
+| La ficha quedaba abierta tras borrar | Escribí `abierta` donde la variable era `abierto` |
 
-**Veintidós errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Veintitrés errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---

@@ -64,7 +64,8 @@ Arriba de Pacientes hay un contador por institucion: cuantos te manda cada una. 
 Tocando uno se filtra la lista para ver solo esos, y tocandolo de nuevo volves a todos.
 La lista de instituciones se edita en Horarios, abajo de todo. Si entra un club nuevo, lo agregas ahi y aparece solo en el alta y en el padron.
 ##Borrar un paciente
-Desde su ficha en Pacientes, boton Borrar. Pide escribir la palabra BORRAR.
+Desde su ficha en Pacientes, boton Borrar.
+Si recien lo cargaste y no tiene nada, se borra confirmando y listo. Si ya tiene historia clinica, lesiones o turnos dados, te pide escribir la palabra BORRAR: ahi si hay algo que perder.
 Se lleva su ficha, su historia clinica, sus lesiones y libera sus turnos futuros.
 %AMBAR|La caja NO se toca. Si esa persona pago, ese ingreso queda en la contabilidad: borrar a alguien no puede hacer desaparecer plata que entro.
 Para borrar TODOS de una (por ejemplo, despues de probar el portal), esta el boton de Mi perfil, abajo de todo.
