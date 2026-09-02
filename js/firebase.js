@@ -639,6 +639,99 @@ function fbEntrarKine(usuario, clave){
 
 
 /* ══════════════════════════════════════════════════════════════════════
+   LA CUENTA DEL PACIENTE
+
+   EL PROBLEMA QUE RESUELVE
+   ------------------------
+   Las reglas exigen haber entrado para leer la lista de pacientes. Pero
+   la pantalla de entrada necesita comprobar el documento y la fecha de
+   nacimiento ANTES de dejar entrar. Circulo cerrado: con datos locales
+   funcionaba, con la base no.
+
+   COMO SE RESUELVE
+   ----------------
+   Que valide Firebase, no el portal. Al darse de alta se le crea una
+   cuenta invisible:
+
+       usuario  = <documento>@estudio.app
+       clave    = su fecha de nacimiento, sin guiones
+
+   El paciente nunca ve eso: sigue escribiendo su documento y su fecha.
+   Pero ahora quien comprueba es Firebase, que para eso esta, y nadie
+   necesita leer la lista de nadie.
+
+   Ademas, la ficha se guarda con el identificador de esa cuenta como
+   clave. Asi las reglas pueden decir "cada uno lee lo suyo" sin ninguna
+   tabla de equivalencias que alguien tenga que cargar a mano.
+   ══════════════════════════════════════════════════════════════════════ */
+function correoDe(doc){
+  return String(doc || '').replace(/\D/g, '') + '@' + FB_DOM;
+}
+
+function claveDe(nacimiento){
+  return String(nacimiento || '').replace(/-/g, '');   /* 8 digitos: alcanza */
+}
+
+/* Crea la cuenta al darse de alta. Devuelve el identificador. */
+function fbCrearPaciente(doc, nacimiento){
+  return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FB_KEY, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email:correoDe(doc), password:claveDe(nacimiento),
+                            returnSecureToken:true})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.idToken){
+        _fbGuardarSes({idToken:d.idToken, refreshToken:d.refreshToken,
+                       vence: Date.now() + (+d.expiresIn - 60) * 1000,
+                       email:d.email, uid:d.localId});
+        _fbListo = Promise.resolve(true);
+        return d.localId;
+      }
+      var m = (d && d.error && d.error.message) || '';
+      if(m.indexOf('EMAIL_EXISTS') >= 0){
+        throw new Error('YA_EXISTE');
+      }
+      throw new Error(m || 'No se pudo crear la cuenta.');
+    });
+}
+
+/* Entra con documento y fecha de nacimiento. */
+function fbEntrarPaciente(doc, nacimiento){
+  return _fbEntrar(correoDe(doc), claveDe(nacimiento))
+    .then(function(){
+      var uid = FB_SES && FB_SES.uid;
+      _fbListo = Promise.resolve(true);
+      return fetch(FB_URL + '/kine/pacientes/' + uid + '.json?auth='
+                   + encodeURIComponent(FB_SES.idToken))
+        .then(function(r){ return r.json(); })
+        .then(function(ficha){
+          if(!ficha) throw new Error('SIN_FICHA');
+          if(!BASE.pacientes.some(function(x){ return x.id === uid; })){
+            BASE.pacientes.push(ficha);
+          }
+          return {ok:true, destino:'mi.html', nombre:ficha.nombre, pid:uid};
+        });
+    })
+    .catch(function(e){
+      var m = (e && e.message) || '';
+      if(m === 'SIN_FICHA'){
+        return {ok:false, motivo:'Tu cuenta existe pero no encontramos tu ficha. '
+          + 'Avisale al kinesiólogo.'};
+      }
+      if(m.indexOf('incorrecto') >= 0 || m.indexOf('INVALID') >= 0){
+        return {ok:false, motivo:'No encontramos a nadie con esos datos. Revisá el documento '
+          + 'y la fecha. Si nunca te diste de alta, hacelo primero.'};
+      }
+      if(m.indexOf('Failed to fetch') >= 0){
+        return {ok:false, motivo:'No hay conexión. Revisá tu internet y volvé a intentar.'};
+      }
+      return {ok:false, motivo:m || 'No se pudo entrar.'};
+    });
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
    SIN CONFIGURAR, ESTE ARCHIVO NO EXISTE
 
    Las funciones de arriba quedan definidas igual por como funciona
@@ -650,6 +743,8 @@ if(!FB_CONFIGURADO){
     window.fbSet = undefined;
     window.fbGet = undefined;
     window.fbPush = undefined;
+    window.fbCrearPaciente = undefined;
+    window.fbEntrarPaciente = undefined;
   }catch(e){}
 }
 
@@ -712,87 +807,88 @@ if(FB_CONFIGURADO){
    Van en la consola de Firebase, en Realtime Database, pestaña Reglas.
    Son lo unico que protege los datos: la clave de arriba es publica.
 
-   Lo importante en una linea: el cuerpo tecnico ve la disponibilidad,
-   NUNCA el diagnostico.
+   Lo importante en una linea: cada paciente lee y escribe SOLO su propia
+   ficha, porque la ficha se guarda con el identificador de su cuenta
+   como clave. No hace falta ninguna tabla de equivalencias.
 
 {
   "rules": {
     "kine": {
+      "roles": { ".read": "auth != null", ".write": false },
+
+      "pacientes": {
+        ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
+        "$pid": {
+          ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
+          ".write": "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')"
+        }
+      },
 
       "disponibilidad": {
         ".read": "auth != null",
-        ".write": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'"
+        ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'"
       },
 
       "lesiones": {
-        ".read": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'",
-        ".write": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'",
-        "$id": {
-          ".read": "auth != null && (root.child('kine/roles/' + auth.uid).val() == 'kine' || data.child('pid').val() == root.child('kine/uid_pid/' + auth.uid).val())"
-        }
+        ".read":  "auth != null",
+        ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'"
       },
 
       "historia": {
         "$pid": {
-          ".read": "auth != null && (root.child('kine/roles/' + auth.uid).val() == 'kine' || $pid == root.child('kine/uid_pid/' + auth.uid).val())",
-          ".write": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'"
+          ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
+          ".write": "auth != null"
         }
       },
 
-      "pacientes": {
-        ".read": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'",
+      "estudios": {
         "$pid": {
-          ".read": "auth != null && ($pid == root.child('kine/uid_pid/' + auth.uid).val() || root.child('kine/roles/' + auth.uid).val() == 'kine')",
-          ".write": "auth != null && ($pid == root.child('kine/uid_pid/' + auth.uid).val() || root.child('kine/roles/' + auth.uid).val() == 'kine')"
+          ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
+          ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'"
         }
-      },
-
-      "agenda": {
-        ".read": "auth != null",
-        ".write": "auth != null"
       },
 
       "mensajes": {
         "$pid": {
-          ".read": "auth != null && ($pid == root.child('kine/uid_pid/' + auth.uid).val() || root.child('kine/roles/' + auth.uid).val() == 'kine')",
-          ".write": "auth != null && ($pid == root.child('kine/uid_pid/' + auth.uid).val() || root.child('kine/roles/' + auth.uid).val() == 'kine')"
+          ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
+          ".write": "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')"
         }
       },
 
       "adherencia": {
         "$pid": {
-          ".read": "auth != null && ($pid == root.child('kine/uid_pid/' + auth.uid).val() || root.child('kine/roles/' + auth.uid).val() == 'kine')",
-          ".write": "auth != null && $pid == root.child('kine/uid_pid/' + auth.uid).val()"
+          ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
+          ".write": "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')"
         }
       },
 
       "wellness": {
         "$pid": {
-          ".read": "auth != null && ($pid == root.child('kine/uid_pid/' + auth.uid).val() || root.child('kine/roles/' + auth.uid).val() == 'kine')",
-          ".write": "auth != null && $pid == root.child('kine/uid_pid/' + auth.uid).val()"
+          ".read":  "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')",
+          ".write": "auth != null && ($pid == auth.uid || root.child('kine/roles/' + auth.uid).val() == 'kine')"
         }
       },
 
-      "caja":     { ".read": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'",
-                    ".write": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'" },
-      "accesos":  { ".read": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'",
-                    ".write": "auth != null" },
-      "programas":{ ".read": "auth != null", ".write": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'" },
-      "ejercicios":{".read": "auth != null", ".write": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'" },
-      "perfil":   { ".read": "auth != null", ".write": "auth != null && root.child('kine/roles/' + auth.uid).val() == 'kine'" },
-
-      "roles":    { ".read": "auth != null", ".write": false },
-      "uid_pid":  { ".read": "auth != null", ".write": false }
+      "agenda":     { ".read": "auth != null", ".write": "auth != null" },
+      "accesos":    { ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'", ".write": "auth != null" },
+      "caja":       { ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
+                      ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
+      "programas":  { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
+      "ejercicios": { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
+      "horario":    { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
+      "perfil":     { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" }
     }
   }
 }
 
-   DOS TABLAS QUE HAY QUE CARGAR A MANO, UNA SOLA VEZ:
+   LO UNICO QUE HAY QUE CARGAR A MANO, UNA SOLA VEZ:
 
-     kine/roles/<uid>     = "kine"   para la cuenta del kinesiologo
-     kine/uid_pid/<uid>   = "P07"    ata cada cuenta con su ficha
+     kine/roles/<uid del kinesiologo>  =  "kine"
 
-   Se cargan desde la consola de Firebase. Que ".write" sea false en las
-   dos no es un olvido: si un paciente pudiera escribir ahi, se haria
-   kinesiologo solo y vería todas las historias clinicas.
+   Que ".write" sea false ahi no es un olvido: si un paciente pudiera
+   escribir en roles, se haria kinesiologo solo y veria todas las
+   historias clinicas.
+
+   Los pacientes NO se cargan a mano: al darse de alta con el codigo QR
+   se crean su cuenta solos y su ficha queda con ese identificador.
    ══════════════════════════════════════════════════════════════════════ */

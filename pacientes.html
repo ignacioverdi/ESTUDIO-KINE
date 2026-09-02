@@ -169,6 +169,7 @@ function abrir(id){
     + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">'
     + (L ? '<a class="bt" href="lesiones.html?f=' + L.id + '" style="text-decoration:none">Ver su ficha</a>'
          : '<button class="bt" onclick="abrirLesion(\'' + p.id + '\')">Abrir una lesión</button>')
+    + '<button class="bt hueco" onclick="corregirDatos(\'' + p.id + '\')">Corregir sus datos</button>'
     + '<button class="bt hueco" onclick="abrirConversacion(\'' + p.id + '\')">Mensajes'
     + (sinLeer(p.id) ? ' (' + sinLeer(p.id) + ' sin leer)' : '') + '</button>'
     + '<a class="bt neutro" href="agenda.html" style="text-decoration:none">Darle un turno</a>'
@@ -327,6 +328,107 @@ function guardarLesion(){
   cerrarLesion();
   irA('lesiones.html?f=' + id);
 }
+/* ══════════════════════════════════════════════════════════════════════
+   CORREGIR LOS DATOS CON LOS QUE ENTRA
+
+   El paciente entra con su documento y su fecha de nacimiento. Si al
+   darse de alta se equivoco en cualquiera de los dos, no puede entrar
+   NUNCA MAS, y encima no entiende por que: el portal le dice que no
+   encuentra a nadie con esos datos, sin aclarar cual de los dos esta
+   mal. Eso es a proposito, para que nadie averigue quien es paciente del
+   estudio probando documentos.
+
+   Pero entonces el kinesiologo TIENE que poder arreglarlo. Sin esta
+   pantalla, un error de tipeo dejaba a alguien afuera para siempre.
+
+   La correccion queda asentada en la historia clinica, como corresponde:
+   se cambio un dato de identificacion y tiene que constar quien y cuando.
+   ══════════════════════════════════════════════════════════════════════ */
+function corregirDatos(pid){
+  var p = paciente(pid);
+  if(!p) return;
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo'; caja.id = 'cajaCorregir';
+  caja.innerHTML = '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarCorregir()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Corregir</span><h2>' + p.nombre + '</h2>'
+
+    + '<div class="nota info">Con <b>el documento y la fecha de nacimiento</b> es con lo que '
+    + 'el paciente entra al portal. Si se equivocó al cargarlos, no va a poder entrar y no va '
+    + 'a entender por qué. Acá se arregla.</div>'
+
+    + '<label class="campo"><span class="eti">Nombre y apellido</span>'
+    + '<input type="text" id="cNombre" value="' + (p.nombre || '').replace(/"/g,'&quot;') + '"></label>'
+    + '<div class="rejilla c2">'
+    + '<label class="campo"><span class="eti">Documento</span>'
+    + '<input type="text" id="cDoc" inputmode="numeric" value="' + (p.doc || '') + '"></label>'
+    + '<label class="campo"><span class="eti">Fecha de nacimiento</span>'
+    + '<input type="date" id="cNac" value="' + (p.nacimiento || '') + '"></label></div>'
+    + '<div class="rejilla c2">'
+    + '<label class="campo"><span class="eti">Teléfono</span>'
+    + '<input type="text" id="cTel" value="' + (p.tel || '') + '"></label>'
+    + '<label class="campo"><span class="eti">Correo</span>'
+    + '<input type="text" id="cMail" value="' + (p.email || '') + '"></label></div>'
+
+    + '<div id="avisoCorregir"></div>'
+    + '<button class="bt ancho" onclick="guardarCorreccion(\'' + pid + '\')">Guardar</button>'
+    + '<p style="font-size:13px;color:var(--tinta3);margin-top:12px">La corrección queda '
+    + 'asentada en su historia clínica, con la fecha y tu nombre.</p></div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarCorregir(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarCorregir(){
+  var c = document.getElementById('cajaCorregir');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
+function guardarCorreccion(pid){
+  var p = paciente(pid);
+  var nuevo = {
+    nombre: (document.getElementById('cNombre').value || '').trim(),
+    doc: (document.getElementById('cDoc').value || '').trim(),
+    nacimiento: document.getElementById('cNac').value,
+    tel: (document.getElementById('cTel').value || '').trim(),
+    email: (document.getElementById('cMail').value || '').trim()
+  };
+  var av = document.getElementById('avisoCorregir');
+  if(!nuevo.nombre || !nuevo.doc || !nuevo.nacimiento){
+    av.innerHTML = '<div class="nota aviso">El nombre, el documento y la fecha de nacimiento '
+      + 'no pueden quedar vacíos: sin ellos no puede entrar.</div>';
+    return;
+  }
+
+  /* Un documento repetido significa que hay dos fichas de la misma
+     persona, y despues ninguna de las dos entra bien. */
+  var choca = null;
+  BASE.pacientes.forEach(function(x){
+    if(x.id !== pid && String(x.doc).replace(/\D/g,'') === nuevo.doc.replace(/\D/g,'')) choca = x;
+  });
+  if(choca){
+    av.innerHTML = '<div class="nota reserva">Ese documento ya lo tiene <b>' + choca.nombre
+      + '</b>. Si son la misma persona, hay dos fichas duplicadas.</div>';
+    return;
+  }
+
+  var cambios = [];
+  ['nombre','doc','nacimiento','tel','email'].forEach(function(k){
+    var antes = p[k] || '';
+    if(String(antes) !== String(nuevo[k])){
+      cambios.push(k + ': "' + (antes || 'vacío') + '" pasa a "' + nuevo[k] + '"');
+      p[k] = nuevo[k];
+    }
+  });
+  if(!cambios.length){ cerrarCorregir(); return; }
+
+  guardar('kine/pacientes/' + pid, p);
+  asentar(pid, 'rectificacion', 'Se corrigieron datos de identificación. ' + cambios.join('. ') + '.');
+  cerrarCorregir();
+  pintar();
+}
+
 function campo(l, v){
   return '<div style="margin-bottom:12px"><span class="eti">' + l + '</span>'
        + '<div class="mono" style="font-size:15px;margin-top:3px">' + v + '</div></div>';

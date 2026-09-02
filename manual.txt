@@ -59,6 +59,10 @@ Apunta la camara del celular al codigo del cartel, completa sus datos en dos min
 Vos no tipeas nada y no hay errores de dictado. Si no tenes el cartel a mano, en Pacientes hay botones para mandarle el enlace por WhatsApp.
 ##O cargarlo vos
 En Pacientes, arriba, el boton "+ Nuevo paciente" abre la misma ficha para completarla con la persona adelante.
+##Si un paciente no puede entrar
+Es el problema mas comun y tiene una sola causa: se equivoco al cargar su documento o su fecha de nacimiento, que es con lo que entra.
+%ROJO|El portal le dice "no encontramos a nadie con esos datos", sin aclarar cual de los dos esta mal. Eso es a proposito: si dijera "ese documento no esta", cualquiera podria averiguar quien es paciente del estudio probando documentos. Pero significa que el paciente no puede resolverlo solo. Lo resolves vos: en Pacientes, abris su ficha y tocas "Corregir sus datos". Ahi cambias el documento o la fecha, y ya puede entrar. La correccion queda asentada en su historia clinica.
+-Antes de corregir, fijate que el documento este sin puntos. Es el error mas frecuente de todos.
 ##Que se le pregunta
 |Dato|Para que sirve
 |Nombre, documento, nacimiento|El documento y la fecha son con lo que despues entra.
@@ -226,6 +230,7 @@ Lo unico que hay que recordar todos los dias.
 |Darle su historia clinica|Historias, Descargar en PDF.
 |Saber cuanto gane este mes|Panel, arriba de todo.
 |Responderle un mensaje|Pacientes, boton Mensajes.
+|Que alguien no puede entrar|Pacientes, boton Corregir sus datos.
 |Entender una pantalla|El boton con el signo de pregunta, arriba.
 @@ANCHOS 58 107
 ##Las cuatro cosas que no hay que olvidarse

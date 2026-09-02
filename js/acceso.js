@@ -82,6 +82,18 @@ function entrarPaciente(doc, nacimiento, clave){
   if(!d) return {ok:false, motivo:'Escribí tu número de documento.'};
   if(!nacimiento) return {ok:false, motivo:'Elegí tu fecha de nacimiento.'};
 
+  /* Con la base conectada, quien comprueba es Firebase. El portal no
+     puede leer la lista de pacientes antes de que alguien entre: las
+     reglas lo prohiben, y con razon. */
+  if(typeof fbEntrarPaciente === 'function'){
+    return fbEntrarPaciente(d, nacimiento).then(function(r){
+      if(r.ok) guardarSesion({tipo:'paciente', pid:r.pid, desde:HOY});
+      if(r.ok && typeof registrarAcceso === 'function')
+        registrarAcceso(r.pid, 'ingreso del paciente');
+      return r;
+    });
+  }
+
   var enc = null;
   BASE.pacientes.forEach(function(p){
     if(soloNumeros(p.doc) === d) enc = p;

@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/tema.css">
 <link rel="stylesheet" href="css/estudio.css">
 <script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/ayuda.js"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/acceso.js"></script><script src="js/ayuda.js"></script>
 </head>
 <body data-pag="alta">
 <!-- PANTALLA PUBLICA — no lleva base.js a propósito: es pública. El que entra
@@ -35,7 +35,13 @@ var F = {};
    cargandose solo desde el QR, o el kinesiologo cargandolo con la persona
    adelante. Los campos son los mismos; lo que cambia es como se habla.
    Al paciente se le dice "tus datos"; al kine, "sus datos". */
-var LOCARGA_EL_KINE = (typeof rol === 'function' && rol() === 'kine');
+/* Quien carga es el kinesiologo SOLO si tiene sesion abierta como tal.
+   Antes se miraba rol(), que queda guardado de la ultima vez que alguien
+   uso ese navegador: si el kinesiologo habia entrado antes, el alta
+   publica creia que la estaba cargando el, y no le creaba la cuenta al
+   paciente. Resultado: se daba de alta y despues no podia entrar. */
+var LOCARGA_EL_KINE = (typeof sesion === 'function')
+  && !!sesion() && sesion().tipo === 'kine';
 function vos(a, b){ return LOCARGA_EL_KINE ? b : a; }
 function pintar(){
   document.getElementById('todo').innerHTML =
@@ -302,6 +308,35 @@ function enviar(){
   if(F.tipo === 'plantel' && F.dorsal) nuevo.dorsal = +F.dorsal;
   if(F.tipo === 'particular') nuevo.obra_social = F.obra || 'Particular';
   if(esMenor(F.nac)) nuevo.tutor = {nombre:F.tutor, tel:F.tutortel || F.tel, vinculo:F.vinculo || '—'};
+  /* Con la base conectada se le crea la cuenta invisible, y su ficha se
+     guarda con ese identificador como clave. Asi las reglas pueden decir
+     "cada uno lee lo suyo" sin ninguna tabla que cargar a mano. */
+  if(typeof fbCrearPaciente === 'function' && !LOCARGA_EL_KINE){
+    document.getElementById('aviso').innerHTML =
+      '<div class="nota info">Creando tu acceso…</div>';
+    fbCrearPaciente(nuevo.doc, nuevo.nacimiento)
+      .then(function(uid){
+        nuevo.id = uid;
+        terminarAlta(nuevo);
+      })
+      .catch(function(e){
+        if((e && e.message) === 'YA_EXISTE'){
+          document.getElementById('aviso').innerHTML =
+            '<div class="nota aviso"><b>Ya estás en el sistema.</b> Ese documento ya se dio '
+            + 'de alta antes. <a href="index.html" style="color:inherit;text-decoration:underline">'
+            + 'Entrá por acá</a> con tu documento y tu fecha de nacimiento.</div>';
+          return;
+        }
+        document.getElementById('aviso').innerHTML =
+          '<div class="nota reserva">No se pudo crear tu acceso: '
+          + ((e && e.message) || 'sin conexión') + '. Probá de nuevo.</div>';
+      });
+    return;
+  }
+  terminarAlta(nuevo);
+}
+
+function terminarAlta(nuevo){
   BASE.pacientes.push(nuevo);
   guardar('kine/pacientes/' + nuevo.id, nuevo);
   /* Primeros dos asientos de la historia: el alta y el consentimiento.

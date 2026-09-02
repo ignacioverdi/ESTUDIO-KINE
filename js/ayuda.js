@@ -22,6 +22,7 @@ var AYUDA = {
       ['Si sos paciente', 'Entrás con tu documento y tu fecha de nacimiento, los mismos que cargaste al darte de alta. No hay contraseña que recordar.'],
       ['Si sos el kinesiólogo', 'Entrás con tu correo y tu contraseña, que se cambian en Mi perfil.'],
       ['Primera vez en el estudio', 'El enlace de abajo te lleva a cargar tus datos. Tarda dos minutos y se hace una sola vez.'],
+      ['Si no te reconoce', 'Revisá que el documento sea sin puntos y que la fecha sea la correcta. Si igual no entrás, avisale al kinesiólogo: puede que al darte de alta haya quedado un dato mal cargado, y él lo corrige en el momento.'],
       ['Para tenerlo a mano', 'Instalalo como aplicación: en Chrome, los tres puntitos y "Instalar". En iPhone, Compartir y "Agregar a inicio".']
     ],
     ojo: 'Documento más fecha de nacimiento no es tan fuerte como una contraseña, y es a propósito: si le pedimos al paciente crear una, la mitad no vuelve a entrar nunca. Para compensar, cada paciente ve SOLO lo suyo y cada ingreso queda registrado.'
@@ -143,9 +144,10 @@ var AYUDA = {
       ['Mirá los que dicen "sin atender"', 'Son los que se dieron de alta y todavía no viste. Pasan a activo con la primera sesión.'],
       ['Buscá por nombre o documento', 'Con el buscador de arriba de la lista.'],
       ['Abrí una ficha', 'Tocá el paciente y desde ahí le abrís una lesión o le das turno.'],
+      ['Si alguien no puede entrar', 'Casi siempre es que se equivocó al cargar su documento o su fecha de nacimiento. Con "Corregir sus datos" lo arreglás y ya puede entrar.'],
       ['Abrir una lesión', 'Elegís zona, lado y gravedad. Los criterios de cada fase y la fecha estimada de alta se completan solos.']
     ],
-    ojo: 'Vos no cargás datos a mano: los carga el paciente. Eso evita los errores de tipeo y te ahorra el trabajo administrativo, que es donde se va el tiempo del estudio.'
+    ojo: 'El paciente entra con su documento y su fecha de nacimiento. Si se equivocó en cualquiera de los dos, NO PUEDE ENTRAR y no entiende por qué: el portal le dice que no encuentra a nadie con esos datos, sin aclarar cuál está mal. Eso es a propósito, para que nadie averigüe quién es paciente del estudio probando documentos. Por eso el botón de corregir: es la única forma de destrabarlo, y va a pasar seguido.'
   },
 
   programa: {
