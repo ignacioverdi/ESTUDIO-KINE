@@ -1,0 +1,233 @@
+Como se usa el portal
+Manual completo. No hace falta leerlo entero: cada seccion es una tarea suelta. Buscá la que necesites en el indice.
+@DIRECCION
+%CAJA|Adentro del portal hay ayuda en cada pantalla. Arriba a la derecha de todas las pantallas hay un boton redondo con un signo de pregunta. Tocalo y te explica esa pantalla: para que sirve, como se usa paso a paso, y donde suele estar la trampa. Este manual es lo mismo, pero en papel y todo junto.
+##Que hay adentro
+|Si querés...|Andá a la pagina
+|Entrar por primera vez|2
+|Saber que hace cada seccion del menu|2
+|Preparar el portal el primer dia|3
+|Sumar pacientes|4
+|Atender a alguien: el dia a dia|5
+|Dar turnos y reservar un plan entero|7
+|Abrir una lesion y manejar las fases|8
+|Cargarle los ejercicios|10
+|La historia clinica y los estudios|11
+|Cobrar, los planes y los gastos|12
+|Saber que ve el paciente|13
+|Dibujar circuitos en la cancha|14
+|Una hoja para tener a mano|15
+@@ANCHOS 110 55
+@SALTO
+
+#Entrar
+Hay dos puertas distintas: una para vos y otra para los pacientes.
+1|Abri la direccion en el navegador|Chrome, Safari, Edge, el que uses. Anda en la computadora, el celular y la tablet.
+2|Toca "Soy el kinesiologo"|Es el boton de la derecha. El de la izquierda es para los pacientes.
+3|Poné tu correo y tu contraseña|Si es la primera vez, son los que trae de fabrica y los cambias enseguida en Mi perfil.
+%VERDE|Para tenerlo siempre a mano, instalalo como aplicacion. Computadora: en Chrome, los tres puntitos de arriba a la derecha, y "Instalar". Android: aparece un cartel solo; si no, menu y "Instalar app". iPhone: el boton de Compartir y "Agregar a inicio". Instalado abre desde un icono, sin la barra del navegador.
+##Que hace cada seccion
+|Seccion|Para que sirve
+|Panel|La pantalla de arranque. Los avisos del dia, los turnos, la plata del mes y como esta el plantel.
+|Agenda|El calendario. Dar turnos, marcar quien vino, reservar un plan entero.
+|Lesiones|Las fichas de los que estan en tratamiento. Las fases y los criterios.
+|Pacientes|El padron: todos los que pasaron por el estudio.
+|Historias|La historia clinica completa de cada uno, con sus estudios. Documento legal.
+|Programas|Cargar los ejercicios que hace en casa.
+|Caja|Ingresos, egresos, planes y sesiones que le quedan a cada uno.
+|Horarios|Cuando atendes. De ahi salen todos los turnos.
+|Mi perfil|Tu foto, tu logo, tu matricula, tu contraseña. Y el boton de vaciar.
+|Cartel|El cartel con el codigo QR para la recepcion.
+|Pizarron|Dibujar circuitos en la cancha.
+|Ejercicios|La biblioteca de ejercicios con video.
+@@ANCHOS 30 135
+@SALTO
+
+#El primer dia
+Cuatro cosas, una sola vez. Despues no se vuelven a hacer.
+1|Borrar los pacientes de prueba|El portal viene con pacientes inventados para que se vea funcionando. En Mi perfil, abajo de todo, hay un boton para vaciar. Pide escribir la palabra VACIAR.
+%ROJO|Hacelo ANTES de cargar tu primer paciente de verdad. Si no, dentro de un mes no vas a saber cual es real y cual inventado, y en una historia clinica eso no se puede permitir. No se borran tus horarios, tu perfil, la biblioteca de ejercicios ni las plantillas de lesion: eso es la herramienta, no los datos.
+2|Cargar tus datos|En la misma pantalla de Mi perfil: tu nombre, tu matricula, tu foto y el logo del estudio. Cambia la contraseña de fabrica. El telefono es al que llegan los avisos de WhatsApp cuando alguien reserva turno.
+3|Cargar tus horarios|En Horarios. Ver la pagina 7.
+4|Imprimir el cartel|En Cartel, boton Imprimir. Pegalo donde entra la gente: es lo que hace que no tengas que cargar datos de pacientes nunca mas.
+@SALTO
+
+#Sumar un paciente
+Hay dos formas, y conviene usar la primera siempre que se pueda.
+##Que lo cargue el paciente, con el QR
+Apunta la camara del celular al codigo del cartel, completa sus datos en dos minutos y aparece solo en tu lista, marcado como "sin atender".
+Vos no tipeas nada y no hay errores de dictado. Si no tenes el cartel a mano, en Pacientes hay botones para mandarle el enlace por WhatsApp.
+##O cargarlo vos
+En Pacientes, arriba, el boton "+ Nuevo paciente" abre la misma ficha para completarla con la persona adelante.
+##Que se le pregunta
+|Dato|Para que sirve
+|Nombre, documento, nacimiento|El documento y la fecha son con lo que despues entra.
+|Telefono y correo|Para el aviso del turno.
+|Motivo de consulta|Con sus palabras, no con las tuyas.
+|De que trabaja|No es lo mismo un dolor lumbar en alguien que pasa ocho horas sentado que en un jugador.
+|Deporte y frecuencia|Cambia el tratamiento y los criterios de alta.
+|Cirugias y lesiones anteriores|Pueden contraindicar ejercicios enteros.
+|Que quiere volver a poder hacer|El campo mas importante.
+@@ANCHOS 55 110
+%AMBAR|El objetivo del paciente es el campo que mas importa. "Volver a nadar 2000 metros sin dolor" es un objetivo; "estar mejor" no lo es. Es contra lo que se mide si el tratamiento sirvio, y es lo que le vas a poder mostrar el dia del alta.
+@SALTO
+
+#El dia a dia
+Esto es lo que vas a hacer quince veces por dia. Es un solo boton.
+##Lo primero cada mañana: los avisos
+Arriba del Panel. Cruzan solos el dolor de las sesiones, los ejercicios que hizo en casa y los mensajes sin responder. Ninguno dice solamente que algo anda mal: todos dicen que hacer.
+|Cuando salta|Que hacer
+|El dolor le sube tres sesiones seguidas|Bajarle la carga antes de seguir.
+|Termina peor de como llega, dos veces|Revisar que se hace en sesion.
+|Hizo menos de la mitad de sus ejercicios|Preguntarle por que.
+|Hace cinco dias que no registra nada|Escribirle antes de que abandone.
+|Cumplio todos los criterios de la fase|Pasarlo a la siguiente.
+|Se paso de la fecha estimada de alta|Reestimarla y avisarle al entrenador.
+|Te escribio y no le respondiste|Responderle.
+|Se quedo sin sesiones del plan|Renovarselo.
+@@ANCHOS 78 87
+##Atender a alguien que llega
+1|Toca su turno en el Panel|Se abre todo en una sola pantalla. No hay que ir a ningun otro lado.
+2|Completa mientras atendes|Si vino o falto. Que tipo de sesion. Cuanto le dolia al llegar y al terminar. Que se hizo. Y de una vez, el proximo turno.
+3|Toca confirmar|En un solo toque: queda marcado que vino, se le descuenta la sesion del plan, se cobra si paga por sesion, se guarda en su ficha, se asienta en la historia clinica y le queda el proximo turno reservado.
+%VERDE|Los dos valores de dolor son obligatorios; la nota no. La diferencia entre el dolor al llegar y al terminar es el dato que muestra si la sesion sirvio. Sin esos dos numeros el resto no dice nada.
+##Si el paciente falta
+Marca "Falto". No se le descuenta la sesion ni se cobra, pero cuenta en el porcentaje de ausencias del mes, que es el numero que mas plata mueve en un estudio: cada hueco es una hora que no se recupera.
+@SALTO
+
+#La agenda y tus horarios
+No hay que crear los turnos ni los meses: existen para cualquier fecha.
+##Primero, tus horarios
+En Horarios decis cuando atendes, y de ahi salen todos los turnos de todos los dias, para siempre. Podes dar un turno para dentro de seis meses sin haber hecho nada antes.
+|Que se configura|Como
+|Cuanto dura cada turno|20, 30, 40, 45 o 60 minutos.
+|Tu semana, dia por dia|Cada dia con sus franjas. Podes poner mañana y tarde por separado, o cerrar el dia entero.
+|Feriados y vacaciones|Cierran ese dia puntual.
+@@ANCHOS 50 115
+Arriba te dice cuantos turnos por semana genera tu horario: sirve para darte cuenta si quedo algo mal cargado. Si lo cambias mas adelante, los turnos ya dados no se borran.
+##La agenda
+Arranca con una tira de siete dias, cada uno diciendo cuantos lugares libres tiene. El mes entero se despliega con el boton "Ver el mes", y con las flechas vas todo lo lejos que quieras.
+Toca un horario libre para asignarlo. En los turnos ya dados tenes "Atender" y "Recordar", que arma el mensaje de WhatsApp y lo manda de un toque. El de Recordar solo aparece en los que todavia no confirmaron.
+%VERDE|Reservar un plan entero de una. Quien compra un plan de diez no quiere pedir turno diez veces. Con el boton "Reservar una serie" elegis el paciente, los dias de la semana y la hora, y se reservan todas juntas. Si alguna fecha esta ocupada, la saltea y te avisa cuantas pudo poner.
+@SALTO
+
+#Abrir una lesion
+Es lo que convierte a alguien del padron en alguien en tratamiento.
+1|Desde Pacientes, "Abrir una lesion"|Elegis zona, lado, gravedad y si hubo cirugia.
+2|Lo demas se completa solo|Los criterios de cada fase salen de la zona. La fecha estimada de alta se calcula con la zona y la gravedad. El parte medico lo marca como de baja. Todo eso lo podes corregir despues.
+##Los dos relojes
+Cada ficha muestra dos numeros distintos: los dias desde la lesion o la cirugia, y los dias que lleva tratandose.
+No son lo mismo. Alguien que se opero hace 90 dias pero empezo la rehabilitacion hace 10 no esta atrasado: recien empieza. Con un solo numero eso no se ve, y es la diferencia entre apurar a un paciente o entenderlo.
+Si la espera entre la lesion y la primera sesion fue de mas de una semana, el portal te lo avisa en la ficha.
+##Las cinco fases
+|Fase|Que se busca|Cancha
+|1 Proteccion|Bajar el dolor y proteger la zona|No
+|2 Rango|Recuperar movilidad y fuerza|No
+|3 Readaptacion|Fuerza especifica y aterrizajes|Gimnasio
+|4 Reintegro|Volumen parcial, gesto tecnico|Parcial
+|5 Alta|Competir sin restricciones|Si
+@@ANCHOS 32 103 30
+##Por que el boton de avanzar esta apagado
+Porque faltan criterios por cumplir. Se enciende solo cuando estan todos tildados, y al pasar de fase los criterios se vacian y aparecen los de la fase nueva.
+No es un capricho del programa: la evidencia sobre retorno al juego muestra que volver antes de tiempo aumenta mucho el riesgo de recaida, y que el alta se da por criterios cumplidos y no por dias transcurridos. La fecha estimada sirve para avisarle al entrenador, no para decidir.
+%VERDE|Al llegar a la fase 5 la lesion se cierra sola. El paciente pasa a figurar disponible en el parte medico y la ficha queda en su historial.
+@SALTO
+
+#Cargarle los ejercicios
+Lo que hace en casa, con el video al lado.
+1|Anda a Programas y elegi al paciente|Los que no tienen lesion abierta aparecen apagados: primero hay que abrirles una.
+2|Elegi la fase|Cada fase tiene su programa. Podes dejar armada la proxima antes de que llegue.
+3|Suma de la biblioteca|Los de la zona lesionada aparecen primero y vienen con la dosis sugerida puesta.
+4|Ajusta series, repeticiones y carga|Las repeticiones son texto libre a proposito: sirve tanto "12" como "30 seg" o "10 por lado".
+5|Pega el enlace del video|Funciona con YouTube, Vimeo o un archivo de video.
+6|Guarda|En ese momento el paciente lo ve en su celular. No hay que avisarle nada.
+%CAJA|Los videos no se guardan adentro del portal, porque pesan demasiado. Se suben a YouTube o Vimeo y aca se pega el enlace. Si vas a filmar tus propios ejercicios, en YouTube subilos como ocultos: no aparecen en las busquedas pero funcionan con el enlace.
+##Que ve el paciente al abrirlo
+El video arriba con el nombre, y debajo una fila por serie donde anota el peso que uso de verdad y las repeticiones que le salieron. Entre serie y serie hay un boton de descanso de 60 segundos que vibra al terminar.
+%VERDE|Por que el peso se anota por serie y no una sola vez. Tres series de 12 con 8 kilos no es lo mismo que 12 con 10, 12 con 8 y 8 con 6: la segunda te dice que se quedo sin fuerza en la ultima, y que la carga esta al limite. Con un solo numero esa informacion se pierde. Ademas le mostramos que uso la vez anterior, asi no tiene que acordarse.
+@SALTO
+
+#La historia clinica
+Se escribe sola mientras trabajas. Es un documento legal.
+##Que se asienta solo
+Cada cosa que haces genera un asiento numerado, con fecha, hora y tu nombre: el alta del paciente, el consentimiento, la apertura de la lesion, cada sesion, cada criterio que tildas, cada mensaje, cada cambio de fase y el alta final. Vos no haces nada distinto.
+##No se puede editar el pasado
+Corregir algo no borra lo anterior: agrega una rectificacion que apunta al asiento equivocado. Es como en papel, donde uno tacha y firma al lado en vez de arrancar la hoja.
+Arriba de la historia hay un cartel que dice si esta integra. Si alguien modificara un asiento viejo, el sistema lo detecta y lo avisa.
+##Los estudios complementarios
+Ecografias, resonancias, radiografias, informes. Van pegados a la historia, con el boton "Agregar un estudio".
+Lo mejor es una foto del estudio o un recorte de la imagen que importa: se achica sola, pesa poco y se ve al instante. Un PDF sirve si es un informe de texto.
+%AMBAR|Un PDF de resonancia pesa entre 5 y 60 megas: guardarlos adentro haria el portal lento y caro. Si el archivo es grande, el portal te avisa y te ofrece pegar un enlace, asi el archivo queda donde ya esta. De todas formas, una foto del corte que te interesa suele ser mas util que las trescientas imagenes del estudio completo.
+##El paciente puede pedirte una copia
+Por ley el paciente es el titular de su historia clinica y podes tener que darsela dentro de las 48 horas. Es un boton: "Descargar en PDF". El paciente tambien la ve entera desde su celular.
+%AMBAR|El cuerpo tecnico nunca ve el diagnostico. Si el paciente es del plantel, el entrenador ve solamente si esta disponible, limitado o de baja, y para cuando vuelve. Nada mas. El diagnostico es un dato de salud y no lo necesita para armar el equipo.
+@SALTO
+
+#La plata
+Planes, sesiones que quedan, lo que entra y lo que sale.
+|Plan|Como funciona
+|Plantel del club|Lo cubre el club. No se factura por sesion.
+|Sesion a sesion|Paga cada vez. Se cobra al marcar que vino.
+|Plan de 10|Se descuenta una sesion por cada una atendida.
+|Mensual libre|Todas las del mes, sin descontar.
+|Asesoria online|Rutinas y seguimiento por la app.
+|Premium|App, sesiones libres y atencion personalizada.
+@@ANCHOS 40 125
+%VERDE|La sesion se descuenta cuando marcas que vino, no cuando reserva. Si se descontara al reservar, una cancelacion a tiempo le comeria una sesion al paciente y terminarias discutiendo por WhatsApp.
+##Que se anota solo y que cargas vos
+Se anotan solos: los planes que vendes y las sesiones sueltas que atendes.
+Los cargas vos: los gastos. Alquiler, luz, insumos, equipamiento.
+##Quien se esta quedando sin sesiones
+En Caja, los que tienen dos sesiones o menos aparecen en ambar y los que no tienen ninguna en rojo. Conviene avisarles antes de que lleguen a cero.
+@SALTO
+
+#Lo que ve el paciente
+Conviene que lo sepas, porque te lo va a preguntar.
+##Como entra
+Con su documento y su fecha de nacimiento. No tiene contraseña.
+Es a proposito: si le pedimos crear una contraseña, la mitad no vuelve a entrar nunca. La olvida y no llama para recuperarla.
+%AMBAR|Su limite, dicho claro: no es tan fuerte como una contraseña. Alguien que sepa el documento Y la fecha de nacimiento podria ver esa ficha. Para compensar, cada paciente ve solo lo suyo: nunca la lista de pacientes, ni la agenda completa, ni la caja. En los turnos de otros ve la palabra "ocupado", nunca de quien son. Y cada ingreso queda registrado.
+|Pantalla|Que hace ahi
+|Mi recuperacion|En que fase esta, que le falta, su turno, y sus ejercicios de hoy con video.
+|Mis turnos|Elegir un dia y reservar. Confirmar con "Ahi voy" o avisar que no puede.
+|Como estoy|Cinco preguntas diarias: sueño, cansancio, dolor muscular, animo y estres. Medio minuto.
+|Mi historia|Su historia clinica completa. La puede descargar.
+@@ANCHOS 36 129
+##El paciente te puede escribir
+Al lado de cada ejercicio tiene un boton de consultar, y lo que escribe queda pegado a ESE ejercicio, asi sabes exactamente de cual habla. Lo ves en el aviso del Panel, en el padron con un cartelito rojo, y desde la ficha.
+%AMBAR|El portal le dice que respondes antes de su proximo turno, y que esto no es una guardia. Sin eso, un chat es una trampa: el paciente escribe a las tres de la mañana creyendo que alguien lo lee.
+##Las cinco preguntas diarias
+Se completan despues de entrenar, no antes. Si se cargan antes, estan midiendo como amanecio, no como lo dejo el entrenamiento.
+@SALTO
+
+#El pizarron de circuitos
+Para los trabajos de campo, en la cancha.
+Elegi la cancha (entera, media, espacio reducido o gimnasio), toca un elemento de la izquierda y despues toca la cancha para colocarlo. Con "Mover" arrastras lo que ya esta puesto.
+Los recorridos se dibujan arrastrando de un punto a otro: "Correr" es flecha derecha, "Conducir" es ondulada (con pelota) y "Pase" es punteada.
+Despues numeras las postas y escribis que se hace en cada una. Se guarda en la biblioteca y se puede sumar al programa de cualquier paciente.
+-Anda mejor en la computadora que en el celular: dibujar un circuito con el dedo es incomodo. En el celular sirve para consultarlo.
+@SALTO
+
+#Para tener a mano
+Lo unico que hay que recordar todos los dias.
+@DIRECCION
+|Quiero...|Anda a...
+|Atender a alguien que llego|Panel, toca su turno.
+|Sumar un paciente nuevo|Que escanee el QR del Cartel.
+|Dar un turno|Agenda, elegi el dia y toca un horario libre.
+|Reservar un plan de 10|Agenda, boton Reservar una serie.
+|Cambiar mis horarios|Horarios.
+|Cambiarle los ejercicios|Programas.
+|Ver como viene alguien|Lesiones, abri su ficha.
+|Darle el alta|Lesiones, tilda los criterios de la fase 5.
+|Cargar una ecografia o resonancia|Historias, Agregar un estudio.
+|Venderle un plan|Caja, boton Cambiar plan.
+|Anotar un gasto|Caja.
+|Darle su historia clinica|Historias, Descargar en PDF.
+|Saber cuanto gane este mes|Panel, arriba de todo.
+|Responderle un mensaje|Pacientes, boton Mensajes.
+|Entender una pantalla|El boton con el signo de pregunta, arriba.
+@@ANCHOS 58 107
+##Las cuatro cosas que no hay que olvidarse
+%AMBAR|Uno: cambiar la contraseña de fabrica. Dos: vaciar los pacientes de prueba antes de cargar el primero de verdad. Tres: los dos valores de dolor en cada sesion, porque la diferencia entre ellos es el dato que sirve. Cuatro: el objetivo del paciente, escrito con sus palabras.
+-Si algo no se entiende, no anda o falta algo: anotalo y decilo. El portal se sigue armando, y lo que no sirve se cambia.
