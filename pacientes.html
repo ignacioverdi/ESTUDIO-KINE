@@ -393,7 +393,7 @@ function borrarPaciente(pid){
   BASE.lesiones.forEach(function(x){ if(x.pid === pid) L.push(x); });
   var turnos = 0;
   Object.keys(BASE.agenda || {}).forEach(function(d){
-    (BASE.agenda[d] || []).forEach(function(t){ if(t.pid === pid && d >= HOY) turnos++; });
+    turnosDe(d).forEach(function(t){ if(t.pid === pid && d >= HOY) turnos++; });
   });
 
   var caja = document.createElement('div');
@@ -442,7 +442,7 @@ function confirmarBorrado(pid){
   /* Sus turnos futuros quedan libres. Los pasados se dejan: son parte
      de lo que ocurrió y de las estadísticas del mes. */
   Object.keys(BASE.agenda || {}).forEach(function(d){
-    (BASE.agenda[d] || []).forEach(function(x){
+    turnosDe(d).forEach(function(x){
       if(x.pid === pid && d >= HOY){
         delete x.pid; delete x.dorsal; delete x.tipo; delete x.confirmado;
         x.estado = null;

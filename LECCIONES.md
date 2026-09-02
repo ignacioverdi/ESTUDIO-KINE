@@ -33,8 +33,9 @@
 | El kinesiólogo no veía los pacientes cargados | Pedía la rama entera y las reglas dan permiso por rama |
 | Los datos de ejemplo se mezclaban con los reales | Nunca los borré al conectar la base |
 | Un paciente cargado desaparecía | El vaciado corría en CADA carga y borraba ramas enteras |
+| El botón de borrar no abría nada | Firebase guarda las listas como objetos, y un objeto no tiene `forEach` |
 
-**Veintiún errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Veintidós errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---

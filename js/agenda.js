@@ -103,10 +103,35 @@ function franjaDeHora(hora){
 /* ── LA AGENDA DE UN DIA ────────────────────────────────────────────
    Mezcla los horarios que existen con lo que ya esta reservado.
    Es la unica funcion que las pantallas deberian usar.              */
+/* ══════════════════════════════════════════════════════════════════════
+   LA AGENDA DE UN DIA, SIEMPRE COMO LISTA
+
+   Firebase guarda las listas como objetos: lo que sale es
+   {"0":{...},"1":{...}} y no [{...},{...}]. Un objeto no tiene forEach,
+   asi que cualquier codigo que recorriera la agenda explotaba apenas los
+   datos venian de la base en vez del archivo.
+
+   Paso de verdad: el boton de borrar un paciente no abria NADA, y sin
+   mirar la consola era imposible saber por que.
+
+   Esta funcion devuelve siempre una lista, venga de donde venga. Todo el
+   portal la usa en vez de tocar BASE.agenda directo.
+   ══════════════════════════════════════════════════════════════════════ */
+function turnosDe(fecha){
+  var d = (BASE.agenda || {})[fecha];
+  if(!d) return [];
+  if(Array.isArray(d)) return d;
+  return Object.keys(d).map(function(k){
+    var t = d[k];
+    if(t && typeof t === 'object' && !t.h) t.h = k;   /* la hora era la clave */
+    return t;
+  }).filter(Boolean).sort(function(a, b){ return a.h < b.h ? -1 : 1; });
+}
+
 function agendaDe(fecha){
   if(!BASE.agenda) BASE.agenda = {};
   var guardados = {};
-  (BASE.agenda[fecha] || []).forEach(function(t){
+  turnosDe(fecha).forEach(function(t){
     if(t.pid || t.dorsal || t.estado) guardados[t.h] = t;
   });
 
@@ -140,7 +165,7 @@ function ocupacionDe(fecha){
 function podarAgenda(){
   if(!BASE.agenda) return;
   Object.keys(BASE.agenda).forEach(function(f){
-    var hay = (BASE.agenda[f] || []).some(function(t){ return t.pid || t.dorsal || t.estado; });
+    var hay = turnosDe(f).some(function(t){ return t.pid || t.dorsal || t.estado; });
     if(!hay) delete BASE.agenda[f];
   });
 }
@@ -231,11 +256,13 @@ function reservarSerie(pid, diasSemana, hora, cuantas, desde){
   return {puestos: puestos, salteados: salteados};
 }
 
-function turnosDe(pid, desdeHoy){
+/* Los turnos de UNA persona. Ojo con el nombre parecido a turnosDe(fecha):
+   este pide un paciente, aquel una fecha. */
+function turnosDePaciente(pid, desdeHoy){
   var r = [];
   Object.keys(BASE.agenda || {}).sort().forEach(function(f){
     if(desdeHoy && f < HOY) return;
-    (BASE.agenda[f] || []).forEach(function(t){
+    turnosDe(f).forEach(function(t){
       if(t.pid === pid && t.estado === 'reservado') r.push({fecha: f, turno: t});
     });
   });

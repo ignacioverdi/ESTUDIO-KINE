@@ -128,7 +128,7 @@ function estadisticaTurnos(mes){
   var total = 0, atendidos = 0, ausentes = 0, cancelados = 0;
   for(var d in BASE.agenda){
     if(d.slice(0, 7) !== mes) continue;
-    BASE.agenda[d].forEach(function(t){
+    (typeof turnosDe === 'function' ? turnosDe(d) : (BASE.agenda[d] || [])).forEach(function(t){
       if(!t.dorsal && !t.pid) return;
       total++;
       if(t.estado === 'atendido')  atendidos++;

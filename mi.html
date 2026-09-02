@@ -35,10 +35,14 @@ if(!L){
 function pintar(){
   var prog = programaDe(L);
   var prox = null;
-  (BASE.agenda[HOY] || []).concat(BASE.agenda['2026-08-31'] || []).forEach(function(t){
-    if(!prox && (t.pid === miPid() || (t.dorsal && t.dorsal === miDorsal()))
-       && t.estado === 'reservado') prox = t;
+  /* Los proximos dias, no dos fechas escritas a mano. */
+  [HOY, sumarDias(HOY,1), sumarDias(HOY,2), sumarDias(HOY,3)].forEach(function(dd){
+    turnosDe(dd).forEach(function(t){
+      if(!prox && (t.pid === miPid() || (t.dorsal && t.dorsal === miDorsal()))
+         && t.estado === 'reservado') prox = t;
+    });
   });
+
   document.getElementById('todo').innerHTML =
     '<h1 class="tit">' + L.zona + ' ' + (L.lado === '—' ? '' : L.lado) + '</h1>'
     + '<p class="bajada">' + L.diagnostico + '. Llevás ' + diasDeLesion(L) + ' días desde '
@@ -164,7 +168,7 @@ function actualizarCuenta(){
 function turnoProximo(){
   var r = null;
   Object.keys(BASE.agenda).sort().forEach(function(d){
-    BASE.agenda[d].forEach(function(t){
+    turnosDe(d).forEach(function(t){
       if(!r && t.pid === miPid() && t.estado === 'reservado') r = {d:d, t:t};
     });
   });

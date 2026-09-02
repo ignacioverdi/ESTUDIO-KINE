@@ -352,6 +352,37 @@ def main():
         problemas += e6[:2]
         ctx.close()
 
+        print('\n  1i. LA AGENDA COMO LA GUARDA FIREBASE')
+        # Firebase guarda las listas como objetos: {"0":{...},"1":{...}}.
+        # Un objeto no tiene forEach, asi que el codigo que recorria la
+        # agenda explotaba apenas los datos venian de la base. Paso de
+        # verdad: el boton de borrar un paciente no abria NADA.
+        ctx = b.new_context(**pw.devices['iPhone 14 Pro'])
+        pg = ctx.new_page()
+        e7 = []
+        pg.on('pageerror', lambda x: e7.append(str(x)))
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+        pg.evaluate("localStorage.clear()")
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
+        entrarComoKine(pg)
+        pg.goto(base + 'pacientes.html'); pg.wait_for_timeout(1000)
+        pg.evaluate("var n={};Object.keys(BASE.agenda).forEach(function(d){var o={};"
+                    "(BASE.agenda[d]||[]).forEach(function(t,i){o[String(i)]=t;});n[d]=o;});"
+                    "BASE.agenda=n;")
+        lista = pg.evaluate("Array.isArray(turnosDe(HOY)) && turnosDe(HOY).length > 0")
+        pg.evaluate("abrir(BASE.pacientes[0].id)")
+        pg.wait_for_timeout(400)
+        pg.evaluate("borrarPaciente(BASE.pacientes[0].id)")
+        pg.wait_for_timeout(600)
+        abre = pg.evaluate("!!document.getElementById('cajaBorrar')")
+        print('     la agenda se lee igual siendo objeto :', lista)
+        print('     el boton de borrar abre              :', abre)
+        for cond, t4 in [(lista, 'la agenda no se lee cuando viene como objeto'),
+                         (abre, 'el boton de borrar no abre nada')]:
+            if not cond: problemas.append(t4)
+        problemas += [x for x in e7 if 'forEach' in x][:2]
+        ctx.close()
+
         print('\n  2. CODIGOS QR')
         try:
             import cv2

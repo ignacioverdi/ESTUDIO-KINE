@@ -84,7 +84,7 @@ function vaciarLocal(){
   BASE.wellness = {};
   BASE.ejercicios = [];
   for(var d in BASE.agenda){
-    (BASE.agenda[d] || []).forEach(function(t){
+    (typeof turnosDe === 'function' ? turnosDe(d) : (BASE.agenda[d] || [])).forEach(function(t){
       delete t.pid; delete t.dorsal; delete t.tipo; delete t.estado; delete t.confirmado;
     });
   }
