@@ -672,6 +672,33 @@ function claveDe(nacimiento){
   return String(nacimiento || '').replace(/-/g, '');   /* 8 digitos: alcanza */
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   CREAR LA CUENTA SIN PERDER LA SESION DE QUIEN ESTA CARGANDO
+
+   Cuando el kinesiologo carga un paciente a mano, hay que crearle la
+   cuenta igual: si no, esa persona NUNCA va a poder entrar. Le pasaba a
+   todos los que se cargaban desde "+ Nuevo paciente".
+
+   Pero crear una cuenta devuelve una sesion nueva, y guardarla echaria
+   al kinesiologo de la suya en el medio del trabajo. Asi que se crea la
+   cuenta, se toma el identificador, y NO se guarda esa sesion: la del
+   kinesiologo sigue intacta.
+   ══════════════════════════════════════════════════════════════════════ */
+function fbCrearCuentaPaciente(doc, nacimiento){
+  return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FB_KEY, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email:correoDe(doc), password:claveDe(nacimiento),
+                            returnSecureToken:true})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.localId) return d.localId;        /* la sesion NO se guarda */
+      var m = (d && d.error && d.error.message) || '';
+      if(m.indexOf('EMAIL_EXISTS') >= 0) throw new Error('YA_EXISTE');
+      throw new Error(m || 'No se pudo crear la cuenta.');
+    });
+}
+
 /* Crea la cuenta al darse de alta. Devuelve el identificador. */
 function fbCrearPaciente(doc, nacimiento){
   return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FB_KEY, {
@@ -744,6 +771,7 @@ if(!FB_CONFIGURADO){
     window.fbGet = undefined;
     window.fbPush = undefined;
     window.fbCrearPaciente = undefined;
+    window.fbCrearCuentaPaciente = undefined;
     window.fbEntrarPaciente = undefined;
   }catch(e){}
 }

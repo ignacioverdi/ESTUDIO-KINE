@@ -59,6 +59,7 @@ Apunta la camara del celular al codigo del cartel, completa sus datos en dos min
 Vos no tipeas nada y no hay errores de dictado. Si no tenes el cartel a mano, en Pacientes hay botones para mandarle el enlace por WhatsApp.
 ##O cargarlo vos
 En Pacientes, arriba, el boton "+ Nuevo paciente" abre la misma ficha para completarla con la persona adelante.
+Al guardar se le crea el acceso solo: ya puede entrar con su documento y su fecha de nacimiento, sin que hagas nada mas.
 ##Los contadores del padron
 Arriba de Pacientes hay un contador por institucion: cuantos te manda cada una. Es el numero que dice de donde te llega el trabajo y de quien dependes.
 Tocando uno se filtra la lista para ver solo esos, y tocandolo de nuevo volves a todos.

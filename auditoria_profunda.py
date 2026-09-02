@@ -143,6 +143,14 @@ with sync_playwright() as pw:
         ok('paciente: '+p, not errs, ('| '+errs[0][:60]) if errs else '')
 
     print('')
+    print('══ EL CIRCUITO QUE MAS IMPORTA ══')
+    # El kine carga un paciente y ese paciente entra. Sin esto el portal
+    # no sirve: los cargados a mano no podian entrar NUNCA porque no se
+    # les creaba la cuenta.
+    tiene_cuenta = pg.evaluate("typeof fbCrearCuentaPaciente === 'function'")
+    ok('al cargar a mano se le crea la cuenta', tiene_cuenta)
+
+    print('')
     print('══ AHORA LAS ACCIONES DE VERDAD ══')
     pg.evaluate("guardarSesion({tipo:'kine', desde:HOY})")
 

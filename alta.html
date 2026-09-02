@@ -308,6 +308,32 @@ function enviar(){
   /* Con la base conectada se le crea la cuenta invisible, y su ficha se
      guarda con ese identificador como clave. Asi las reglas pueden decir
      "cada uno lee lo suyo" sin ninguna tabla que cargar a mano. */
+  /* Si lo carga el kinesiologo, se le crea la cuenta igual pero SIN
+     tocar su sesion. Antes no se creaba ninguna y esos pacientes no
+     podian entrar nunca: era el caso mas comun del estudio. */
+  if(typeof fbCrearCuentaPaciente === 'function' && LOCARGA_EL_KINE){
+    document.getElementById('aviso').innerHTML =
+      '<div class="nota info">Creando su acceso…</div>';
+    fbCrearCuentaPaciente(nuevo.doc, nuevo.nacimiento)
+      .then(function(uid){
+        nuevo.id = uid;
+        terminarAlta(nuevo);
+      })
+      .catch(function(e){
+        if((e && e.message) === 'YA_EXISTE'){
+          document.getElementById('aviso').innerHTML =
+            '<div class="nota aviso"><b>Ese documento ya está cargado.</b> '
+            + 'Buscalo en el padrón: ya existe una ficha con ese número.</div>';
+          return;
+        }
+        document.getElementById('aviso').innerHTML =
+          '<div class="nota reserva">No se pudo crear su acceso: '
+          + ((e && e.message) || 'sin conexión') + '. El paciente no va a poder entrar. '
+          + 'Probá de nuevo.</div>';
+      });
+    return;
+  }
+
   if(typeof fbCrearPaciente === 'function' && !LOCARGA_EL_KINE){
     document.getElementById('aviso').innerHTML =
       '<div class="nota info">Creando tu acceso…</div>';

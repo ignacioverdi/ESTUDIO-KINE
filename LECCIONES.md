@@ -38,8 +38,9 @@
 | La historia clínica venía con un hueco al principio | Los folios arrancan en 1 y Firebase numera desde 0 |
 | El paciente entraba y veía todo vacío | Pedía sus datos con el identificador del kinesiólogo |
 | Seis errores de la misma familia | Firebase devuelve las cosas distinto de como se guardan |
+| Los pacientes cargados a mano no podían entrar nunca | Solo se creaba cuenta a los que usaban el QR |
 
-**Veintiséis errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Veintisiete errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---
