@@ -122,10 +122,37 @@ function ahora(){
    Es la única forma de escribir algo clínico. Nunca se edita, nunca se
    borra: se agrega. Corregir es asentar una rectificación que apunta al
    asiento equivocado, igual que tachar y firmar al lado en papel.     */
+/* ══════════════════════════════════════════════════════════════════════
+   LA HISTORIA, SIEMPRE COMO LISTA Y SIN HUECOS
+
+   Los asientos se numeran desde 1, porque el folio 1 es el primero. Pero
+   Firebase, cuando las claves son numeros, devuelve una LISTA que empieza
+   en 0: queda un hueco nulo al principio.
+
+   Eso rompia dos cosas. La cuenta de asientos daba uno de mas, y
+   cualquier codigo que recorriera la historia explotaba al toparse con
+   el hueco. En un documento legal eso no puede pasar.
+
+   Esta funcion devuelve siempre una lista limpia, venga como venga.
+   ══════════════════════════════════════════════════════════════════════ */
 function historiaDe(pid){
   if(!BASE.historia) BASE.historia = {};
-  if(!BASE.historia[pid]) BASE.historia[pid] = [];
-  return BASE.historia[pid];
+  var h = BASE.historia[pid];
+  if(!h){ BASE.historia[pid] = []; return BASE.historia[pid]; }
+
+  if(!Array.isArray(h)){
+    h = Object.keys(h).map(function(k){ return h[k]; });
+  }
+  h = h.filter(Boolean);          /* fuera los huecos */
+
+  /* Se ordena por el numero de folio que lleva CADA asiento, no por la
+     clave. Las claves pueden venir como "a1","a2" o como "1","2" segun
+     como se guardaron, y ordenarlas como texto pondria el folio 10 antes
+     del 2. En una historia clinica el orden es obligatorio por ley: es
+     un documento cronologico y foliado. */
+  h.sort(function(a, b){ return (a.n || 0) - (b.n || 0); });
+  BASE.historia[pid] = h;
+  return h;
 }
 
 function asentar(pid, tipo, contenido, rectifica){
@@ -157,7 +184,10 @@ function asentar(pid, tipo, contenido, rectifica){
   }));
 
   h.push(asiento);
-  guardar('kine/historia/' + pid + '/' + asiento.n, asiento);
+  /* La clave lleva una letra adelante para que Firebase NO lo trate como
+     lista: con claves numericas devuelve un array con un hueco en el 0,
+     porque los folios arrancan en 1. */
+  guardar('kine/historia/' + pid + '/a' + asiento.n, asiento);
   return asiento;
 }
 

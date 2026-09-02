@@ -383,6 +383,39 @@ def main():
         problemas += [x for x in e7 if 'forEach' in x][:2]
         ctx.close()
 
+        print('\n  1j. LA HISTORIA CLINICA, CRONOLOGICA Y SIN HUECOS')
+        # Los folios arrancan en 1 y Firebase devuelve listas desde 0: queda
+        # un hueco nulo que rompe cualquier recorrido. Y ordenar las claves
+        # como texto pondria el folio 10 antes del 2. Es un documento legal:
+        # la ley pide que sea cronologico y foliado.
+        ctx = b.new_context(**pw.devices['iPhone 14 Pro'])
+        pg = ctx.new_page()
+        e8 = []
+        pg.on('pageerror', lambda x: e8.append(str(x)))
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+        pg.evaluate("localStorage.clear()")
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
+        entrarComoKine(pg)
+        pg.goto(base + 'historia.html?p=P07'); pg.wait_for_timeout(900)
+        pg.evaluate("BASE.historia = BASE.historia || {};"
+                    "BASE.historia['P07'] = {};"
+                    "[2,10,1,3].forEach(function(n){"
+                    "BASE.historia['P07']['a'+n] = {n:n, tipo:'nota', contenido:'x',"
+                    "fecha:HOY, hora:'09:00', autor:'V', sello:HOY, autor_id:'v',"
+                    "huella_previa:'0', huella:'h', rectifica:null};});")
+        orden = pg.evaluate("historiaDe('P07').map(function(a){return a.n}).join(',')")
+        pg.evaluate("BASE.historia['P07'] = [null, {n:1,tipo:'nota',contenido:'x',"
+                    "fecha:HOY,hora:'09:00',autor:'V',sello:HOY,autor_id:'v',"
+                    "huella_previa:'0',huella:'h',rectifica:null}];")
+        sin_hueco = pg.evaluate("historiaDe('P07').length") == 1
+        print('     en orden de folio (1,2,3,10)         :', orden)
+        print('     limpia los huecos                    :', sin_hueco)
+        for cond, t5 in [(orden == '1,2,3,10', 'la historia clinica NO queda en orden de folio'),
+                         (sin_hueco, 'la historia clinica queda con huecos')]:
+            if not cond: problemas.append(t5)
+        problemas += e8[:2]
+        ctx.close()
+
         print('\n  2. CODIGOS QR')
         try:
             import cv2

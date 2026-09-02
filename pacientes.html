@@ -398,6 +398,8 @@ function borrarPaciente(pid){
   });
 
   var asientos = (historiaDe(pid) || []).length;
+  /* Un paciente recien cargado tiene exactamente dos asientos: el alta y
+     el consentimiento. Mas que eso significa que ya pasaron cosas. */
   var tieneCosas = asientos > 2 || L.length > 0 || turnos > 0;
 
   var caja = document.createElement('div');
