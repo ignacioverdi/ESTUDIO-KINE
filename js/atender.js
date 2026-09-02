@@ -38,7 +38,7 @@ function atender(dia, hora){
 
   var p = paciente(t.pid);
   var L = null;
-  BASE.lesiones.forEach(function(x){
+  sanearTodasLasLesiones().forEach(function(x){
     if(x.pid === t.pid && x.estado === 'activa') L = x;
   });
 

@@ -47,7 +47,7 @@ function escribirMensaje(pid, texto, contexto){
   texto = (texto || '').trim();
   if(!texto) return null;
   var t = (typeof ahora === 'function') ? ahora() : {sello:HOY, fecha:HOY, hora:''};
-  var quien = rol() === 'kine' ? 'kine' : 'paciente';
+  var quien = soyKine() ? 'kine' : 'paciente';
   var m = {
     id: 'M' + String(Date.now()).slice(-8) + mensajes().length,
     pid: pid, de: quien, texto: texto,
@@ -86,8 +86,8 @@ function iconoContexto(c){
 function abrirConversacion(pid, contexto){
   var p = paciente(pid);
   if(!p) return;
-  var soyKine = rol() === 'kine';
-  marcarLeidos(pid, soyKine ? 'paciente' : 'kine');
+  var esKine = soyKine();
+  marcarLeidos(pid, esKine ? 'paciente' : 'kine');
 
   var caja = document.createElement('div');
   caja.className = 'ayuda-fondo';
@@ -101,14 +101,14 @@ function abrirConversacion(pid, contexto){
 }
 
 function pintarConversacion(pid){
-  var p = paciente(pid), soyKine = rol() === 'kine';
+  var p = paciente(pid), esKine = soyKine();
   var lista = mensajesDe(pid);
   var ctx = window._ctxMsj || {tipo:'general', detalle:''};
 
   document.getElementById('cuerpoMsj').innerHTML =
     '<button class="cerrar" onclick="cerrarConversacion()" aria-label="Cerrar">&times;</button>'
     + '<span class="eti">Mensajes</span>'
-    + '<h2>' + (soyKine ? p.nombre : 'Consultarle a Vero') + '</h2>'
+    + '<h2>' + (esKine ? p.nombre : 'Consultarle a Vero') + '</h2>'
 
     + (ctx.tipo !== 'general'
         ? '<div class="nota info">' + iconoContexto(ctx) + '</div>'
@@ -117,7 +117,7 @@ function pintarConversacion(pid){
     + '<div class="charla">'
     + (lista.length
         ? lista.map(function(m){
-            var mio = (soyKine && m.de === 'kine') || (!soyKine && m.de === 'paciente');
+            var mio = (esKine && m.de === 'kine') || (!esKine && m.de === 'paciente');
             return '<div class="msj ' + (mio ? 'mio' : 'suyo') + '">'
               + (m.contexto && m.contexto.tipo !== 'general'
                   ? '<span class="ancla">' + iconoContexto(m.contexto) + '</span>' : '')
@@ -126,12 +126,12 @@ function pintarConversacion(pid){
               + ' · ' + (m.de === 'kine' ? 'Vero' : p.nombre.split(' ')[0]) + '</span></div>';
           }).join('')
         : '<div class="vacio" style="padding:24px"><b>Todavía no hay mensajes</b>'
-          + (soyKine ? 'Escribile si querés.' : 'Escribí lo que quieras preguntar.') + '</div>')
+          + (esKine ? 'Escribile si querés.' : 'Escribí lo que quieras preguntar.') + '</div>')
     + '</div>'
 
     + '<label class="campo" style="margin-top:14px">'
-    + '<span class="eti">' + (soyKine ? 'Responder' : 'Tu consulta') + '</span>'
-    + '<textarea id="txtMsj" placeholder="' + (soyKine
+    + '<span class="eti">' + (esKine ? 'Responder' : 'Tu consulta') + '</span>'
+    + '<textarea id="txtMsj" placeholder="' + (esKine
         ? 'Probá con menos carga y contame cómo te fue.'
         : 'En el segundo ejercicio siento un tirón en la parte de atrás...') + '"></textarea></label>'
     + '<div id="avisoMsj"></div>'
@@ -139,7 +139,7 @@ function pintarConversacion(pid){
 
     /* Sin esto un chat es una trampa: el paciente escribe de madrugada
        creyendo que alguien lo lee. */
-    + (soyKine ? ''
+    + (esKine ? ''
         : '<div class="nota aviso" style="margin-top:14px">'
           + 'Vero responde antes de tu próximo turno. <b>Esto no es una guardia:</b> '
           + 'si te pasa algo urgente, llamá por teléfono.</div>');

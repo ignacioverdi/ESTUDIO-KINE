@@ -43,7 +43,7 @@ function diasDesde(fecha){
 function alertas(){
   var lista = [];
 
-  BASE.lesiones.forEach(function(L){
+  sanearTodasLasLesiones().forEach(function(L){
     if(L.estado !== 'activa') return;
     var p = L.pid ? paciente(L.pid) : null;
     if(!p) return;

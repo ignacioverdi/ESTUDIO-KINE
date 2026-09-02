@@ -429,13 +429,33 @@ function jugador(d){
 }
 function nombre(d){ return jugador(d).n; }
 function lesionPorId(id){
-  for(var i=0;i<BASE.lesiones.length;i++) if(BASE.lesiones[i].id===id) return BASE.lesiones[i];
+  var Ls = lista(BASE.lesiones);
+  for(var i=0;i<Ls.length;i++) if(Ls[i].id===id) return sanearLesion(Ls[i]);
   return null;
 }
+/* Cada lesion se limpia UNA vez, al leerla. Asi todo el portal puede
+   usar L.criterios y L.sesiones sin preguntarse de donde vinieron.
+   Corregirlo en los treinta lugares que las usan seria pedir que nadie
+   se olvide nunca; esto lo arregla en el origen. */
+function sanearLesion(L){
+  if(!L) return L;
+  if(!Array.isArray(L.criterios)) L.criterios = lista(L.criterios);
+  else L.criterios = L.criterios.filter(Boolean);
+  if(!Array.isArray(L.sesiones)) L.sesiones = lista(L.sesiones);
+  else L.sesiones = L.sesiones.filter(Boolean);
+  return L;
+}
+
+function sanearTodasLasLesiones(){
+  BASE.lesiones = lista(BASE.lesiones).map(sanearLesion);
+  return BASE.lesiones;
+}
+
 function lesionDe(d){
   if(d === null || d === undefined) return null;   /* sin dorsal no se adivina */
   for(var i=0;i<BASE.lesiones.length;i++)
-    if(BASE.lesiones[i].dorsal===d && BASE.lesiones[i].estado==='activa') return BASE.lesiones[i];
+    if(BASE.lesiones[i].dorsal===d && BASE.lesiones[i].estado==='activa')
+      return sanearLesion(BASE.lesiones[i]);
   return null;
 }
 
@@ -445,7 +465,8 @@ function lesionDe(d){
 function lesionDePid(pid){
   if(!pid) return null;
   for(var i=0;i<BASE.lesiones.length;i++)
-    if(BASE.lesiones[i].pid===pid && BASE.lesiones[i].estado==='activa') return BASE.lesiones[i];
+    if(BASE.lesiones[i].pid===pid && BASE.lesiones[i].estado==='activa')
+      return sanearLesion(BASE.lesiones[i]);
   return null;
 }
 function estadoDe(d){ return (BASE.disponibilidad[d] || {estado:'ok'}); }
@@ -588,12 +609,41 @@ function porInstitucion(){
   return cuenta;
 }
 
-function programaDe(L){
-  var p = BASE.programas[L.id];
-  return (p && p[L.fase]) ? p[L.fase] : [];
+/* ══════════════════════════════════════════════════════════════════════
+   TODA LISTA QUE VENGA DE LA BASE PASA POR ACA
+
+   Firebase devuelve las listas como objetos, y si las claves son numeros
+   que arrancan en 1 mete un hueco nulo en la posicion 0. Eso hizo que el
+   programa de ejercicios, los criterios de fase y las sesiones
+   explotaran apenas los datos venian de la base y no del archivo.
+
+   En vez de acordarse en cada lugar, se limpia acá.
+   ══════════════════════════════════════════════════════════════════════ */
+function lista(x){
+  if(!x) return [];
+  if(Array.isArray(x)) return x.filter(function(v){ return v !== null && v !== undefined; });
+  return Object.keys(x).map(function(k){ return x[k]; })
+           .filter(function(v){ return v !== null && v !== undefined; });
 }
+
+function programaDe(L){
+  if(!L) return [];
+  var p = BASE.programas ? BASE.programas[L.id] : null;
+  return lista(p ? p[L.fase] : null);
+}
+
+function criteriosDeLesion(L){
+  return lista(L ? L.criterios : null);
+}
+
+function sesionesDe(L){
+  return lista(L ? L.sesiones : null);
+}
+
 function criteriosListos(L){
-  var n = 0; L.criterios.forEach(function(c){ if(c.ok) n++; }); return n;
+  var n = 0;
+  criteriosDeLesion(L).forEach(function(c){ if(c.ok) n++; });
+  return n;
 }
 
 /* ── ESCRITURA Y PERSISTENCIA ───────────────────────────────────────
@@ -645,5 +695,70 @@ function guardar(ruta, valor){
   persistir();
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   BASE SIEMPRE SANA
+
+   Veinticinco lugares del portal recorren listas de BASE. Corregirlos uno
+   por uno seria pedir que nadie se olvide nunca, y ya fallamos cuatro
+   veces asi: alcanza con que UNO quede sin arreglar para que la pantalla
+   explote y el usuario vea un boton que "no hace nada".
+
+   Se garantiza acá: lo que tiene que ser lista, es lista. Sin huecos.
+   Se llama al arrancar y cada vez que llegan datos de la base.
+   ══════════════════════════════════════════════════════════════════════ */
+function sanearBase(){
+  ['pacientes','lesiones','caja','accesos','instituciones','faq',
+   'ejercicios','mensajes','plantel'].forEach(function(r){
+    if(BASE[r] !== undefined) BASE[r] = lista(BASE[r]);
+  });
+
+  /* Las de adentro tambien: cada lesion con sus criterios y sesiones. */
+  BASE.lesiones.forEach(function(L){
+    if(!L) return;
+    L.criterios = lista(L.criterios);
+    L.sesiones = lista(L.sesiones);
+  });
+
+  /* Los programas: una lista de ejercicios por lesion y fase. */
+  Object.keys(BASE.programas || {}).forEach(function(id){
+    Object.keys(BASE.programas[id] || {}).forEach(function(fase){
+      BASE.programas[id][fase] = lista(BASE.programas[id][fase]);
+    });
+  });
+
+  /* La historia, en orden de folio y sin huecos. */
+  Object.keys(BASE.historia || {}).forEach(function(pid){
+    var h = lista(BASE.historia[pid]);
+    h.sort(function(a, b){ return (a.n || 0) - (b.n || 0); });
+    BASE.historia[pid] = h;
+  });
+
+  /* Los estudios de cada paciente. */
+  Object.keys(BASE.estudios || {}).forEach(function(pid){
+    BASE.estudios[pid] = lista(BASE.estudios[pid]);
+  });
+
+  /* Los turnos de cada dia. */
+  Object.keys(BASE.agenda || {}).forEach(function(f){
+    var l = BASE.agenda[f];
+    if(!Array.isArray(l)){
+      l = Object.keys(l || {}).map(function(k){
+        var t = l[k];
+        if(t && typeof t === 'object' && !t.h) t.h = k;
+        return t;
+      });
+    }
+    BASE.agenda[f] = l.filter(Boolean).sort(function(a, b){ return a.h < b.h ? -1 : 1; });
+  });
+
+  /* Y las franjas horarias de cada dia de la semana. */
+  if(BASE.horario && BASE.horario.semana){
+    Object.keys(BASE.horario.semana).forEach(function(d){
+      BASE.horario.semana[d] = lista(BASE.horario.semana[d]);
+    });
+  }
+}
+
 /* Se recupera apenas se carga, antes de que ninguna pantalla dibuje. */
 recuperar();
+sanearBase();

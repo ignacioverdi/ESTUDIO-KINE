@@ -33,7 +33,7 @@ function pintar(){
     document.getElementById('bajada').textContent =
       'Tres en tratamiento. Cada ficha avanza por criterios cumplidos, no por días transcurridos.';
     ficha.innerHTML = '';
-    var activas = BASE.lesiones.filter(function(L){ return L.estado === 'activa'; });
+    var activas = sanearTodasLasLesiones().filter(function(L){ return L.estado === 'activa'; });
     lista.innerHTML = (ALTA_DADA
         ? '<div class="nota bien"><b>' + ALTA_DADA + '</b> recibió el alta. '
           + 'Ya figura disponible en el parte médico y su ficha pasó al historial.</div>'

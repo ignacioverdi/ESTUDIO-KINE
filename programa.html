@@ -53,7 +53,7 @@ function PARAMOK(k){
 function cargar(){
   if(!pid) return;
   L = null;
-  BASE.lesiones.forEach(function(x){
+  sanearTodasLasLesiones().forEach(function(x){
     if(x.pid === pid && x.estado === 'activa') L = x;
   });
   if(!L) return;
@@ -61,8 +61,9 @@ function cargar(){
   var clave = pid + '|' + fase;
   if(cargado === clave) return;              /* ya está en pantalla, no pisar */
   cargado = clave;
+  /* Por lista(): de la base viene como objeto y con un hueco adelante. */
   var g = BASE.programas[L.id] && BASE.programas[L.id][fase];
-  prog = g ? JSON.parse(JSON.stringify(g)) : [];
+  prog = JSON.parse(JSON.stringify(lista(g)));
 }
 function pintar(){
   var caja = document.getElementById('todo');
@@ -72,7 +73,7 @@ function pintar(){
       + 'celular con el video de cada ejercicio.</p>'
       + '<div class="tarjeta">' + BASE.pacientes.map(function(p){
           var l = null;
-          BASE.lesiones.forEach(function(x){ if(x.pid === p.id && x.estado === 'activa') l = x; });
+          sanearTodasLasLesiones().forEach(function(x){ if(x.pid === p.id && x.estado === 'activa') l = x; });
           return '<button class="fila" onclick="elegir(\'' + p.id + '\')"'
             + (l ? '' : ' disabled style="opacity:.4"') + '>'
             + '<span class="hh">' + (p.dorsal ? '#' + p.dorsal : 'P') + '</span>'
@@ -101,7 +102,7 @@ function pintar(){
     + '<span class="eti">Hoy está en la ' + L.fase + '</span></div>'
     + '<div class="pestanias" id="selFase" style="margin-bottom:0">'
     + [1,2,3,4].map(function(f){
-        var tiene = BASE.programas[L.id] && BASE.programas[L.id][f];
+        var tiene = lista(BASE.programas[L.id] && BASE.programas[L.id][f]).length;
         return '<button class="pest' + (f === fase ? ' on' : '') + '" data-f="' + f + '">'
           + 'Fase ' + f + (tiene ? ' ·' + tiene.length : '') + '</button>';
       }).join('') + '</div>'

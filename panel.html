@@ -173,7 +173,7 @@ document.getElementById('turnos').innerHTML = turnos.map(function(t){
        + (pendiente ? 'atender' : t.estado) + '</span></button>';
 }).join('');
 /* ── lesiones activas ── */
-document.getElementById('activas').innerHTML = BASE.lesiones.filter(function(L){
+document.getElementById('activas').innerHTML = sanearTodasLasLesiones().filter(function(L){
   return L.estado === 'activa'; }).map(function(L){
   var listos = criteriosListos(L), tot = L.criterios.length;
   return '<button class="fila" style="align-items:flex-start" onclick="irA(\'lesiones.html?f=' + L.id + '\')">'

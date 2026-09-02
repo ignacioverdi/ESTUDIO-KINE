@@ -61,7 +61,12 @@
 <body data-pag="historia">
 <div class="hoja angosta" id="todo"></div>
 <script>
-var pid = new URLSearchParams(location.search).get('p') || (rol() === 'kine' ? null : miPid());
+/* Quien mira se decide por la SESION, no por rol(), que queda guardado
+   en el navegador de la ultima vez que alguien lo uso. Si el kinesiologo
+   habia entrado antes en ese aparato, el paciente no veia su historia. */
+var _s = (typeof sesion === 'function') ? sesion() : null;
+var esKine = !!(_s && _s.tipo === 'kine');
+var pid = new URLSearchParams(location.search).get('p') || (esKine ? null : miPid());
 /* Mirar una historia clínica ya es un acceso, y queda registrado. */
 if(pid) registrarAcceso(pid, 'lectura de historia clínica');
 function pintar(){
@@ -82,7 +87,7 @@ function pintar(){
   var h = historiaDe(pid);
   var v = verificarHistoria(pid);
   var acc = accesosDe(pid);
-  var esKine = rol() === 'kine';
+
   caja.innerHTML =
     '<h1 class="tit">Historia clínica</h1>'
     + '<p class="bajada">' + p.nombre + ' · documento ' + p.doc

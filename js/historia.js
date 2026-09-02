@@ -89,7 +89,15 @@ function sha256(txt){
    Firebase esto sale de la cuenta que inició sesión y no se puede
    falsear desde el navegador.                                       */
 function autorActual(){
-  if(rol() === 'kine') return {id:'vero', nombre:'Vero', matricula:'MP 00000'};
+  /* Quien firma sale de la SESION. Con rol() alcanzaba con que el
+     kinesiologo hubiera entrado antes en ese navegador para que un
+     asiento del paciente quedara firmado por el. */
+  if(typeof soyKine === 'function' ? soyKine() : (rol() === 'kine')){
+    var P = BASE.perfil || {};
+    return {id: (sesion() && sesion().uid) || 'kine',
+            nombre: P.nombre || 'Kinesiólogo',
+            matricula: P.matricula || '—'};
+  }
   var p = paciente(miPid());
   return {id: p ? p.id : 'paciente', nombre: p ? p.nombre : 'Paciente', matricula:'—'};
 }

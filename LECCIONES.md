@@ -36,8 +36,10 @@
 | El botón de borrar no abría nada | Firebase guarda las listas como objetos, y un objeto no tiene `forEach` |
 | La ficha quedaba abierta tras borrar | Escribí `abierta` donde la variable era `abierto` |
 | La historia clínica venía con un hueco al principio | Los folios arrancan en 1 y Firebase numera desde 0 |
+| El paciente entraba y veía todo vacío | Pedía sus datos con el identificador del kinesiólogo |
+| Seis errores de la misma familia | Firebase devuelve las cosas distinto de como se guardan |
 
-**Veinticuatro errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Veintiséis errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---
@@ -121,6 +123,17 @@ página y había que bajar hasta el fondo. Y tocar un turno para atender no hac�
 absolutamente nada, sin ningún aviso, porque los turnos de ejemplo se habían
 escrito antes de que existiera el padrón. Las dos cosas aparecieron el mismo día,
 tocando la aplicación en un iPhone simulado.
+
+**Lo que entra de afuera se limpia en la puerta, no en cada habitación.**
+
+Seis errores seguidos salieron del mismo lugar: Firebase no devuelve los
+datos como los guardamos. Cada vez arreglaba el lugar donde explotaba, y a
+los dos días explotaba en otro. Veinticinco lugares del portal recorren
+listas: pedir que ninguno se olvide es pedir lo imposible.
+
+Ahora hay una sola función que sanea todo lo que entra, y corre al arrancar
+y cada vez que llegan datos. Y una auditoría que prueba el portal entero
+contra datos en el formato real de Firebase.
 
 **Fallar en silencio es la peor forma de fallar.** Si algo no puede seguir, tiene
 que decirlo.

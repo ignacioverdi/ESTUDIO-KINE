@@ -58,6 +58,22 @@ function salir(){
   location.href = 'index.html';
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   QUIEN ES, SE DECIDE ACA Y EN NINGUN OTRO LADO
+
+   Varias pantallas preguntaban rol(), que no es quien entro: es lo que
+   quedo guardado en ese navegador la ultima vez que alguien lo uso. Si
+   el kinesiologo habia entrado antes en la computadora del consultorio,
+   el paciente que entraba despues era tratado como kinesiologo.
+
+   En la historia clinica eso decide QUIEN FIRMA cada asiento. Un asiento
+   firmado por la persona equivocada en un documento legal es grave.
+   ══════════════════════════════════════════════════════════════════════ */
+function soyKine(){
+  var s = sesion();
+  return !!(s && s.tipo === 'kine');
+}
+
 function quienEntro(){
   var s = sesion();
   if(!s) return null;

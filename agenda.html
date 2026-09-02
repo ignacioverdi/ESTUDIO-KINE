@@ -115,7 +115,7 @@
 </div>
 
 <script>
-var esKine = rol() === 'kine';
+var esKine = (typeof soyKine === 'function') ? soyKine() : (rol() === 'kine');
 var dia = HOY;
 var mes = mesDe(HOY);
 

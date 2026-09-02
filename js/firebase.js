@@ -815,10 +815,75 @@ function fbCargarTodo(){
   }).catch(function(){});
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   NORMALIZAR LO QUE VUELVE DE LA BASE
+
+   Firebase no devuelve las cosas como las guardamos, y ese desajuste nos
+   costo cuatro errores seguidos, encontrados de a uno cuando algo se
+   rompia:
+
+     · Una lista guardada vuelve como objeto: {"0":x,"1":y}. Un objeto no
+       tiene forEach, asi que el codigo explota.
+     · Si las claves son numeros que arrancan en 1, devuelve una lista con
+       un HUECO nulo en la posicion 0.
+     · Y si los numeros no son seguidos, mezcla las dos formas.
+
+   En vez de acordarse rama por rama, se arregla UNA VEZ acá: todo lo que
+   entra pasa por esta funcion. Las ramas que el portal usa como lista
+   salen siempre como lista, sin huecos y en orden.
+   ══════════════════════════════════════════════════════════════════════ */
+var RAMAS_LISTA = ['pacientes','lesiones','caja','accesos','instituciones',
+                   'faq','ejercicios','mensajes','plantel'];
+
+function _fbNormalizar(rama, d){
+  if(d === null || d === undefined) return d;
+
+  if(RAMAS_LISTA.indexOf(rama) < 0) return d;   /* es un objeto y esta bien */
+
+  var lista;
+  if(Array.isArray(d)){
+    lista = d.filter(function(x){ return x !== null && x !== undefined; });
+  }else{
+    lista = Object.keys(d).map(function(k){
+      var v = d[k];
+      /* La clave suele ser el identificador: se le devuelve al objeto si
+         lo perdio, porque el portal busca por id. */
+      if(v && typeof v === 'object' && !Array.isArray(v) && !v.id) v.id = k;
+      return v;
+    }).filter(Boolean);
+  }
+
+  /* Orden estable: por id si lo tienen, para que la lista no baile entre
+     una carga y otra. */
+  lista.sort(function(a, b){
+    var x = (a && a.id) || '', y = (b && b.id) || '';
+    return x < y ? -1 : (x > y ? 1 : 0);
+  });
+  return lista;
+}
+
 function _fbTraerRamas(ses){
   var tok = (FB_SES && FB_SES.idToken) || '';
-  var uid = (FB_SES && FB_SES.uid) || '';
   if(!tok) return;
+
+  /* ══════════════════════════════════════════════════════════════════
+     EL IDENTIFICADOR TIENE QUE SER EL DEL PACIENTE, NO EL DE FB_SES
+
+     FB_SES es la ultima sesion de Firebase abierta en ese navegador. Si
+     el kinesiologo habia entrado antes en la computadora del estudio, un
+     paciente que entra despues pedia SUS PROPIOS DATOS con el
+     identificador del kinesiologo: le pedia a la base
+     "pacientes/<uid del kine>" y no encontraba nada.
+
+     Resultado: el paciente entraba y veia su pantalla vacia, sin
+     ejercicios, sin turno y sin historia. Sin error visible.
+
+     El identificador correcto es el de la sesion del portal.
+     ══════════════════════════════════════════════════════════════════ */
+  var uid = (ses && ses.tipo === 'paciente' && ses.pid)
+              ? ses.pid
+              : ((FB_SES && FB_SES.uid) || '');
+  if(!uid) return;
 
   /* ══════════════════════════════════════════════════════════════════
      LOS DATOS DE EJEMPLO NO CONVIVEN CON LOS REALES
@@ -872,6 +937,7 @@ function _fbTraerRamas(ses){
        'adherencia/' + uid, 'wellness/' + uid, 'estudios/' + uid];
 
   var pendientes = ramas.length, fallaron = [];
+  try{ window._ramasPedidas = ramas.slice(); }catch(e){}
 
   ramas.forEach(function(r){
     fetch(FB_URL + '/kine/' + r + '.json?auth=' + encodeURIComponent(tok))
@@ -882,6 +948,7 @@ function _fbTraerRamas(ses){
       .then(function(d){
         if(d === null || d === undefined) return;
         var partes = r.split('/');
+        d = _fbNormalizar(partes[0], d);
         if(partes.length === 2){
           /* Una rama propia del paciente: se mete en su lugar. */
           if(partes[0] === 'pacientes'){
@@ -894,22 +961,15 @@ function _fbTraerRamas(ses){
             BASE[partes[0]][partes[1]] = d;
           }
         }else{
-          /* Las listas vienen como objeto y el portal las usa como lista. */
-          if(['pacientes','lesiones','caja','accesos','mensajes','instituciones','faq'].indexOf(r) >= 0
-             && d && !Array.isArray(d)){
-            BASE[r] = Object.keys(d).map(function(k){
-              var v = d[k];
-              if(v && typeof v === 'object' && !v.id) v.id = k;
-              return v;
-            });
-          }else{
-            BASE[r] = d;
-          }
+          BASE[r] = d;   /* ya viene normalizado */
         }
       })
       .catch(function(e){ fallaron.push(r + ' (' + e.message + ')'); })
       .then(function(){
         if(--pendientes > 0) return;
+        /* Antes de dibujar: lo que llego puede venir como objeto o con
+           huecos, y todas las pantallas asumen listas limpias. */
+        if(typeof sanearBase === 'function'){ try{ sanearBase(); }catch(e){} }
         if(typeof pintar === 'function'){ try{ pintar(); }catch(e){} }
         if(fallaron.length) _fbAvisarLectura(fallaron);
       });

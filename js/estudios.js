@@ -47,7 +47,7 @@ function guardarEstudio(pid, est){
   if(!BASE.estudios[pid]) BASE.estudios[pid] = [];
   est.id = 'E' + String(Date.now()).slice(-8) + BASE.estudios[pid].length;
   est.cargado = HOY;
-  est.por = (rol() === 'kine') ? 'el kinesiólogo' : 'el paciente';
+  est.por = soyKine() ? 'el kinesiólogo' : 'el paciente';
   BASE.estudios[pid].push(est);
   guardar('kine/estudios/' + pid + '/' + est.id, est);
 
