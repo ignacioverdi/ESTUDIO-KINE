@@ -19,20 +19,36 @@
 <body data-pag="mi">
 <div class="hoja angosta" id="todo"></div>
 <script>
-/* Por ficha, nunca por dorsal: un particular no tiene dorsal y antes
-   terminaba viendo la lesion de otro. */
-var L = lesionDePid(miPid()) || lesionDe(miDorsal());
+/* ══════════════════════════════════════════════════════════════════════
+   LA LESION SE BUSCA AL DIBUJAR, NO AL CARGAR
+
+   Esto se calculaba una sola vez, apenas cargaba la pagina. Pero los
+   datos de la base llegan DESPUES, y cuando llegaban la variable seguia
+   valiendo lo de antes: vacia.
+
+   Resultado: el paciente entraba, sus datos llegaban bien, y la pantalla
+   le decia "Estás al día" como si no tuviera nada. Lo peor es que no
+   habia ningun error: simplemente mostraba lo que habia calculado antes
+   de tener con que.
+
+   Ahora se busca cada vez que se dibuja, y como la llegada de datos
+   dispara un redibujado, aparece sola.
+   ══════════════════════════════════════════════════════════════════════ */
+var L = null;
 var hechos = {}, dolor = null, esfuerzo = null;
-if(!L){
-  document.getElementById('todo').innerHTML =
-    '<h1 class="tit">Estás al día</h1>'
-    + '<p class="bajada">No tenés ninguna lesión abierta. Si te empezó a molestar algo, '
-    + 'pedí un turno y lo vemos.</p>'
-    + '<a class="bt" href="agenda.html" style="text-decoration:none;display:inline-block">Pedir un turno</a>';
-}else{
-  pintar();
-}
+
 function pintar(){
+  L = lesionDePid(miPid()) || lesionDe(miDorsal());
+
+  if(!L){
+    document.getElementById('todo').innerHTML =
+      '<h1 class="tit">Estás al día</h1>'
+      + '<p class="bajada">No tenés ninguna lesión abierta. Si te empezó a molestar algo, '
+      + 'pedí un turno y lo vemos.</p>'
+      + '<a class="bt" href="agenda.html" style="text-decoration:none;display:inline-block">Pedir un turno</a>';
+    return;
+  }
+
   var prog = programaDe(L);
   var prox = null;
   /* Los proximos dias, no dos fechas escritas a mano. */
@@ -218,5 +234,7 @@ if('serviceWorker' in navigator){
       }).catch(function(){});
   }).catch(function(){});
 }
+
+pintar();
 </script>
 </body></html>

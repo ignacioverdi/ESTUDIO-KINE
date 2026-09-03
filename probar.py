@@ -433,8 +433,8 @@ def main():
             pg.goto(base + 'cartel.html')
             # Con Firebase configurado la pantalla tarda mas en dibujarse:
             # se espera al codigo, no un tiempo fijo.
-            pg.wait_for_selector('#cartel .qr svg', timeout=15000)
-            pg.wait_for_timeout(400)
+            pg.wait_for_selector('#cartel .qr svg', timeout=25000)
+            pg.wait_for_timeout(1200)
             pg.locator('#cartel').screenshot(path='/tmp/_qr.png')
             leido, _, _ = cv2.QRCodeDetector().detectAndDecode(cv2.imread('/tmp/_qr.png'))
             esperado = pg.evaluate('URL_ALTA')

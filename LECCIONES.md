@@ -39,8 +39,9 @@
 | El paciente entraba y veía todo vacío | Pedía sus datos con el identificador del kinesiólogo |
 | Seis errores de la misma familia | Firebase devuelve las cosas distinto de como se guardan |
 | Los pacientes cargados a mano no podían entrar nunca | Solo se creaba cuenta a los que usaban el QR |
+| El paciente veía "Estás al día" teniendo lesión | La pantalla decidía antes de que llegaran los datos |
 
-**Veintisiete errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Veintiocho errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---
@@ -124,6 +125,15 @@ página y había que bajar hasta el fondo. Y tocar un turno para atender no hac�
 absolutamente nada, sin ningún aviso, porque los turnos de ejemplo se habían
 escrito antes de que existiera el padrón. Las dos cosas aparecieron el mismo día,
 tocando la aplicación en un iPhone simulado.
+
+**Los datos llegan tarde, y hay que dibujar dos veces.**
+
+Con internet de verdad la base tarda medio segundo. Todas mis pruebas
+tenían los datos al instante, así que ninguna vio que la pantalla decidía
+qué mostrar antes de tener con qué. El paciente veía "Estás al día"
+teniendo una lesión abierta, sin ningún error a la vista.
+
+Ahora hay una prueba que demora las respuestas a propósito.
 
 **Lo que entra de afuera se limpia en la puerta, no en cada habitación.**
 
