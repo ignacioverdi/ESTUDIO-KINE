@@ -237,7 +237,8 @@ function limpiarTodo(){
         .then(function(resp){
           return resp.json().then(function(d){
             var n = d ? (Array.isArray(d) ? d.length : Object.keys(d).length) : 0;
-            return x + ': ' + resp.status + (resp.ok ? ' — ' + n + ' cosas' : ' RECHAZADO');
+            if(!resp.ok) return x + ': RECHAZADO (' + resp.status + ')';
+            return x + ': ' + (n === 0 ? 'vacío' : n + (n === 1 ? ' registro' : ' registros'));
           });
         })
         .catch(function(e){ return x + ': sin conexión'; });
@@ -246,7 +247,13 @@ function limpiarTodo(){
       out.push('Lo que hay en la base:');
       lineas.forEach(function(l){ out.push('  ' + l); });
       out.push('');
-      out.push('En pantalla ves: ' + (BASE.pacientes ? BASE.pacientes.length : 0) + ' pacientes');
+      var enPantalla = BASE.pacientes ? BASE.pacientes.length : 0;
+      out.push('En pantalla ves: ' + enPantalla + (enPantalla === 1 ? ' paciente' : ' pacientes'));
+      out.push('');
+      out.push(lineas.some(function(l){ return l.indexOf('RECHAZADO') >= 0; })
+        ? '>>> Hay ramas rechazadas: faltan reglas en Firebase. Mandale esto a Nacho.'
+        : '>>> La base responde bien. Si igual no ves un paciente que cargaste, '
+          + 'mandale esto a Nacho.');
       r.textContent = out.join('\n');
     });
   };
