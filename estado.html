@@ -188,4 +188,68 @@ function limpiarTodo(){
   });
 }
 </script>
+
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script>
+<script src="js/acceso.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   PRUEBA DE LA BASE
+
+   Cuando algo "no aparece", esta pantalla dice exactamente donde se
+   corta: si hay sesion, si la base contesta, que ramas rechaza y cuantos
+   pacientes hay de verdad.
+
+   Sirve para no tener que adivinar por WhatsApp.
+   ══════════════════════════════════════════════════════════════════════ */
+(function(){
+  var caja = document.createElement('div');
+  caja.style.cssText = 'max-width:760px;margin:24px auto;padding:18px;border:1px solid #2A3B4A;'
+    + 'border-radius:12px;background:#0E1620;color:#DCE6EE;font-family:monospace;font-size:13px';
+  caja.innerHTML = '<b style="font-size:15px">Prueba de la base de datos</b>'
+    + '<p style="color:#8AA0B4;font-size:12.5px;line-height:1.6">Si cargaste un paciente y no '
+    + 'aparece, tocá el botón y mandale el resultado a Nacho.</p>'
+    + '<button id="btDiag" style="padding:12px 18px;border-radius:8px;border:1px solid #00D8E8;'
+    + 'background:transparent;color:#00D8E8;cursor:pointer;font-family:inherit">Probar la base</button>'
+    + '<pre id="resDiag" style="white-space:pre-wrap;margin-top:14px;color:#9FB4C6"></pre>';
+  document.body.appendChild(caja);
+
+  document.getElementById('btDiag').onclick = function(){
+    var r = document.getElementById('resDiag');
+    r.textContent = 'Probando…';
+    var out = [];
+    out.push('Firebase configurado: ' + (typeof FB_CONFIGURADO !== 'undefined' && FB_CONFIGURADO));
+    var s = (typeof sesion === 'function') ? sesion() : null;
+    out.push('Entraste como: ' + (s ? s.tipo : 'NADIE — entrá primero'));
+    var tok = (typeof FB_SES !== 'undefined' && FB_SES) ? FB_SES.idToken : null;
+    out.push('Sesión de Firebase: ' + (tok ? 'sí (' + FB_SES.uid + ')' : 'NO'));
+    if(!tok){
+      out.push('');
+      out.push('>>> Sin sesión de Firebase no se puede leer nada.');
+      out.push('    Salí y volvé a entrar con tu correo y contraseña.');
+      r.textContent = out.join('\n');
+      return;
+    }
+    var q = '?auth=' + encodeURIComponent(tok);
+    var ramas = ['pacientes','lesiones','historia','agenda','instituciones','roles'];
+    Promise.all(ramas.map(function(x){
+      return fetch(FB_URL + '/kine/' + x + '.json' + q)
+        .then(function(resp){
+          return resp.json().then(function(d){
+            var n = d ? (Array.isArray(d) ? d.length : Object.keys(d).length) : 0;
+            return x + ': ' + resp.status + (resp.ok ? ' — ' + n + ' cosas' : ' RECHAZADO');
+          });
+        })
+        .catch(function(e){ return x + ': sin conexión'; });
+    })).then(function(lineas){
+      out.push('');
+      out.push('Lo que hay en la base:');
+      lineas.forEach(function(l){ out.push('  ' + l); });
+      out.push('');
+      out.push('En pantalla ves: ' + (BASE.pacientes ? BASE.pacientes.length : 0) + ' pacientes');
+      r.textContent = out.join('\n');
+    });
+  };
+})();
+</script>
 </body></html>

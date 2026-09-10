@@ -759,6 +759,46 @@ function fbEntrarPaciente(doc, nacimiento){
 
 
 /* ══════════════════════════════════════════════════════════════════════
+   GUARDAR Y COMPROBAR
+
+   "Quedó cargado" no puede decirse sin haberlo comprobado. El portal
+   avisaba que el paciente estaba guardado apenas mandaba la escritura,
+   sin esperar la respuesta: si la base la rechazaba, el cartel de exito
+   ya estaba en pantalla y el paciente no existia en ningun lado.
+
+   Esto escribe, vuelve a leer, y recien entonces contesta. Es una
+   consulta mas por paciente nuevo, que se hace una vez en la vida de esa
+   persona. Barato al lado de perder una ficha.
+   ══════════════════════════════════════════════════════════════════════ */
+function fbGuardarYComprobar(ruta, valor){
+  if(!FB_CONFIGURADO || !FB_SES || !FB_SES.idToken){
+    return Promise.resolve({ok:true, sinBase:true});
+  }
+  var q = '?auth=' + encodeURIComponent(FB_SES.idToken);
+  return fetch(FB_URL + '/' + ruta + '.json' + q, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(valor)
+    })
+    .then(function(r){
+      if(!r.ok) throw new Error('La base rechazó el guardado (' + r.status + ')');
+      return fetch(FB_URL + '/' + ruta + '.json' + q);
+    })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d) throw new Error('Se guardó pero no se pudo confirmar.');
+      return {ok:true};
+    })
+    .catch(function(e){
+      var m = (e && e.message) || '';
+      if(m.indexOf('Failed to fetch') >= 0){
+        m = 'No hay conexión con el servidor.';
+      }
+      return {ok:false, motivo:m};
+    });
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
    SIN CONFIGURAR, ESTE ARCHIVO NO EXISTE
 
    Las funciones de arriba quedan definidas igual por como funciona
@@ -772,6 +812,7 @@ if(!FB_CONFIGURADO){
     window.fbPush = undefined;
     window.fbCrearPaciente = undefined;
     window.fbCrearCuentaPaciente = undefined;
+    window.fbGuardarYComprobar = undefined;
     window.fbEntrarPaciente = undefined;
   }catch(e){}
 }
@@ -999,6 +1040,7 @@ function _fbTraerRamas(ses){
            huecos, y todas las pantallas asumen listas limpias. */
         if(typeof sanearBase === 'function'){ try{ sanearBase(); }catch(e){} }
         if(typeof pintar === 'function'){ try{ pintar(); }catch(e){} }
+        try{ window._fallaronRamas = fallaron.slice(); }catch(e){}
         if(fallaron.length) _fbAvisarLectura(fallaron);
       });
   });

@@ -360,8 +360,34 @@ function enviar(){
 }
 
 function terminarAlta(nuevo){
+  /* Se comprueba que haya quedado ANTES de decir que si. Antes se
+     avisaba "quedó cargado" apenas se mandaba la escritura, sin esperar
+     respuesta: si la base la rechazaba, el cartel de exito ya estaba en
+     pantalla y la ficha no existia en ningun lado. */
+  if(typeof fbGuardarYComprobar === 'function'){
+    document.getElementById('aviso').innerHTML =
+      '<div class="nota info">Guardando…</div>';
+    fbGuardarYComprobar('kine/pacientes/' + nuevo.id, nuevo).then(function(r){
+      if(!r.ok){
+        var av = document.getElementById('aviso');
+        av.innerHTML = '<div class="nota reserva"><b>NO se pudo guardar.</b> ' + r.motivo
+          + '<br>La ficha no quedó registrada. Probá de nuevo.</div>';
+        /* Que la pantalla suba hasta el aviso: si queda abajo, la persona
+           no lo ve y se va creyendo que cargo al paciente. */
+        try{ av.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){}
+        return;
+      }
+      BASE.pacientes.push(nuevo);
+      seguirAlta(nuevo);
+    });
+    return;
+  }
   BASE.pacientes.push(nuevo);
   guardar('kine/pacientes/' + nuevo.id, nuevo);
+  seguirAlta(nuevo);
+}
+
+function seguirAlta(nuevo){
   /* Primeros dos asientos de la historia: el alta y el consentimiento.
      El consentimiento es un asiento propio porque la ley pide que conste
      de forma expresa y destacada, con fecha. */
