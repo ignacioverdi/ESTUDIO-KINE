@@ -699,6 +699,34 @@ function fbCrearCuentaPaciente(doc, nacimiento){
     });
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   RECUPERAR UNA FICHA HUERFANA
+
+   Dar de alta son dos pasos: crear la cuenta de acceso y guardar la
+   ficha. Si el primero sale bien y el segundo falla, queda una cuenta
+   sin ficha: el paciente no figura en el padron, y al intentar cargarlo
+   de nuevo el portal dice "ese documento ya esta cargado" y se corta.
+
+   Trabado para siempre, sin forma de arreglarlo desde ningun lado.
+
+   Esto busca el identificador de esa cuenta ya existente para poder
+   guardarle la ficha que le falta. Se entra con sus datos solo para
+   leer el identificador y NO se guarda esa sesion: la del kinesiologo
+   sigue intacta.
+   ══════════════════════════════════════════════════════════════════════ */
+function fbUidDePaciente(doc, nacimiento){
+  return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + FB_KEY, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email:correoDe(doc), password:claveDe(nacimiento),
+                            returnSecureToken:true})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.localId) return d.localId;       /* la sesion NO se guarda */
+      throw new Error('NO_COINCIDE');
+    });
+}
+
 /* Crea la cuenta al darse de alta. Devuelve el identificador. */
 function fbCrearPaciente(doc, nacimiento){
   return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FB_KEY, {
@@ -812,6 +840,7 @@ if(!FB_CONFIGURADO){
     window.fbPush = undefined;
     window.fbCrearPaciente = undefined;
     window.fbCrearCuentaPaciente = undefined;
+    window.fbUidDePaciente = undefined;
     window.fbGuardarYComprobar = undefined;
     window.fbEntrarPaciente = undefined;
   }catch(e){}

@@ -275,9 +275,15 @@ function enviar(){
   var repetido = null;
   BASE.pacientes.forEach(function(p){ if(p.doc === F.doc) repetido = p; });
   if(repetido){
-    av.innerHTML = '<div class="nota info">Ya estás en el sistema, ' + repetido.nombre.split(' ')[0]
-      + '. No hace falta que te des de alta de nuevo — '
-      + '<a href="index.html" style="color:var(--acc-texto)">entrá por acá</a>.</div>';
+    /* El mensaje cambia segun quien esta cargando: al paciente hay que
+       decirle que entre; al kinesiologo, donde encontrar la ficha. */
+    av.innerHTML = LOCARGA_EL_KINE
+      ? '<div class="nota aviso"><b>' + repetido.nombre + ' ya está en el padrón</b> '
+        + 'con ese documento. Buscalo ahí en vez de cargarlo de nuevo: si se carga dos veces, '
+        + 'queda con la historia clínica partida al medio.</div>'
+      : '<div class="nota info">Ya estás en el sistema, ' + repetido.nombre.split(' ')[0]
+        + '. No hace falta que te des de alta de nuevo — '
+        + '<a href="index.html" style="color:var(--acc-texto)">entrá por acá</a>.</div>';
     av.scrollIntoView({block:'center'});
     return;
   }
@@ -321,9 +327,30 @@ function enviar(){
       })
       .catch(function(e){
         if((e && e.message) === 'YA_EXISTE'){
+          /* La cuenta existe. Puede ser que ya esté todo bien, o que haya
+             quedado una cuenta sin ficha de un intento anterior que falló
+             a la mitad. Hay que averiguar cuál de las dos. */
           document.getElementById('aviso').innerHTML =
-            '<div class="nota aviso"><b>Ese documento ya está cargado.</b> '
-            + 'Buscalo en el padrón: ya existe una ficha con ese número.</div>';
+            '<div class="nota info">Ese documento ya tenía acceso. Revisando…</div>';
+          fbUidDePaciente(nuevo.doc, nuevo.nacimiento)
+            .then(function(uid){
+              var yaEsta = BASE.pacientes.some(function(p){ return p.id === uid; });
+              if(yaEsta){
+                document.getElementById('aviso').innerHTML =
+                  '<div class="nota aviso"><b>Ese paciente ya está en el padrón.</b> '
+                  + 'Buscalo por su documento.</div>';
+                return;
+              }
+              /* Ficha huérfana: se completa lo que faltaba. */
+              nuevo.id = uid;
+              terminarAlta(nuevo);
+            })
+            .catch(function(){
+              document.getElementById('aviso').innerHTML =
+                '<div class="nota reserva"><b>Ese documento ya tiene acceso, pero con otra '
+                + 'fecha de nacimiento.</b><br>Revisá la fecha. Si está bien, buscalo en el '
+                + 'padrón: puede estar cargado con otro nombre.</div>';
+            });
           return;
         }
         document.getElementById('aviso').innerHTML =

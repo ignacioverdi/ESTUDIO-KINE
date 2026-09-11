@@ -4,19 +4,20 @@ Manual completo. No hace falta leerlo entero: cada seccion es una tarea suelta. 
 %CAJA|Adentro del portal hay ayuda en cada pantalla. Arriba a la derecha de todas las pantallas hay un boton redondo con un signo de pregunta. Tocalo y te explica esa pantalla: para que sirve, como se usa paso a paso, y donde suele estar la trampa. Este manual es lo mismo, pero en papel y todo junto.
 ##Que hay adentro
 |Si querés...|Andá a la pagina
-|Entrar por primera vez|2
-|Saber que hace cada seccion del menu|2
-|Preparar el portal el primer dia|3
-|Sumar pacientes|4
-|Avisar turnos y atender: el dia a dia|6
-|Dar turnos y reservar un plan entero|8
-|Abrir una lesion y manejar las fases|9
-|Cargarle los ejercicios|11
-|La historia clinica y los estudios|12
-|Cobrar, los planes y los gastos|13
-|Saber que ve el paciente|14
-|Dibujar circuitos en la cancha|16
-|Una hoja para tener a mano|17
+|Entrar por primera vez|3
+|Saber que hace cada seccion del menu|3
+|Preparar el portal el primer dia|5
+|Sumar pacientes|6
+|Avisar turnos y atender: el dia a dia|8
+|Dar turnos y reservar un plan entero|10
+|Abrir una lesion y manejar las fases|11
+|Cargarle los ejercicios|13
+|La historia clinica y los estudios|14
+|Cobrar, los planes y los gastos|15
+|Saber que ve el paciente|16
+|Llevar el plantel y los partidos|18
+|Dibujar circuitos en la cancha|20
+|Una hoja para tener a mano|21
 @@ANCHOS 110 55
 @SALTO
 
@@ -35,6 +36,7 @@ Hay dos puertas distintas: una para vos y otra para los pacientes.
 |Historias|La historia clinica completa de cada uno, con sus estudios. Documento legal.
 |Programas|Cargar los ejercicios que hace en casa.
 |Caja|Ingresos, egresos, planes y sesiones que le quedan a cada uno.
+|Plantel|El plantel de la temporada, el calendario de partidos\ny los minutos de cada jugador.
 |Horarios|Cuando atendes. De ahi salen todos los turnos.
 |Mi perfil|Tu foto, tu logo, tu matricula, tu contraseña. Y el boton de vaciar.
 |Cartel|El cartel con el codigo QR para la recepcion.
@@ -48,7 +50,7 @@ Cuatro cosas, una sola vez. Despues no se vuelven a hacer.
 1|Borrar los pacientes de prueba|El portal viene con pacientes inventados para que se vea funcionando. En Mi perfil, abajo de todo, hay un boton para vaciar. Pide escribir la palabra VACIAR.
 %ROJO|Hacelo ANTES de cargar tu primer paciente de verdad. Si no, dentro de un mes no vas a saber cual es real y cual inventado, y en una historia clinica eso no se puede permitir. No se borran tus horarios, tu perfil, la biblioteca de ejercicios ni las plantillas de lesion: eso es la herramienta, no los datos.
 2|Cargar tus datos|En la misma pantalla de Mi perfil: tu nombre, tu matricula, tu foto y el logo del estudio. Cambia la contraseña de fabrica. El telefono es al que llegan los avisos de WhatsApp cuando alguien reserva turno.
-3|Cargar tus horarios|En Horarios. Ver la pagina 8.
+3|Cargar tus horarios|En Horarios. Ver la pagina 10.
 4|Imprimir el cartel|En Cartel, boton Imprimir. Pegalo donde entra la gente: es lo que hace que no tengas que cargar datos de pacientes nunca mas.
 @SALTO
 
@@ -223,6 +225,34 @@ Al lado de cada ejercicio tiene un boton de consultar, y lo que escribe queda pe
 Se completan despues de entrenar, no antes. Si se cargan antes, estan midiendo como amanecio, no como lo dejo el entrenamiento.
 @SALTO
 
+#El plantel y los partidos
+Para clubes: llevar los minutos de cada jugador y saber en que minuto se lesionan.
+##Primero, la temporada
+En Plantel. Le ponés nombre y elegís de qué club. Se hace una vez al año.
+##El plantel
+Sumás jugadores del padrón, hasta 30. No es una lista aparte: son los mismos pacientes que ya tenés cargados.
+%VERDE|Eso importa mas de lo que parece. Si un jugador se lesiona, su ficha ya esta ahi con toda su historia: no hay que cargarlo de nuevo ni cruzar dos listas que tarde o temprano dejan de coincidir.
+##El calendario
+En Los partidos cargas fecha, rival, si es de local o visitante y la competencia. Podes meter todo el año de una vez, y despues solo abris la planilla el dia que se juega.
+##Antes del partido: los citados
+Desde el proximo partido, boton "Elegir los citados". Tocas a los que van.
+##El dia del partido
+1|Tocá a los 11 titulares|En la lista de citados. Los demas quedan en el banco.
+2|Tocá Empezar|El reloj corre solo. Si cerras la pantalla o se apaga el celular, al volver sigue en el minuto correcto.
+3|Un cambio: dos toques|Boton Cambio, quien sale, quien entra. El minuto lo pone el reloj: vos no escribis nada.
+4|Una lesion: dos toques|Boton "Se lesionó", quien y donde. El minuto queda guardado sin preguntarlo.
+5|Al terminar|Boton "Terminar el partido". Los minutos de cada uno quedan asentados en su historia clinica.
+%AMBAR|Todo esto esta pensado para usarse parado, al costado de la cancha, con una mano y mirando el partido. Si cargar un cambio llevara mas de dos toques, no se cargaria, y a la semana el sistema estaria vacio.<br/><br/>Si el reloj se desfasa porque hubo demoras, el boton "Corregir minuto" lo acomoda. Y si te olvidaste de cargar un cambio, tocas al jugador en el banco y entra en el minuto actual.
+##Los minutos no se escriben
+Se calculan solos de las entradas y salidas, que es como funciona un partido. El que arranca y termina jugo 90; el que entro a los 65 jugo 25. Nadie hace esa cuenta.
+En la solapa Minutos ves la tabla de toda la temporada: partidos jugados, cuantos de titular, minutos totales y promedio por partido, ordenado de mas a menos.
+%VERDE|Sirve para ver quien esta al limite de carga antes de que se rompa, que es justo lo que un kinesiologo quiere saber.
+##En que minuto se lesionan
+Es el dato que casi ningun club tiene. No cuantas lesiones hubo, sino CUANDO aparecen dentro del partido.
+En la solapa Lesiones hay un grafico por tramos de 15 minutos.
+%AMBAR|Si se amontonan despues del minuto 70, el problema suele ser la condicion fisica y se puede trabajar. Si estan repartidas parejo, hay que buscar por otro lado. Con un numero total de lesiones eso no se ve.
+@SALTO
+
 #El pizarron de circuitos
 Para los trabajos de campo, en la cancha.
 Elegi la cancha (entera, media, espacio reducido o gimnasio), toca un elemento de la izquierda y despues toca la cancha para colocarlo. Con "Mover" arrastras lo que ya esta puesto.
@@ -253,6 +283,9 @@ Lo unico que hay que recordar todos los dias.
 |Cambiar las preguntas frecuentes|Mi perfil, abajo.
 |Que alguien no puede entrar|Pacientes, boton Corregir sus datos.
 |Borrar un paciente|Pacientes, abri su ficha, boton Borrar.
+|Cargar el calendario de partidos|Plantel, solapa Los partidos.
+|Llevar la planilla del partido|Plantel, Abrir la planilla.
+|Ver los minutos de cada jugador|Plantel, solapa Minutos.
 |Entender una pantalla|El boton con el signo de pregunta, arriba.
 @@ANCHOS 58 107
 ##Las cuatro cosas que no hay que olvidarse

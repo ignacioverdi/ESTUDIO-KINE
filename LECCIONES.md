@@ -40,8 +40,9 @@
 | Seis errores de la misma familia | Firebase devuelve las cosas distinto de como se guardan |
 | Los pacientes cargados a mano no podían entrar nunca | Solo se creaba cuenta a los que usaban el QR |
 | El paciente veía "Estás al día" teniendo lesión | La pantalla decidía antes de que llegaran los datos |
+| Una cuenta sin ficha dejaba al paciente trabado para siempre | El alta son dos pasos y no había forma de retomar el segundo |
 
-**Veintiocho errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Veintinueve errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---
