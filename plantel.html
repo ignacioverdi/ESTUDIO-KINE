@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Plantel · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/estudios.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/plantel.js"></script><script src="js/recordatorios.js"></script><script src="js/asistente.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
+</head>
+<style>
+  .tabla-min{width:100%;border-collapse:collapse;font-size:14px}
+  .tabla-min th{font-family:var(--dat);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--tinta3);text-align:right;padding:8px 6px;border-bottom:var(--borde) solid var(--linea)}
+  .tabla-min th:first-child{text-align:left}
+  .tabla-min td{padding:11px 6px;border-bottom:var(--borde) solid var(--linea);
+    text-align:right;font-family:var(--dat)}
+  .tabla-min td:first-child{text-align:left;font-family:var(--txt)}
+  .tabla-min tr:hover td{background:var(--sup2)}
+  .tabla-min .dest{color:var(--acc-texto);font-weight:600}
+  .barra{height:6px;border-radius:3px;background:var(--linea);overflow:hidden;margin-top:4px}
+  .barra i{display:block;height:100%;background:var(--acc)}
+  .tramos{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;align-items:end;height:110px}
+  .tramo{display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+  .tramo i{display:block;background:var(--rojo);border-radius:3px 3px 0 0;min-height:3px}
+  .tramo span{font-family:var(--dat);font-size:9.5px;color:var(--tinta3);text-align:center;
+    margin-top:5px;letter-spacing:.3px}
+  .tramo b{font-family:var(--dat);font-size:13px;text-align:center;color:var(--rojo)}
+</style>
+</head>
+<body data-pag="plantel">
+
+<div class="hoja" id="todo"></div>
+
+<script>
+var T = temporadaActiva();
+var solapa = 'plantel';
+
+function pintar(){
+  T = temporadaActiva();
+  if(!T){
+    document.getElementById('todo').innerHTML =
+      '<h1 class="tit">Plantel y partidos</h1>'
+      + '<p class="bajada">Para llevar los minutos de cada jugador, primero creá la temporada.</p>'
+      + '<div class="tarjeta">'
+      + '<label class="campo"><span class="eti">Nombre de la temporada</span>'
+      + '<input type="text" id="tNombre" value="Temporada ' + new Date(HOY).getFullYear() + '"></label>'
+      + '<label class="campo"><span class="eti">De qué club</span>'
+      + '<select id="tInst">' + instituciones().map(function(i){
+          return '<option>' + i.nombre + '</option>'; }).join('') + '</select></label>'
+      + '<button class="bt ancho" onclick="nuevaTemporada()">Crear la temporada</button></div>';
+    return;
+  }
+
+  var pls = partidos(T.id);
+  var jugados = pls.filter(function(p){ return p.estado === 'jugado'; });
+  var prox = proximoPartido(T.id);
+
+  document.getElementById('todo').innerHTML =
+    '<h1 class="tit">' + T.nombre + '</h1>'
+    + '<p class="bajada">' + T.institucion + ' · ' + planteDe(T).length + ' jugadores · '
+    + jugados.length + ' de ' + pls.length + ' partidos jugados</p>'
+
+    + (prox
+        ? '<div class="tarjeta" style="border-color:var(--acc-borde)">'
+          + '<div class="tarjeta-cab"><h2 class="sub">Próximo partido</h2>'
+          + '<span class="eti">' + fechaCorta(prox.fecha) + '</span></div>'
+          + '<p style="font-size:17px;margin-bottom:12px">'
+          + (prox.condicion === 'local' ? 'vs ' : 'en ') + '<b>' + prox.rival + '</b> · '
+          + lista(prox.citados).length + ' citados</p>'
+          + '<button class="bt ancho" onclick="irA(\'partido.html?p=' + prox.id + '\')">'
+          + 'Abrir la planilla</button>'
+          + '<button class="bt neutro ancho" style="margin-top:8px" onclick="abrirCitados(\'' + prox.id + '\')">'
+          + 'Elegir los citados</button></div>'
+        : '')
+
+    + '<div class="pestanias">'
+    + [['plantel','El plantel'],['fixture','Los partidos'],['minutos','Minutos'],['lesiones','Lesiones']]
+        .map(function(x){
+          return '<button class="pest' + (solapa === x[0] ? ' on' : '') + '" '
+               + 'onclick="solapa=\'' + x[0] + '\';pintar()">' + x[1] + '</button>';
+        }).join('') + '</div>'
+
+    + (solapa === 'plantel' ? verPlantel()
+     : solapa === 'fixture' ? verFixture()
+     : solapa === 'minutos' ? verMinutos()
+     : verLesiones());
+}
+
+/* ── EL PLANTEL ─────────────────────────────────────────────────── */
+function verPlantel(){
+  var dentro = planteDe(T);
+  var fuera = BASE.pacientes.filter(function(p){
+    return institucionDe(p) === T.institucion && lista(T.plantel).indexOf(p.id) < 0;
+  });
+  return '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">En el plantel</h2>'
+    + '<span class="eti">' + dentro.length + ' de 30</span></div>'
+    + (dentro.length
+        ? dentro.map(function(p){
+            return '<div class="fila" style="cursor:default">'
+              + '<span class="hh">' + (p.dorsal || '—') + '</span>'
+              + '<span class="cu"><b>' + p.nombre + '</b>'
+              + '<small>' + acumuladoDe(p.id, T.id).minutos + ' minutos en la temporada</small></span>'
+              + '<button class="bt neutro chico" onclick="sacarDelPlantel(\'' + p.id + '\')">Sacar</button>'
+              + '</div>';
+          }).join('')
+        : '<div class="vacio"><b>Todavía no hay nadie</b>Sumalos de la lista de abajo.</div>')
+    + '</div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Para sumar</h2>'
+    + '<span class="eti">' + T.institucion + '</span></div>'
+    + (fuera.length
+        ? fuera.map(function(p){
+            return '<button class="fila" onclick="sumarAlPlantel(\'' + p.id + '\')">'
+              + '<span class="hh">' + (p.dorsal || '—') + '</span>'
+              + '<span class="cu"><b>' + p.nombre + '</b></span>'
+              + '<span class="pin gris">sumar</span></button>';
+          }).join('')
+        : '<div class="vacio"><b>No hay más pacientes de ' + T.institucion + '</b>'
+          + 'Cargalos primero en Pacientes.</div>')
+    + '</div>';
+}
+
+function sumarAlPlantel(pid){
+  if(lista(T.plantel).length >= 30){ alert('El plantel ya tiene 30.'); return; }
+  T.plantel = lista(T.plantel).concat([pid]);
+  guardar('kine/temporadas/' + T.id + '/plantel', T.plantel);
+  pintar();
+}
+function sacarDelPlantel(pid){
+  T.plantel = lista(T.plantel).filter(function(x){ return x !== pid; });
+  guardar('kine/temporadas/' + T.id + '/plantel', T.plantel);
+  pintar();
+}
+
+/* ── LOS PARTIDOS ───────────────────────────────────────────────── */
+function verFixture(){
+  var pls = partidos(T.id);
+  return '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Calendario</h2>'
+    + '<span class="eti">' + pls.length + ' partidos</span></div>'
+    + (pls.length
+        ? pls.map(function(p){
+            return '<button class="fila" onclick="irA(\'partido.html?p=' + p.id + '\')">'
+              + '<span class="hh">' + fechaCorta(p.fecha) + '</span>'
+              + '<span class="cu"><b>' + (p.condicion === 'local' ? 'vs ' : 'en ') + p.rival + '</b>'
+              + '<small>' + p.competencia + ' · ' + lista(p.citados).length + ' citados</small></span>'
+              + '<span class="pin ' + (p.estado === 'jugado' ? 'atendido' : 'reservado') + '">'
+              + (p.estado === 'jugado' ? 'jugado' : 'pendiente') + '</span></button>';
+          }).join('')
+        : '<div class="vacio"><b>Sin partidos cargados</b>Agregá el primero abajo.</div>')
+    + '</div>'
+
+    + '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Agregar un partido</h2></div>'
+    + '<div class="rejilla c2">'
+    + '<label class="campo"><span class="eti">Fecha</span>'
+    + '<input type="date" id="pFecha"></label>'
+    + '<label class="campo"><span class="eti">Rival</span>'
+    + '<input type="text" id="pRival" placeholder="Nombre del rival"></label></div>'
+    + '<div class="rejilla c2">'
+    + '<label class="campo"><span class="eti">Dónde</span>'
+    + '<select id="pCond"><option value="local">De local</option>'
+    + '<option value="visitante">De visitante</option></select></label>'
+    + '<label class="campo"><span class="eti">Competencia</span>'
+    + '<input type="text" id="pComp" value="Liga"></label></div>'
+    + '<div id="avisoP"></div>'
+    + '<button class="bt ancho" onclick="agregarPartido()">Agregar</button>'
+    + '<p style="font-size:13px;color:var(--tinta3);margin-top:10px">'
+    + 'Podés cargar todo el calendario del año de una y después solo abrís la planilla el día '
+    + 'del partido.</p></div>';
+}
+
+function agregarPartido(){
+  var f = document.getElementById('pFecha').value;
+  var r = (document.getElementById('pRival').value || '').trim();
+  if(!f || !r){
+    document.getElementById('avisoP').innerHTML =
+      '<div class="nota aviso">Poné la fecha y el rival.</div>';
+    return;
+  }
+  crearPartido({temporada:T.id, fecha:f, rival:r,
+                condicion:document.getElementById('pCond').value,
+                competencia:document.getElementById('pComp').value});
+  pintar();
+}
+
+/* ── LOS CITADOS ────────────────────────────────────────────────── */
+function abrirCitados(id){
+  var P = partidoPorId(id);
+  if(!P) return;
+  var c = document.createElement('div');
+  c.className = 'ayuda-fondo'; c.id = 'cajaCit';
+  document.body.appendChild(c);
+  document.body.style.overflow = 'hidden';
+  c.addEventListener('click', function(e){ if(e.target === c) cerrarCitados(); });
+  pintarCitados(id);
+}
+
+function pintarCitados(id){
+  var P = partidoPorId(id);
+  document.getElementById('cajaCit').innerHTML = '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarCitados()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Citados</span><h2>' + (P.condicion === 'local' ? 'vs ' : 'en ') + P.rival + '</h2>'
+    + '<p>Tocá a los que van. ' + lista(P.citados).length + ' elegidos.</p>'
+    + planteDe(T).map(function(p){
+        var va = lista(P.citados).indexOf(p.id) >= 0;
+        return '<button class="fila' + (va ? '' : ' libre') + '" '
+          + 'onclick="tocarCitado(\'' + id + '\',\'' + p.id + '\')">'
+          + '<span class="hh">' + (p.dorsal || '—') + '</span>'
+          + '<span class="cu"><b>' + p.nombre + '</b></span>'
+          + '<span class="pin ' + (va ? 'atendido' : 'gris') + '">'
+          + (va ? 'va' : 'no') + '</span></button>';
+      }).join('')
+    + '<button class="bt ancho" style="margin-top:14px" onclick="cerrarCitados()">Listo</button></div>';
+}
+
+function tocarCitado(id, pid){
+  var P = partidoPorId(id);
+  var c = lista(P.citados);
+  P.citados = c.indexOf(pid) >= 0 ? c.filter(function(x){ return x !== pid; }) : c.concat([pid]);
+  guardar('kine/partidos/' + id + '/citados', P.citados);
+  pintarCitados(id);
+}
+
+function cerrarCitados(){
+  var c = document.getElementById('cajaCit');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+  pintar();
+}
+
+/* ── LOS MINUTOS ACUMULADOS ─────────────────────────────────────── */
+function verMinutos(){
+  var carga = cargaDelPlantel(T);
+  var tope = carga.length ? carga[0].a.minutos : 1;
+  if(!carga.length){
+    return '<div class="tarjeta"><div class="vacio"><b>Sin datos todavía</b>'
+      + 'Los minutos aparecen solos cuando cargues un partido.</div></div>';
+  }
+  return '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">Minutos de la temporada</h2>'
+    + '<span class="eti">de más a menos</span></div>'
+    + '<table class="tabla-min"><thead><tr>'
+    + '<th>Jugador</th><th>PJ</th><th>Tit</th><th>Min</th><th>Prom</th><th>Les</th>'
+    + '</tr></thead><tbody>'
+    + carga.map(function(x){
+        return '<tr><td><b>' + x.p.nombre + '</b>'
+          + '<div class="barra"><i style="width:' + Math.round(x.a.minutos * 100 / (tope || 1)) + '%"></i></div></td>'
+          + '<td>' + x.a.partidos + '</td>'
+          + '<td>' + x.a.titular + '</td>'
+          + '<td class="dest">' + x.a.minutos + '</td>'
+          + '<td>' + x.a.promedio + '</td>'
+          + '<td>' + (x.a.lesiones || '') + '</td></tr>';
+      }).join('')
+    + '</tbody></table>'
+    + '<p style="font-size:13px;color:var(--tinta3);margin-top:12px">'
+    + 'PJ: partidos jugados · Tit: de titular · Min: minutos totales · Prom: promedio por partido</p>'
+    + '</div>';
+}
+
+/* ── EN QUE MINUTO SE LESIONAN ──────────────────────────────────── */
+function verLesiones(){
+  var L = lesionesDeTemporada(T.id);
+  var tramos = lesionesPorTramo(T.id);
+  var tope = Math.max.apply(null, tramos.map(function(t){ return t.n; })) || 1;
+  return '<div class="tarjeta">'
+    + '<div class="tarjeta-cab"><h2 class="sub">En qué minuto se lesionan</h2>'
+    + '<span class="eti">' + L.length + ' en la temporada</span></div>'
+    + (L.length
+        ? '<div class="tramos">'
+          + tramos.map(function(t){
+              return '<div class="tramo"><b>' + (t.n || '') + '</b>'
+                + '<i style="height:' + Math.round(t.n * 100 / tope) + '%"></i>'
+                + '<span>' + t.de + '-' + t.a + "'" + '</span></div>';
+            }).join('')
+          + '</div>'
+          + '<p style="font-size:13px;color:var(--tinta2);margin-top:14px">'
+          + 'Si se amontonan en los últimos tramos, el problema suele ser la condición física '
+          + 'y se puede trabajar. Si están repartidas parejo, hay que buscar por otro lado.</p>'
+        : '<div class="vacio"><b>Ninguna lesión cargada</b>'
+          + 'Se cargan desde la planilla del partido, con un toque.</div>')
+    + '</div>'
+
+    + (L.length
+        ? '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">Una por una</h2></div>'
+          + L.map(function(x){
+              var j = paciente(x.pid);
+              return '<button class="fila" onclick="irA(\'partido.html?p=' + x.partido + '\')">'
+                + '<span class="hh">' + x.minuto + "'" + '</span>'
+                + '<span class="cu"><b>' + (j ? j.nombre : '—') + '</b>'
+                + '<small>' + x.zona + ' · ' + (x.condicion === 'local' ? 'vs ' : '')
+                + x.rival + ' · ' + fechaCorta(x.fecha) + '</small></span></button>';
+            }).join('') + '</div>'
+        : '');
+}
+
+function nuevaTemporada(){
+  crearTemporada(document.getElementById('tNombre').value,
+                 document.getElementById('tInst').value);
+  pintar();
+}
+
+pintar();
+</script>
+</body></html>

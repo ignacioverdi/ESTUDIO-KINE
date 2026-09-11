@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Partido · Estudio</title>
+<link rel="icon" href="img/icono-192.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estudio">
+<meta name="format-detection" content="telephone=no">
+<link rel="stylesheet" href="css/tema.css">
+<link rel="stylesheet" href="css/estudio.css">
+<script src="js/firebase.js" onerror="void 0"></script>
+<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/estudios.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/plantel.js"></script><script src="js/recordatorios.js"></script><script src="js/asistente.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
+</head>
+<style>
+  /* ── LA PLANILLA DEL PARTIDO ──────────────────────────────────
+     Todo grande: se usa parado, al costado de la cancha, con una mano. */
+  .reloj{position:sticky;top:0;z-index:40;background:var(--sup);
+    border-bottom:var(--borde) solid var(--linea);padding:14px 0 16px;margin-bottom:16px}
+  .reloj-n{font-family:var(--dat);font-size:52px;font-weight:700;line-height:1;
+    text-align:center;letter-spacing:-1px}
+  .reloj-e{text-align:center;font-family:var(--dat);font-size:11px;letter-spacing:1.6px;
+    text-transform:uppercase;color:var(--tinta3);margin-top:4px}
+  .reloj-bt{display:flex;gap:8px;margin-top:14px}
+  .reloj-bt .bt{flex:1;min-height:52px;font-size:15px}
+  .corriendo .reloj-n{color:var(--acc-texto)}
+
+  .jug{display:flex;align-items:center;gap:11px;padding:12px;border-radius:var(--r);
+    border:var(--borde) solid var(--linea);background:var(--sup2);margin-bottom:7px;
+    width:100%;text-align:left;color:inherit;font-family:inherit;cursor:pointer;min-height:60px}
+  .jug:hover{border-color:var(--acc)}
+  .jug.dentro{border-color:var(--verde);background:var(--verde-suave)}
+  .jug.lesionado{border-color:var(--rojo);background:var(--rojo-suave)}
+  .jug .d{width:38px;height:38px;border-radius:50%;background:var(--sup);flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;font-family:var(--dat);
+    font-size:15px;font-weight:700;border:var(--borde) solid var(--linea2)}
+  .jug.dentro .d{background:var(--verde);color:var(--sobre-verde);border-color:var(--verde)}
+  .jug .n{flex:1;min-width:0}
+  .jug .n b{display:block;font-size:15.5px}
+  .jug .n small{display:block;color:var(--tinta3);font-family:var(--dat);font-size:12px}
+  .jug .m{font-family:var(--dat);font-size:17px;font-weight:600;color:var(--acc-texto)}
+</style>
+</head>
+<body data-pag="partido">
+
+<div class="hoja" id="todo"></div>
+
+<script>
+/* Se busca DENTRO de pintar, no al cargar: los datos de la base llegan
+   despues y si se resuelve antes, queda en null para siempre y la
+   pantalla dice que no encontro el partido. Mismo error que ya nos paso
+   con la pantalla del paciente. */
+var ID_PARTIDO = new URLSearchParams(location.search).get('p');
+var P = null, T = null;
+
+/* El reloj. Corre solo: el minuto de cada cosa sale de acá y nadie lo
+   escribe. Se guarda cuándo arrancó, así si se cierra la pantalla o se
+   apaga el celular, al volver sigue en el minuto correcto. */
+var RELOJ = {corriendo:false, desde:null, acumulado:0};
+
+function minutoActual(){
+  var m = RELOJ.acumulado;
+  if(RELOJ.corriendo && RELOJ.desde) m += (Date.now() - RELOJ.desde) / 60000;
+  return Math.floor(m);
+}
+
+function guardarReloj(){
+  if(!P) return;
+  P.reloj = {corriendo:RELOJ.corriendo, desde:RELOJ.desde, acumulado:RELOJ.acumulado};
+  guardar('kine/partidos/' + P.id + '/reloj', P.reloj);
+}
+
+var _relojListo = false;
+function recuperarReloj(){
+  if(_relojListo) return;          /* una sola vez, o pisa lo que corre */
+  if(P && P.reloj){
+    _relojListo = true;
+    RELOJ.corriendo = P.reloj.corriendo;
+    RELOJ.desde = P.reloj.desde;
+    RELOJ.acumulado = P.reloj.acumulado || 0;
+  }
+}
+
+function arrancar(){
+  RELOJ.corriendo = true;
+  RELOJ.desde = Date.now();
+  guardarReloj();
+  pintar();
+}
+
+function parar(){
+  RELOJ.acumulado = minutoActual();
+  RELOJ.corriendo = false;
+  RELOJ.desde = null;
+  guardarReloj();
+  pintar();
+}
+
+function ajustarMinuto(){
+  var m = prompt('¿En qué minuto va el partido?', minutoActual());
+  if(m === null) return;
+  RELOJ.acumulado = Math.max(0, parseInt(m, 10) || 0);
+  RELOJ.desde = RELOJ.corriendo ? Date.now() : null;
+  guardarReloj();
+  pintar();
+}
+
+setInterval(function(){
+  if(RELOJ.corriendo){
+    var n = document.getElementById('relojN');
+    if(n) n.textContent = minutoActual() + "\u2032";
+  }
+}, 5000);
+
+
+function pintar(){
+  P = partidoPorId(ID_PARTIDO);
+  T = P ? (temporadas().filter(function(x){ return x.id === P.temporada; })[0]) : null;
+  if(P) recuperarReloj();
+
+  if(!P){
+    document.getElementById('todo').innerHTML =
+      '<div class="vacio"><b>No se encontró el partido</b>'
+      + '<a class="bt" href="plantel.html" style="text-decoration:none;display:inline-block">'
+      + 'Volver al plantel</a></div>';
+    return;
+  }
+
+  var dentro = lista(P.citados).filter(function(pid){ return enCancha(P, pid); });
+  var banco = lista(P.citados).filter(function(pid){
+    return !enCancha(P, pid) && !(P.minutos[pid] && P.minutos[pid].sale !== null
+           && P.minutos[pid].sale !== undefined);
+  });
+  var salieron = lista(P.citados).filter(function(pid){
+    return P.minutos[pid] && P.minutos[pid].sale !== null && P.minutos[pid].sale !== undefined;
+  });
+
+  document.getElementById('todo').innerHTML =
+
+    '<h1 class="tit">' + (P.condicion === 'local' ? 'vs ' : 'en ') + P.rival + '</h1>'
+    + '<p class="bajada">' + fechaLegible(P.fecha) + ' · ' + P.competencia + '</p>'
+
+    /* ── EL RELOJ ── */
+    + '<div class="reloj' + (RELOJ.corriendo ? ' corriendo' : '') + '">'
+    + '<div class="reloj-n" id="relojN">' + minutoActual() + "\u2032" + '</div>'
+    + '<div class="reloj-e">' + (RELOJ.corriendo ? 'corriendo' : 'detenido') + '</div>'
+    + '<div class="reloj-bt">'
+    + (RELOJ.corriendo
+        ? '<button class="bt neutro" onclick="parar()">Pausar</button>'
+        : '<button class="bt" onclick="arrancar()">' + (minutoActual() ? 'Seguir' : 'Empezar') + '</button>')
+    + '<button class="bt neutro" onclick="ajustarMinuto()">Corregir minuto</button>'
+    + '</div></div>'
+
+    /* ── LO QUE SE HACE DURANTE EL PARTIDO: DOS BOTONES ── */
+    + (dentro.length
+        ? '<div style="display:flex;gap:8px;margin-bottom:18px">'
+          + '<button class="bt" style="flex:1;min-height:56px" onclick="abrirCambio()">Cambio</button>'
+          + '<button class="bt neutro" style="flex:1;min-height:56px;border-color:var(--rojo-borde);'
+          + 'color:var(--rojo)" onclick="abrirLesion()">Se lesionó</button></div>'
+        : '')
+
+    + (!dentro.length && !salieron.length
+        ? '<div class="nota info">Elegí los titulares tocándolos en la lista de abajo. '
+          + 'Después tocá Empezar y el reloj corre solo.</div>'
+        : '')
+
+    + (dentro.length
+        ? '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">En cancha</h2>'
+          + '<span class="eti">' + dentro.length + '</span></div>'
+          + dentro.map(filaJugador).join('') + '</div>'
+        : '')
+
+    + (banco.length
+        ? '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">'
+          + (dentro.length ? 'En el banco' : 'Citados — tocá a los titulares') + '</h2>'
+          + '<span class="eti">' + banco.length + '</span></div>'
+          + banco.map(filaJugador).join('') + '</div>'
+        : '')
+
+    + (salieron.length
+        ? '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">Ya salieron</h2></div>'
+          + salieron.map(filaJugador).join('') + '</div>'
+        : '')
+
+    + (lista(P.lesiones).length
+        ? '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">Lesiones del partido</h2></div>'
+          + lista(P.lesiones).map(function(L){
+              var j = paciente(L.pid);
+              return '<div class="fila" style="cursor:default"><span class="hh">' + L.minuto + "\u2032" + '</span>'
+                + '<span class="cu"><b>' + (j ? j.nombre : '—') + '</b>'
+                + '<small>' + L.zona + (L.nota ? ' · ' + L.nota : '') + '</small></span></div>';
+            }).join('') + '</div>'
+        : '')
+
+    + '<button class="bt hueco ancho" onclick="cerrarPartido()">'
+    + (P.estado === 'jugado' ? 'Partido cerrado — reabrir' : 'Terminar el partido') + '</button>'
+    + '<a class="bt neutro ancho" href="plantel.html" style="text-decoration:none;'
+    + 'text-align:center;margin-top:8px">Volver al plantel</a>';
+}
+
+function filaJugador(pid){
+  var j = paciente(pid);
+  if(!j) return '';
+  var m = P.minutos[pid] || {};
+  var fuera = m.sale !== null && m.sale !== undefined;
+  var adentro = enCancha(P, pid);
+  var lesionado = lista(P.lesiones).some(function(L){ return L.pid === pid; });
+  return '<button class="jug' + (adentro ? ' dentro' : '') + (lesionado ? ' lesionado' : '') + '" '
+    + 'onclick="tocar(\'' + pid + '\')">'
+    + '<span class="d">' + (j.dorsal || j.nombre[0]) + '</span>'
+    + '<span class="n"><b>' + j.nombre + '</b><small>'
+    + (adentro ? (m.titular ? 'titular' : 'entró ' + m.entra + "\u2032")
+       : fuera ? 'salió ' + m.sale + "\u2032"
+       : 'en el banco')
+    + '</small></span>'
+    + '<span class="m">' + (adentro || fuera ? minutosEnPartido(P, pid) + "'" : '') + '</span>'
+    + '</button>';
+}
+
+/* Tocar a alguien: si no empezó el partido, lo pone o saca de titular.
+   Si el partido está en curso, lo hace entrar desde el banco. */
+function tocar(pid){
+  if(!P.minutos) P.minutos = {};
+  var m = P.minutos[pid];
+
+  if(minutoActual() === 0 && !RELOJ.corriendo){
+    /* Antes de empezar: marcar titulares tocándolos. */
+    if(m && m.titular){
+      delete P.minutos[pid];
+      guardar('kine/partidos/' + P.id + '/minutos/' + pid, null);
+    }else{
+      if(titulares(P).length >= 11){
+        alert('Ya hay 11 titulares. Tocá uno para sacarlo.');
+        return;
+      }
+      P.minutos[pid] = {titular:true, entra:0, sale:null};
+      guardar('kine/partidos/' + P.id + '/minutos/' + pid, P.minutos[pid]);
+    }
+    pintar();
+    return;
+  }
+
+  if(enCancha(P, pid)){
+    alert('Está en cancha. Usá el botón Cambio para sacarlo.');
+    return;
+  }
+  if(m && m.sale !== null && m.sale !== undefined){
+    alert('Ya salió del partido.');
+    return;
+  }
+  /* Entra desde el banco sin que salga nadie (sirve si faltó cargar el cambio). */
+  P.minutos[pid] = {titular:false, entra:minutoActual(), sale:null};
+  guardar('kine/partidos/' + P.id + '/minutos/' + pid, P.minutos[pid]);
+  pintar();
+}
+
+
+/* ── EL CAMBIO: dos toques ──────────────────────────────────────── */
+var CAMBIO = {sale:null};
+function abrirCambio(){
+  CAMBIO = {sale:null};
+  mostrar('Cambio', 'Minuto ' + minutoActual() + "\u2032",
+    '<p>¿Quién <b>sale</b>?</p>'
+    + lista(P.citados).filter(function(pid){ return enCancha(P, pid); })
+        .map(function(pid){
+          var j = paciente(pid);
+          return '<button class="jug" onclick="eligeSale(\'' + pid + '\')">'
+            + '<span class="d">' + (j.dorsal || j.nombre[0]) + '</span>'
+            + '<span class="n"><b>' + j.nombre + '</b></span></button>';
+        }).join(''));
+}
+
+function eligeSale(pid){
+  CAMBIO.sale = pid;
+  var libres = lista(P.citados).filter(function(x){
+    return !enCancha(P, x) && !(P.minutos[x] && P.minutos[x].sale !== null
+           && P.minutos[x].sale !== undefined);
+  });
+  mostrar('Cambio', 'Minuto ' + minutoActual() + "\u2032",
+    '<p>Sale <b>' + paciente(pid).nombre + '</b>. ¿Quién <b>entra</b>?</p>'
+    + (libres.length
+        ? libres.map(function(x){
+            var j = paciente(x);
+            return '<button class="jug" onclick="hacerCambio(\'' + x + '\')">'
+              + '<span class="d">' + (j.dorsal || j.nombre[0]) + '</span>'
+              + '<span class="n"><b>' + j.nombre + '</b></span></button>';
+          }).join('')
+        : '<div class="nota aviso">No queda nadie en el banco.</div>')
+    + '<button class="bt neutro ancho" style="margin-top:10px" onclick="soloSale()">'
+    + 'Solo sale, no entra nadie</button>');
+}
+
+function hacerCambio(entra){
+  var min = minutoActual();
+  P.minutos[CAMBIO.sale].sale = min;
+  guardar('kine/partidos/' + P.id + '/minutos/' + CAMBIO.sale, P.minutos[CAMBIO.sale]);
+  P.minutos[entra] = {titular:false, entra:min, sale:null};
+  guardar('kine/partidos/' + P.id + '/minutos/' + entra, P.minutos[entra]);
+  cerrarCartel();
+  pintar();
+}
+
+function soloSale(){
+  var min = minutoActual();
+  P.minutos[CAMBIO.sale].sale = min;
+  guardar('kine/partidos/' + P.id + '/minutos/' + CAMBIO.sale, P.minutos[CAMBIO.sale]);
+  cerrarCartel();
+  pintar();
+}
+
+
+/* ── LA LESION: el minuto sale del reloj ────────────────────────── */
+var LES = {pid:null, zona:null};
+function abrirLesion(){
+  LES = {pid:null, zona:null};
+  mostrar('Se lesionó', 'Minuto ' + minutoActual() + "\u2032",
+    '<p>¿Quién?</p>'
+    + lista(P.citados).filter(function(pid){ return enCancha(P, pid); })
+        .map(function(pid){
+          var j = paciente(pid);
+          return '<button class="jug" onclick="eligeLesionado(\'' + pid + '\')">'
+            + '<span class="d">' + (j.dorsal || j.nombre[0]) + '</span>'
+            + '<span class="n"><b>' + j.nombre + '</b></span></button>';
+        }).join(''));
+}
+
+function eligeLesionado(pid){
+  LES.pid = pid;
+  LES.minuto = minutoActual();
+  mostrar('Se lesionó', paciente(pid).nombre + ' · minuto ' + LES.minuto + "\u2032",
+    '<p>¿Dónde?</p>'
+    + '<div class="pestanias" id="lzona">'
+    + ['Tobillo','Rodilla','Muslo','Hombro','Lumbar','Otra'].map(function(z){
+        return '<button class="pest" onclick="LES.zona=\'' + z + '\';guardarLesionPartido()">'
+             + z + '</button>';
+      }).join('') + '</div>');
+}
+
+function guardarLesionPartido(){
+  if(!P.lesiones) P.lesiones = [];
+  var reg = {pid:LES.pid, minuto:LES.minuto, zona:LES.zona, nota:'', lesion_id:null};
+  P.lesiones.push(reg);
+  guardar('kine/partidos/' + P.id + '/lesiones', P.lesiones);
+
+  /* Queda asentado en su historia clínica: es un hecho médico con hora. */
+  if(typeof asentar === 'function'){
+    asentar(LES.pid, 'nota', 'Se lesionó durante el partido contra ' + P.rival
+      + ' (' + fechaLarga(P.fecha) + '), en el minuto ' + LES.minuto
+      + '. Zona: ' + LES.zona + '.');
+  }
+  cerrarCartel();
+  pintar();
+}
+
+
+/* ── TERMINAR ───────────────────────────────────────────────────── */
+function cerrarPartido(){
+  if(P.estado === 'jugado'){
+    P.estado = 'programado';
+    guardar('kine/partidos/' + P.id + '/estado', 'programado');
+    pintar();
+    return;
+  }
+  if(RELOJ.corriendo) parar();
+  P.estado = 'jugado';
+  P.duracion = Math.max(minutoActual(), P.duracion || 90);
+  guardar('kine/partidos/' + P.id + '/estado', 'jugado');
+  guardar('kine/partidos/' + P.id + '/duracion', P.duracion);
+
+  /* Los minutos quedan asentados en la historia de cada uno: es carga
+     de trabajo, y sirve para entender una lesión posterior. */
+  lista(P.citados).forEach(function(pid){
+    var m = minutosEnPartido(P, pid);
+    if(m > 0 && typeof asentar === 'function'){
+      asentar(pid, 'nota', 'Jugó ' + m + ' minutos contra ' + P.rival
+        + ' (' + fechaLarga(P.fecha) + ').');
+    }
+  });
+  pintar();
+}
+
+
+/* ── El cartel de siempre ───────────────────────────────────────── */
+function mostrar(eti, sub, html){
+  cerrarCartel();
+  var c = document.createElement('div');
+  c.className = 'ayuda-fondo'; c.id = 'cartelP';
+  c.innerHTML = '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarCartel()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">' + eti + '</span><h2>' + sub + '</h2>' + html + '</div>';
+  c.addEventListener('click', function(e){ if(e.target === c) cerrarCartel(); });
+  document.body.appendChild(c);
+  document.body.style.overflow = 'hidden';
+}
+function cerrarCartel(){
+  var c = document.getElementById('cartelP');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
+pintar();
+</script>
+</body></html>

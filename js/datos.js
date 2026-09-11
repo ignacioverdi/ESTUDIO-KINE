@@ -663,7 +663,8 @@ var CLAVE_LOCAL = 'estudio_datos';
 /* Lo que cambia con el uso. El resto (plantillas, planes, textos) es la
    herramienta y no hace falta guardarlo. */
 var RAMAS = ['pacientes', 'lesiones', 'disponibilidad', 'programas', 'agenda', 'horario',
-             'instituciones', 'faq', 'avisados', 'vaciado',
+             'instituciones', 'faq', 'avisados',
+             'temporadas', 'partidos', 'vaciado',
              'historia', 'accesos', 'caja', 'mensajes', 'adherencia', 'perfil',
              'ejercicios'];
 
@@ -708,7 +709,7 @@ function guardar(ruta, valor){
    ══════════════════════════════════════════════════════════════════════ */
 function sanearBase(){
   ['pacientes','lesiones','caja','accesos','instituciones','faq',
-   'ejercicios','mensajes','plantel'].forEach(function(r){
+   'ejercicios','mensajes','plantel','temporadas','partidos'].forEach(function(r){
     if(BASE[r] !== undefined) BASE[r] = lista(BASE[r]);
   });
 
@@ -749,6 +750,17 @@ function sanearBase(){
       });
     }
     BASE.agenda[f] = l.filter(Boolean).sort(function(a, b){ return a.h < b.h ? -1 : 1; });
+  });
+
+  /* Los partidos: cada uno con sus citados y sus lesiones. */
+  lista(BASE.partidos).forEach(function(P){
+    if(!P) return;
+    P.citados = lista(P.citados);
+    P.lesiones = lista(P.lesiones);
+  });
+  lista(BASE.temporadas).forEach(function(T){
+    if(!T) return;
+    T.plantel = lista(T.plantel);
   });
 
   /* Y las franjas horarias de cada dia de la semana. */

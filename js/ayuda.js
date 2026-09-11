@@ -69,6 +69,32 @@ var AYUDA = {
     ojo: 'No hace falta crear los meses: los turnos existen para cualquier fecha. Si cambiás el horario, la agenda de todos los días se recalcula sola, incluidos los meses que todavía no miraste.'
   },
 
+  plantel: {
+    titulo: 'El plantel y la temporada',
+    que_es: 'Los jugadores, el calendario de partidos y los minutos de cada uno.',
+    pasos: [
+      ['Armá el plantel', 'Sumás jugadores del padrón. Son los pacientes de ese club, no una lista aparte: si se lesiona, su ficha ya está.'],
+      ['Cargá todos los partidos del año', 'De una vez, en Los partidos. Después solo abrís la planilla el día que se juega.'],
+      ['Elegí los citados', 'Antes del partido, tocando a los que van.'],
+      ['Minutos', 'Se calculan solos de las entradas y salidas. Nadie los escribe.'],
+      ['Lesiones', 'El gráfico muestra en qué minuto se lesionan. Es el dato que casi ningún club tiene.']
+    ],
+    ojo: 'Si las lesiones se amontonan después del minuto 70, el problema suele ser la condición física y se puede trabajar. Si están repartidas parejo, hay que buscar por otro lado. Con un total de lesiones eso no se ve.'
+  },
+
+  partido: {
+    titulo: 'La planilla del partido',
+    que_es: 'Para usar al costado de la cancha, con una mano, mirando el partido.',
+    pasos: [
+      ['Antes de empezar', 'Tocá a los 11 titulares en la lista. Los demás quedan en el banco.'],
+      ['Tocá Empezar', 'El reloj corre solo. Si se cierra la pantalla o se apaga el celular, al volver sigue en el minuto correcto.'],
+      ['Un cambio', 'Botón Cambio: quién sale, quién entra. Dos toques. El minuto lo pone el reloj.'],
+      ['Una lesión', 'Botón Se lesionó: quién y dónde. El minuto queda guardado sin preguntarlo.'],
+      ['Al terminar', 'Tocá Terminar el partido. Los minutos de cada uno quedan asentados en su historia.']
+    ],
+    ojo: 'El minuto nunca se escribe: sale del reloj. Si el reloj se desfasó porque hubo demoras, el botón Corregir minuto lo acomoda. Y si te olvidaste de cargar un cambio, tocá al jugador en el banco y entra en el minuto actual.'
+  },
+
   agenda: {
     titulo: 'La agenda',
     que_es: 'El calendario del estudio. Los turnos existen para cualquier fecha, sin límite.',

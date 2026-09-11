@@ -27,6 +27,7 @@ var MENU = {
     {id:'historia',   t:'Historias',   ic:'▤', a:'historia.html'},
     {id:'programa',   t:'Programas',   ic:'≡', a:'programa.html'},
     {id:'caja',       t:'Caja',        ic:'◧', a:'caja.html'},
+    {id:'plantel',    t:'Plantel',     ic:'▩', a:'plantel.html'},
     {id:'configuracion', t:'Horarios',  ic:'◷', a:'configuracion.html'},
     {id:'perfil',     t:'Mi perfil',   ic:'◉', a:'perfil.html'},
     {id:'cartel',     t:'Cartel',      ic:'▧', a:'cartel.html'},
@@ -77,6 +78,8 @@ if(typeof exigirSesion === 'function'){
 
 function armarCabecera(){
   var pag = document.body.dataset.pag || '';
+  /* La planilla del partido es parte de Plantel: que el menu lo marque. */
+  if(pag === 'partido') pag = 'plantel';
   var q   = (typeof quienEntro === 'function') ? quienEntro() : null;
   var r   = q ? (q.tipo === 'kine' ? 'kine' : 'jugador') : rol();
   var items = MENU[r === 'kine' ? 'kine' : 'jugador'];

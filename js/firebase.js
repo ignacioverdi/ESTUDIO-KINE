@@ -902,7 +902,7 @@ function fbCargarTodo(){
    salen siempre como lista, sin huecos y en orden.
    ══════════════════════════════════════════════════════════════════════ */
 var RAMAS_LISTA = ['pacientes','lesiones','caja','accesos','instituciones',
-                   'faq','ejercicios','mensajes','plantel'];
+                   'faq','ejercicios','mensajes','plantel','temporadas','partidos'];
 
 function _fbNormalizar(rama, d){
   if(d === null || d === undefined) return d;
@@ -1000,7 +1000,8 @@ function _fbTraerRamas(ses){
   var ramas = esKine
     ? ['pacientes','lesiones','disponibilidad','programas','agenda','historia',
        'caja','mensajes','adherencia','wellness','estudios','perfil','horario',
-       'instituciones','faq','avisados','accesos','ejercicios']
+       'instituciones','faq','avisados','accesos','ejercicios',
+       'temporadas','partidos']
     : ['lesiones','programas','agenda','perfil','horario','instituciones','faq',
        'pacientes/' + uid, 'historia/' + uid, 'mensajes/' + uid,
        'adherencia/' + uid, 'wellness/' + uid, 'estudios/' + uid];
@@ -1146,6 +1147,8 @@ if(FB_CONFIGURADO){
       "sesiones":      { ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
                          ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
       "vaciado":       { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
+      "temporadas":    { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
+      "partidos":      { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
       "instituciones": { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
       "faq":           { ".read": "auth != null", ".write": "root.child('kine/roles/' + auth.uid).val() == 'kine'" },
       "avisados":      { ".read": "root.child('kine/roles/' + auth.uid).val() == 'kine'",
