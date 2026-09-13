@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css">
-<link rel="stylesheet" href="css/estudio.css">
-<script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script><script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-13-0903">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-13-0903">
+<script src="js/firebase.js?v=2026-09-13-0903" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-13-0903"></script><script src="js/plantillas.js?v=2026-09-13-0903"></script><script src="js/agenda.js?v=2026-09-13-0903"></script><script src="js/qr.js?v=2026-09-13-0903"></script><script src="js/historia.js?v=2026-09-13-0903"></script><script src="js/dinero.js?v=2026-09-13-0903"></script><script src="js/atender.js?v=2026-09-13-0903"></script><script src="js/mensajes.js?v=2026-09-13-0903"></script><script src="js/alertas.js?v=2026-09-13-0903"></script><script src="js/ayuda.js?v=2026-09-13-0903"></script><script src="js/acceso.js?v=2026-09-13-0903"></script><script src="js/base.js?v=2026-09-13-0903"></script>
 </head>
 <style>
   /* La entrada no lleva menu ni encabezado: todavia no sabemos quien es. */
@@ -82,8 +82,7 @@ function pintar(){
         ? '<p class="pie-entrada">¿Es tu primera vez en el estudio?<br>'
           + '<a href="alta.html">Cargá tus datos acá</a>, tarda dos minutos.</p>'
         : '<p class="pie-entrada">Si olvidaste la contraseña, se cambia desde Firebase.</p>')
-
-    + (esDemo() ? demo() : '');
+;
 
   ['pDoc','pNac','kMail','kClave'].forEach(function(id){
     var e = document.getElementById(id);
@@ -114,17 +113,7 @@ function formKine(){
     + '<button class="bt ancho" onclick="enviar()">Entrar al estudio</button>';
 }
 
-/* Con datos de prueba, las credenciales a la vista: si no, nadie puede
-   mirar el portal. Desaparece al vaciar los datos de demostracion. */
-function demo(){
-  var p = BASE.pacientes[0] || {};
-  return '<div class="nota aviso" style="margin-top:22px;text-align:left">'
-    + '<b>Datos de demostración.</b><br>'
-    + 'Paciente: documento <b>' + p.doc + '</b>, nacimiento <b>'
-    + (p.nacimiento || '').split('-').reverse().join('/') + '</b><br>'
-    + 'Kinesiólogo: <b>' + ((BASE.perfil || {}).email || 'vero@estudiokine.com')
-    + '</b>, contraseña <b>estudio</b></div>';
-}
+
 
 function elegir(p){ puerta = p; pintar(); }
 

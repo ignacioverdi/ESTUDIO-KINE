@@ -41,8 +41,12 @@
 | Los pacientes cargados a mano no podían entrar nunca | Solo se creaba cuenta a los que usaban el QR |
 | El paciente veía "Estás al día" teniendo lesión | La pantalla decidía antes de que llegaran los datos |
 | Una cuenta sin ficha dejaba al paciente trabado para siempre | El alta son dos pasos y no había forma de retomar el segundo |
+| Veía carteles y datos borrados hace días | La versión no cambiaba y su navegador usaba copias viejas |
+| `PUBLICAR.bat` dejó de funcionar | Lo edité desde Linux y perdió los saltos de línea de Windows |
+| El nombre del estudio no cambiaba al editarlo | Estaba escrito a mano en diecisiete lugares |
+| Las pruebas se apoyaban en los datos de ejemplo | Al sacarlos se rompieron todas; ahora se arman los suyos |
 
-**Veintinueve errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Treinta y un errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---
@@ -126,6 +130,15 @@ página y había que bajar hasta el fondo. Y tocar un turno para atender no hac�
 absolutamente nada, sin ningún aviso, porque los turnos de ejemplo se habían
 escrito antes de que existiera el padrón. Las dos cosas aparecieron el mismo día,
 tocando la aplicación en un iPhone simulado.
+
+**Lo que el otro ve no es lo que vos publicaste.**
+
+Estuve días arreglando cosas que del lado del kinesiólogo seguían rotas: su
+navegador usaba copias viejas porque el número de versión no cambiaba. Yo
+probaba en el sitio publicado y veía todo bien.
+
+Ahora `PUBLICAR.bat` pone la fecha y hora en cada archivo automáticamente, y
+el número de versión es un botón que descarta todo lo guardado.
 
 **Los datos llegan tarde, y hay que dibujar dos veces.**
 

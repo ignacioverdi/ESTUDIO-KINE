@@ -23,6 +23,7 @@ if errorlevel 1 (
 
 echo.
 echo  ── PREPARANDO ─────────────────────────────────────────────
+python version.py
 python auditar.py
 if %errorlevel% neq 0 (
   echo.

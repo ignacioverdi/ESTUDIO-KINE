@@ -71,6 +71,80 @@ def entrarComoKine(pg):
     pg.evaluate("guardarSesion({tipo:'kine', desde:HOY})")
 
 
+def irA(pg, pantalla, espera=1200):
+    """Navega y deja los datos de prueba cargados en esa pantalla.
+
+    Al cambiar de pantalla la memoria se vacía y los datos hay que
+    volver a ponerlos. Hacerlo a mano en cada bloque es garantía de
+    olvidarse en alguno.
+    """
+    pg.goto(pantalla)
+    pg.wait_for_timeout(espera)
+    cargarDatosDePrueba(pg)
+    pg.evaluate("if(typeof pintar === 'function') try{ pintar(); }catch(e){}")
+    pg.wait_for_timeout(400)
+
+
+def cargarDatosDePrueba(pg):
+    """Las pruebas se arman sus propios datos.
+
+    El portal ya no trae pacientes de ejemplo: arranca vacio porque esta
+    en uso real. Antes las pruebas se apoyaban en Marcela Rios y compania,
+    y al sacarlos se rompieron todas. Una prueba que depende de datos que
+    pueden desaparecer no prueba nada.
+    """
+    pg.evaluate("""
+      BASE.pacientes = [
+        {id:'P07', nombre:'Paciente Prueba', doc:'44987123', nacimiento:'2003-04-12',
+         tel:'1155550000', institucion:'Particulares', estado:'activo', plan:'p10',
+         creditos:5, alta:HOY, tipo:'particular', dorsal:7, objetivos:'Volver a correr'},
+        {id:'P12', nombre:'Segundo Prueba', doc:'33222111', nacimiento:'1990-06-01',
+         tel:'1155551111', institucion:'Boca Juniors', estado:'activo', plan:'club',
+         creditos:0, alta:HOY, tipo:'plantel', dorsal:12},
+        {id:'P32', nombre:'Tercero Prueba', doc:'22111000', nacimiento:'1988-02-02',
+         tel:'1155552222', institucion:'Particulares', estado:'pendiente', plan:'sesion',
+         creditos:0, alta:HOY, tipo:'particular'}];
+
+      BASE.lesiones = [
+        {id:'L1', pid:'P07', dorsal:7, zona:'Tobillo', lado:'derecho',
+         diagnostico:'Esguince', mecanismo:'Torsion', fecha:'2026-08-18',
+         cirugia:null, gravedad:2, fase:2, estado:'activa', alta:'2026-09-10',
+         criterios:[{t:'Sin dolor', ok:false}, {t:'Apoya bien', ok:false}],
+         sesiones:[{f:'2026-08-20', pre:5, post:3, tipo:'Tratamiento', nota:''},
+                   {f:'2026-08-22', pre:4, post:5, tipo:'Tratamiento', nota:''},
+                   {f:'2026-08-25', pre:5, post:6, tipo:'Tratamiento', nota:''}]},
+        {id:'L2', pid:'P12', dorsal:12, zona:'Hombro', lado:'derecho',
+         diagnostico:'Tendinopatia', mecanismo:'Sobrecarga', fecha:'2026-08-10',
+         cirugia:'2026-08-18', gravedad:2, fase:3, estado:'activa', alta:'2026-09-02',
+         criterios:[{t:'Rango completo', ok:false}],
+         sesiones:[{f:'2026-08-21', pre:4, post:2, tipo:'Gimnasio', nota:''}]}];
+
+      BASE.programas = {L1: {2: [
+        {n:'Movilidad de tobillo con banda', series:3, reps:'15', carga:'Banda verde',
+         nota:'Rodilla adelante', video:'https://youtu.be/x'},
+        {n:'Eversión con banda', series:3, reps:'12', carga:'Banda roja', nota:'', video:''}]}};
+
+      BASE.disponibilidad = {7:{estado:'baja', motivo:'tobillo', desde:'2026-08-18',
+                                hasta:'2026-09-10'}};
+
+      /* Turnos hoy y mañana: los recordatorios miran el proximo dia. */
+      BASE.agenda = {};
+      BASE.agenda[HOY] = [{h:'09:00', pid:'P07', dorsal:7, tipo:'Tratamiento', estado:'reservado'},
+                          {h:'10:00', pid:'P12', dorsal:12, tipo:'Gimnasio', estado:'reservado'}];
+      /* El proximo dia HABIL, no "mañana": si cae sabado el estudio no
+         atiende y el recordatorio no encuentra a nadie. */
+      var _f = sumarDias(HOY, 1), _v = 0;
+      while(!esDiaDeAtencion(_f) && _v < 10){ _f = sumarDias(_f, 1); _v++; }
+      BASE.agenda[_f] = [{h:'09:00', pid:'P07', dorsal:7,
+                          tipo:'Tratamiento', estado:'reservado'}];
+
+      BASE.adherencia = {P07: {}};
+      BASE.adherencia['P07'][sumarDias(HOY,-1)] = {hechos:{0:false, 1:false}, series:{}};
+
+      if(typeof sanearBase === 'function') sanearBase();
+    """)
+
+
 def entrarComoPaciente(pg, pid='P07'):
     pg.evaluate("guardarSesion({tipo:'paciente', pid:'%s', dorsal:7, desde:HOY})" % pid)
 
@@ -119,7 +193,7 @@ def main():
         pg = b.new_page(viewport={'width':390,'height':844}, has_touch=True, is_mobile=True)
         pg.goto(base + 'index.html'); pg.wait_for_timeout(700)
         entrarComoKine(pg)
-        pg.goto(base + 'panel.html'); pg.wait_for_timeout(1000)
+        irA(pg, base + 'panel.html', 1000)
         # No alcanza con que exista: tiene que verse SIN bajar la pagina.
         # Estuvo al final del documento y nadie se dio cuenta.
         y = pg.evaluate("(function(e){return e?Math.round(e.getBoundingClientRect().top):99999})"
@@ -171,7 +245,7 @@ def main():
             pg.on('pageerror', lambda x: e2.append(str(x)))
             pg.goto(base + 'index.html'); pg.wait_for_timeout(700)
             entrarComoKine(pg)
-            pg.goto(base + 'panel.html'); pg.wait_for_timeout(900)
+            irA(pg, base + 'panel.html', 900)
 
             pg.tap('.menu-bt'); pg.wait_for_timeout(350)
             abre = pg.evaluate("!!document.querySelector('#menuLista.abierto')")
@@ -206,7 +280,7 @@ def main():
         pg.evaluate("localStorage.clear()")      # arrancar limpio: el portal recuerda
         pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
         entrarComoPaciente(pg)
-        pg.goto(base + 'mi.html'); pg.wait_for_timeout(1000)
+        irA(pg, base + 'mi.html', 1000)
 
         pg.evaluate("consultar(1)"); pg.wait_for_timeout(500)
         cuerpo = pg.evaluate("(document.getElementById('cuerpoMsj')||{}).textContent||''")
@@ -223,7 +297,7 @@ def main():
                                "if(t.pid===miPid()&&t.confirmado)r=true;});});return r;})()")
 
         entrarComoKine(pg)
-        pg.goto(base + 'panel.html'); pg.wait_for_timeout(900)
+        irA(pg, base + 'panel.html', 900)
         # Con Firebase conectado, lo que recuerda es la base y no el
         # navegador: sin red no hay nada que comprobar acá.
         con_firebase = pg.evaluate("typeof FB_CONFIGURADO!=='undefined' && FB_CONFIGURADO")
@@ -265,14 +339,14 @@ def main():
         # Una lesion operada tiene DOS relojes: desde la cirugia y desde
         # que empezo a tratarse. Con uno solo no se ve la diferencia entre
         # alguien atrasado y alguien que recien empieza.
-        pg.goto(base + 'lesiones.html?f=L2'); pg.wait_for_timeout(800)
+        irA(pg, base + 'lesiones.html?f=L2', 800)
         txt = pg.evaluate("document.documentElement.textContent")
         dl = pg.evaluate("diasDeLesion(lesionPorId('L2'))")
         dr = pg.evaluate("diasDeRehab(lesionPorId('L2'))")
         dos = ('Días de rehabilitación' in txt) and (dl != dr)
         print('     dos relojes distintos        :', dos, '(%d y %d)' % (dl, dr))
 
-        pg.goto(base + 'pacientes.html'); pg.wait_for_timeout(800)
+        irA(pg, base + 'pacientes.html', 800)
         hay_boton = any('Nuevo paciente' in x for x in pg.evaluate(
             "Array.from(document.querySelectorAll('a.bt')).map(function(a){return a.textContent})"))
         hay_qr = pg.evaluate("!!document.querySelector('#qrChico svg')")
@@ -301,7 +375,7 @@ def main():
         pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
         # P31 es particular: no tiene dorsal ni lesion abierta
         pg.evaluate("guardarSesion({tipo:'paciente', pid:'P31', desde:HOY})")
-        pg.goto(base + 'mi.html'); pg.wait_for_timeout(900)
+        irA(pg, base + 'mi.html', 900)
         ajena = pg.evaluate("(typeof L !== 'undefined' && L) ? (L.pid !== miPid()) : false")
         sin_dorsal = pg.evaluate("miDorsal() === null")
         pid_ok = pg.evaluate("miPid()") == 'P31'
@@ -323,7 +397,7 @@ def main():
         pg.evaluate("localStorage.clear()")
         pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
         entrarComoKine(pg)
-        pg.goto(base + 'panel.html'); pg.wait_for_timeout(1100)
+        irA(pg, base + 'panel.html', 1100)
         hay_manana = 'Avisarles el turno' in pg.evaluate("document.documentElement.textContent")
         con_fecha = pg.evaluate(
             "(function(){var f=proximoDiaConTurnos(HOY);"
@@ -335,7 +409,7 @@ def main():
         # El asistente NO puede contestar nada clinico: un texto automatico
         # diciendo que un dolor es normal puede hacer daño de verdad.
         entrarComoPaciente(pg)
-        pg.goto(base + 'mi.html'); pg.wait_for_timeout(1000)
+        irA(pg, base + 'mi.html', 1000)
         clinicas = pg.evaluate(
             "['me duele','puedo entrenar','es normal esto']"
             ".every(function(f){ return pareceClinico(f); })")
@@ -365,7 +439,7 @@ def main():
         pg.evaluate("localStorage.clear()")
         pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
         entrarComoKine(pg)
-        pg.goto(base + 'pacientes.html'); pg.wait_for_timeout(1000)
+        irA(pg, base + 'pacientes.html', 1000)
         pg.evaluate("var n={};Object.keys(BASE.agenda).forEach(function(d){var o={};"
                     "(BASE.agenda[d]||[]).forEach(function(t,i){o[String(i)]=t;});n[d]=o;});"
                     "BASE.agenda=n;")
@@ -396,7 +470,7 @@ def main():
         pg.evaluate("localStorage.clear()")
         pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
         entrarComoKine(pg)
-        pg.goto(base + 'historia.html?p=P07'); pg.wait_for_timeout(900)
+        irA(pg, base + 'historia.html?p=P07', 900)
         pg.evaluate("BASE.historia = BASE.historia || {};"
                     "BASE.historia['P07'] = {};"
                     "[2,10,1,3].forEach(function(n){"
@@ -454,10 +528,12 @@ def main():
         pg.wait_for_timeout(700)
         entrarComoKine(pg)
 
-        pg.goto(base + 'panel.html'); pg.wait_for_timeout(700)
+        irA(pg, base + 'panel.html', 700)
         antes = pg.evaluate('BASE.lesiones[0].sesiones.length')
-        pg.goto(base + 'lesiones.html?f=L1'); pg.wait_for_timeout(700)
+        irA(pg, base + 'lesiones.html?f=L1', 700)
         try:
+            pg.evaluate("if(typeof abrir === 'function') abrir('L1')")
+            pg.wait_for_timeout(500)
             pg.get_by_role('button', name='Cargar sesión de hoy').click()
             pg.wait_for_timeout(500)
             abrio = pg.evaluate("!!document.getElementById('cajaSesion')")
@@ -467,9 +543,9 @@ def main():
         if not abrio:
             problemas.append('el boton de cargar sesion no abre nada')
 
-        pg.goto(base + 'pacientes.html'); pg.wait_for_timeout(700)
+        irA(pg, base + 'pacientes.html', 700)
         try:
-            pg.evaluate("abrir('P31')"); pg.wait_for_timeout(400)
+            pg.evaluate("abrir('P32')"); pg.wait_for_timeout(400)
             pg.get_by_role('button', name='Abrir una lesión').click()
             pg.wait_for_timeout(500)
             abrio2 = pg.evaluate("!!document.getElementById('cajaLesion')")

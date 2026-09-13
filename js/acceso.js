@@ -150,7 +150,11 @@ function entrarKine(usuario, clave){
   }
 
   var P = BASE.perfil || {};
-  var correo = (P.email || 'vero@estudiokine.com').toLowerCase();
+  /* Sin Firebase no hay a quien preguntarle: se compara contra el perfil.
+     Antes habia un correo inventado de respaldo, que dejaba una puerta
+     abierta que nadie sabia que existia. */
+  var correo = (P.email || '').toLowerCase();
+  if(!correo) return {ok:false, motivo:'Todavía no hay un correo cargado en el perfil.'};
   var esperada = P.clave || 'estudio';
 
   if(usuario !== correo || clave !== esperada){

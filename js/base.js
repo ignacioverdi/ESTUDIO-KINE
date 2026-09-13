@@ -16,7 +16,12 @@
    Se cambia aca y en estado.html, y tiene que coincidir con lo que se
    ve arriba a la derecha del portal.
    ══════════════════════════════════════════════════════════════════ */
-var VERSION_PORTAL = '2026-08-30-a';
+/* La versión se actualiza en CADA publicación, automáticamente: la pone
+   PUBLICAR.bat con la fecha y la hora. Antes se cambiaba a mano y nunca
+   me acordaba, así que el navegador de quien ya había entrado seguía
+   usando archivos viejos durante días: carteles que ya no existían,
+   pacientes de ejemplo ya borrados. */
+var VERSION_PORTAL = '2026-09-13-0903';
 
 var MENU = {
   kine: [
@@ -42,30 +47,18 @@ var MENU = {
   ]
 };
 
-/* Si el estudio ya vació la demostración, los datos inventados no se
-   vuelven a cargar nunca. Esto corre antes que cualquier pantalla.
+/* ══════════════════════════════════════════════════════════════════════
+   SE QUITO LA LIMPIEZA AUTOMATICA
 
-   Con la base conectada la marca llega DESPUES, así que se vuelve a
-   revisar cuando los datos bajan: sin eso, aparecían los inventados
-   por un segundo y encima se mezclaban con los reales. */
-function limpiarSiYaVacio(){
-  if(typeof esDemo === 'function' && !esDemo() && typeof BASE !== 'undefined'){
-    /* Se limpia la memoria, no la base: la base ya se vació una vez. */
-    BASE.pacientes = BASE.pacientes || [];
-    if(BASE.vaciado){
-      ['lesiones','caja','accesos'].forEach(function(r){
-        if(!Array.isArray(BASE[r])) BASE[r] = [];
-      });
-    }
-  }
-}
-/* Si ya se vacio, se limpia la memoria de este aparato y NADA MAS.
-   Antes esto llamaba al vaciado completo, que intentaba borrar ramas de
-   la base en cada carga de pantalla: fallaba siempre y tapaba con un
-   cartel rojo los avisos que si importaban. */
-if(typeof esDemo === 'function' && !esDemo() && typeof vaciarLocal === 'function'){
-  vaciarLocal();
-}
+   Existía para borrar los pacientes inventados de la memoria en cada
+   carga. Ya no hay ninguno: el portal arranca vacío y todo lo que hay
+   viene de la base.
+
+   Dejarla puesta era peor que inútil: vaciaba BASE en cada pantalla
+   antes de que llegaran los datos, y cualquier error de red dejaba la
+   pantalla en blanco en vez de mostrar lo último que se sabía.
+   ══════════════════════════════════════════════════════════════════════ */
+
 
 /* Puerta cerrada: si no entro, no ve. Corre antes que nada.
    No se lanza un error para cortar: eso queda registrado como falla y
@@ -76,6 +69,16 @@ if(typeof exigirSesion === 'function'){
   else if(typeof exigirKine === 'function') exigirKine();
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   EL CARTEL DE DEMOSTRACION SE QUITO
+
+   El portal traia pacientes inventados y un cartel amarillo avisando que
+   no eran reales. Cumplio su funcion mientras se armaba; ahora el
+   estudio tiene pacientes de verdad y el cartel solo molesta.
+
+   Se saco de raiz, junto con los datos. La funcion queda devolviendo
+   nada para no romper lo que la llamaba.
+   ══════════════════════════════════════════════════════════════════════ */
 function armarCabecera(){
   var pag = document.body.dataset.pag || '';
   /* La planilla del partido es parte de Plantel: que el menu lo marque. */
@@ -92,9 +95,13 @@ function armarCabecera(){
     '<div class="top-in">'
     + '<a class="marca" href="index.html"><span class="sig"></span>'
     + '<span><b>' + nombreDelEstudio() + '</b><span>' + bajadaDelEstudio() + '</span></span></a>'
-    + '<div class="quien"><a class="version" href="estado.html" '
-    + 'title="Versión ' + VERSION_PORTAL + ' — estado del portal">v'
-    + VERSION_PORTAL.slice(5) + '</a>'
+    + '<div class="quien">'
+    /* El número de versión es un botón: al tocarlo trae la última
+       versión. Es la forma de resolver "veo algo viejo" sin explicarle
+       atajos de teclado a nadie. */
+    + '<a class="version" href="#" onclick="forzarActualizar();return false" '
+    + 'title="Versión ' + VERSION_PORTAL + ' — tocá para traer la última versión">v'
+    + VERSION_PORTAL.slice(5, 10) + '</a>'
     + '<span class="av">' + quien.ini + '</span>' + quien.txt + '</div>'
     + '<div class="quien" style="margin-left:0">' + botonAyuda(pag) + '</div>'
     + '</div>';
@@ -146,17 +153,6 @@ function armarCabecera(){
   document.body.insertBefore(abajo, document.body.firstChild);
   document.body.insertBefore(nav, document.body.firstChild);
   document.body.insertBefore(top, document.body.firstChild);
-  if(typeof esDemo === 'function' && esDemo())
-    document.body.insertBefore(cartelDemo(), document.body.firstChild);
-}
-
-function cartelDemo(){
-  var d = document.createElement('div');
-  d.className = 'cartel-demo';
-  d.innerHTML = '<span><b>Datos de demostración.</b> Marcela Ríos, Diego Sosa y los demás '
-    + 'son inventados. Antes de cargar el primer paciente de verdad, vaciá todo.</span>'
-    + '<a href="perfil.html">Vaciar y empezar</a>';
-  return d;
 }
 
 function abrirMenu(){
@@ -237,6 +233,34 @@ if(!SIN_ENTRAR && llevaCabecera())
 
    Lo llama firebase.js en cuanto termina de traer todo.
    ══════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════
+   FORZAR LA VERSION NUEVA, SIN SABER ATAJOS
+
+   "Apretá Ctrl + Shift + R" no es una instruccion razonable para alguien
+   que solo quiere usar el portal, y en el celular directamente no existe.
+   El kinesiologo estuvo dias viendo carteles de datos de prueba que ya
+   no existian, sin forma de saber que estaba viendo algo viejo.
+
+   El numero de version de arriba es un boton: se toca y descarta todo lo
+   guardado.
+   ══════════════════════════════════════════════════════════════════════ */
+function forzarActualizar(){
+  try{
+    if(window.caches && caches.keys){
+      caches.keys().then(function(ns){ ns.forEach(function(n){ caches.delete(n); }); });
+    }
+    if(navigator.serviceWorker && navigator.serviceWorker.getRegistrations){
+      navigator.serviceWorker.getRegistrations().then(function(rs){
+        rs.forEach(function(r){ r.unregister(); });
+      });
+    }
+  }catch(e){}
+  /* Con la hora pegada, el navegador no puede usar ninguna copia vieja. */
+  setTimeout(function(){
+    location.href = location.pathname + '?nuevo=' + Date.now();
+  }, 300);
+}
+
 function refrescarCabecera(){
   if(SIN_ENTRAR || !llevaCabecera()) return;
   ['.top', '.nav', '.menu-movil'].forEach(function(sel){

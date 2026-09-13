@@ -19,7 +19,7 @@ var HOY = '2026-08-28';
 /* ══════════════════════════════════════════════════════════════════════
    MODO DEMOSTRACION
 
-   Todo lo que hay abajo es inventado: Marcela Ríos no existe.
+   Las listas arrancan vacías: el portal está en uso real.
    Sirve para mostrar el portal andando, pero es peligroso si se mezcla
    con pacientes de verdad: dentro de un mes nadie sabría cuál es cuál, y
    eso en una historia clínica no se puede permitir.
@@ -41,11 +41,23 @@ var HOY = '2026-08-28';
    Ahora la marca vive en la base, junto a los datos. Se vacia una vez y
    vale para todos los aparatos, siempre.
    ══════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════
+   YA NO HAY DATOS DE DEMOSTRACION
+
+   El portal traia pacientes inventados para que se viera funcionando
+   antes de usarlo, con un cartel amarillo avisando que no eran reales.
+   Ese cartel cumplio su funcion y ahora molesta: el estudio ya tiene
+   pacientes de verdad.
+
+   Se saco todo de raiz en vez de esconder el cartel. Un dato inventado
+   escondido es peor que uno a la vista: aparece cuando nadie lo espera.
+
+   Esta funcion queda devolviendo false para no romper lo que la llama.
+   ══════════════════════════════════════════════════════════════════════ */
 function esDemo(){
-  /* Con la base conectada manda la base. */
-  if(BASE && BASE.vaciado) return false;
-  try{ return localStorage.getItem('estudio_vaciado') !== 'si'; }catch(e){ return true; }
+  return false;
 }
+
 
 /* Deja el portal en cero: sin pacientes, sin lesiones, sin turnos
    ocupados, sin caja. Conserva el horario, las plantillas de lesión y la
@@ -176,104 +188,12 @@ var BASE = {
      estado: 'activo'    ya lo atendieron
              'pendiente' se dio de alta solo y el kine todavía no lo vio
      ──────────────────────────────────────────────────────────────── */
-  pacientes: [
-    {id:'P07', plan:'club', creditos:0, institucion:'Boca Juniors', tipo:'plantel', dorsal:7,  nombre:'Tomás Duarte',
-     nacimiento:'2003-04-12', doc:'44987123', tel:'11 5555 0107',
-     email:'tduarte@mail.com', estado:'activo', alta:'2026-08-11',
-     consentimiento:{aceptado:true, fecha:'2026-08-11'}},
-    {id:'P12', plan:'club', creditos:0, institucion:'Boca Juniors', tipo:'plantel', dorsal:12, nombre:'Nicolás Ibarra',
-     nacimiento:'2001-09-30', doc:'43112876', tel:'11 5555 0112',
-     email:'nibarra@mail.com', estado:'activo', alta:'2026-08-20',
-     consentimiento:{aceptado:true, fecha:'2026-08-20'}},
-    {id:'P15', plan:'club', creditos:0, institucion:'Beyond', tipo:'plantel', dorsal:15, nombre:'Julián Vera',
-     nacimiento:'2004-01-18', doc:'45330091', tel:'11 5555 0115',
-     email:'jvera@mail.com', estado:'activo', alta:'2026-08-24',
-     consentimiento:{aceptado:true, fecha:'2026-08-24'}},
-
-    {id:'P31', tipo:'particular', nombre:'Marcela Ríos',
-     nacimiento:'1988-06-05', doc:'33772109', tel:'11 4444 8890',
-     email:'mrios@mail.com', institucion:'Fénix', estado:'activo',
-     alta:'2026-08-19', motivo:'Dolor de hombro al nadar',
-     ocupacion:'Arquitecta', deporte:'Natación', frecuencia:'3 veces por semana',
-     antecedentes:'Cirugía de menisco izquierdo en 2019.',
-     objetivos:'Volver a nadar 2000 metros sin dolor.',
-     plan:'p10', creditos:6,
-     consentimiento:{aceptado:true, fecha:'2026-08-19'}},
-    {id:'P32', tipo:'particular', nombre:'Diego Sosa',
-     nacimiento:'1975-11-22', doc:'24551038', tel:'11 3333 7712',
-     email:'dsosa@mail.com', institucion:'Particulares', estado:'activo',
-     alta:'2026-08-22', motivo:'Lumbalgia por trabajo de oficina',
-     ocupacion:'Contador', deporte:'Ninguno', frecuencia:'Sedentario',
-     antecedentes:'Hernia de disco L4-L5 diagnosticada en 2021, sin cirugía.',
-     objetivos:'Trabajar ocho horas sentado sin dolor.',
-     plan:'sesion', creditos:0,
-     consentimiento:{aceptado:true, fecha:'2026-08-22'}},
-    {id:'P33', tipo:'particular', nombre:'Camila Ferreyra',
-     nacimiento:'2011-03-14', doc:'56920014', tel:'11 6666 2231',
-     email:'flia.ferreyra@mail.com', institucion:'Particulares', estado:'pendiente',
-     alta:'2026-08-28', motivo:'Esguince de rodilla jugando al hockey',
-     ocupacion:'Estudiante', deporte:'Hockey', frecuencia:'4 veces por semana',
-     antecedentes:'Sin antecedentes.', objetivos:'Volver a jugar el torneo de primavera.',
-     plan:'p10', creditos:9,
-     tutor:{nombre:'Laura Ferreyra', tel:'11 6666 2231', vinculo:'Madre'},
-     consentimiento:{aceptado:true, fecha:'2026-08-28'}}
-  ],
+  pacientes: [],
 
   /* Lo único que ve el cuerpo técnico. Sin diagnóstico: son datos de salud. */
-  disponibilidad: {
-    7:  {estado:'baja',     motivo:'tobillo', desde:'2026-08-11', hasta:'2026-09-15'},
-    12: {estado:'limitado', motivo:'hombro',  desde:'2026-08-20', hasta:'2026-09-02'},
-    15: {estado:'limitado', motivo:'lumbar',  desde:'2026-08-24', hasta:'2026-09-05'}
-  },
+  disponibilidad: {},
 
-  lesiones: [
-    { id:'L1', pid:'P07', dorsal:7, zona:'Tobillo', lado:'derecho',
-      diagnostico:'Esguince lateral grado II',
-      mecanismo:'Caída tras disputa aérea, apoyo sobre el pie de un rival.',
-      fecha:'2026-08-11', fase:2, estado:'activa', alta:'2026-09-15', kine:'',
-      criterios:[
-        {t:'Dolor en reposo por debajo de 2 sobre 10', ok:true},
-        {t:'Dorsiflexión igual a la del tobillo sano', ok:true},
-        {t:'Apoyo en un pie 30 segundos sin dolor', ok:false},
-        {t:'Fuerza de eversión al 80% del lado sano', ok:false}
-      ],
-      sesiones:[
-        {f:'2026-08-26', t:'Tratamiento', pre:3, post:2, nota:'Movilidad articular e isométricos de eversión. Tolera bien.'},
-        {f:'2026-08-24', t:'Tratamiento', pre:4, post:3, nota:'Bajó la inflamación. Sumamos carga en cadena cerrada.'},
-        {f:'2026-08-21', t:'Tratamiento', pre:4, post:4, nota:'Sigue con edema. Drenaje y descarga.'},
-        {f:'2026-08-12', t:'Evaluación',  pre:7, post:6, nota:'Esguince lateral grado II. Bota diez días.'}
-      ]},
-
-    { id:'L2', pid:'P12', dorsal:12, zona:'Hombro', lado:'derecho', cirugia:'2026-08-18',
-      diagnostico:'Tendinopatía del supraespinoso',
-      mecanismo:'Sobrecarga por volumen de lanzamiento en la pretemporada.',
-      fecha:'2026-08-20', fase:3, estado:'activa', alta:'2026-09-02', kine:'',
-      criterios:[
-        {t:'Dolor al lanzar por debajo de 3 sobre 10', ok:true},
-        {t:'Rotación externa sin déficit', ok:true},
-        {t:'Tolera 30 lanzamientos al 70%', ok:true},
-        {t:'Tolera una serie completa a máxima intensidad', ok:false}
-      ],
-      sesiones:[
-        {f:'2026-08-27', t:'Gimnasio',    pre:2, post:2, nota:'Excéntricos de manguito rotador. Sin dolor.'},
-        {f:'2026-08-25', t:'Tratamiento', pre:3, post:2, nota:'Liberación y trabajo escapular.'},
-        {f:'2026-08-21', t:'Evaluación',  pre:5, post:4, nota:'Tendinopatía. Se corta el lanzamiento una semana.'}
-      ]},
-
-    { id:'L3', pid:'P15', dorsal:15, zona:'Lumbar', lado:'—',
-      diagnostico:'Contractura paravertebral',
-      mecanismo:'Carga acumulada: tres partidos en ocho días.',
-      fecha:'2026-08-24', fase:4, estado:'activa', alta:'2026-09-05', kine:'',
-      criterios:[
-        {t:'Sin dolor en flexión completa', ok:true},
-        {t:'Trabajo de core sin compensar', ok:true},
-        {t:'Entrenamiento completo sin molestia', ok:false}
-      ],
-      sesiones:[
-        {f:'2026-08-27', t:'Campo',       pre:1, post:1, nota:'Entrenó parcial. Sin dolor.'},
-        {f:'2026-08-25', t:'Tratamiento', pre:4, post:2, nota:'Descontracturante y activación de glúteo.'}
-      ]}
-  ],
+  lesiones: [],
 
   /* ── DE DONDE VIENE CADA PACIENTE ──────────────────────────────────
      Reemplaza a la obra social, que no se usaba para nada. Con esto el
@@ -311,51 +231,13 @@ var BASE = {
   },
 
   /* Solo lo OCUPADO. Los horarios libres se calculan al momento. */
-  agenda: {
-    '2026-08-28':[
-      {h:'08:30', pid:'P07', dorsal:7,  tipo:'Tratamiento', estado:'atendido'},
-      {h:'09:00', pid:'P12', dorsal:12, tipo:'Gimnasio',    estado:'atendido'},
-      {h:'10:00', pid:'P15', dorsal:15, tipo:'Campo',       estado:'reservado'},
-      {h:'11:00', pid:'P07', dorsal:7,  tipo:'Tratamiento', estado:'reservado'}
-    ],
-    '2026-08-31':[
-      {h:'09:00', pid:'P12', dorsal:12, tipo:'Gimnasio', estado:'reservado'},
-      {h:'10:30', pid:'P15', dorsal:15, tipo:'Campo',    estado:'reservado'}
-    ],
-    '2026-09-02':[
-      {h:'09:30', pid:'P31', dorsal:null, tipo:'Tratamiento', estado:'reservado'}
-    ]
-  },
+  agenda: {},
 
   /* Programa domiciliario por lesión y por fase */
-  programas: {
-    'L1':{
-      2:[ {n:'Movilidad de tobillo con banda', series:3, reps:'15', carga:'Banda verde', nota:'Rodilla adelante sin despegar el talón.', video:'https://www.youtube.com/watch?v=IODxDxX7oi4'},
-          {n:'Eversión con banda',             series:3, reps:'12', carga:'Banda roja',  nota:'Volvé lento. Sin dolor.', video:'https://www.youtube.com/watch?v=IODxDxX7oi4'},
-          {n:'Elevación de talones sentado',   series:3, reps:'20', carga:'5 kg',        nota:'Subí en 2 segundos, bajá en 4.'},
-          {n:'Apoyo en un pie',                series:4, reps:'30 seg', carga:'Sin peso',nota:'Si te sale fácil, cerrá los ojos.', video:'https://www.youtube.com/watch?v=IODxDxX7oi4'} ],
-      3:[ {n:'Elevación de talones de pie',    series:4, reps:'12', carga:'20 kg', nota:'Apoyo completo.'},
-          {n:'Saltos en el lugar',             series:3, reps:'20', carga:'Peso corporal', nota:'Aterrizaje silencioso.'},
-          {n:'Escalera de coordinación',       series:6, reps:'1 pasada', carga:'—', nota:'Contacto corto, mirada al frente.'} ]
-    },
-    'L2':{
-      3:[ {n:'Rotación externa con banda',     series:4, reps:'12', carga:'Banda azul', nota:'Codo pegado al cuerpo.'},
-          {n:'Remo con banda',                 series:3, reps:'15', carga:'Banda verde', nota:'Junto los omóplatos.'},
-          {n:'Elevación en Y boca abajo',      series:3, reps:'10', carga:'1 kg', nota:'Sin subir el hombro a la oreja.'} ]
-    },
-    'L3':{
-      4:[ {n:'Puente de glúteo',               series:3, reps:'15', carga:'Peso corporal', nota:'Apretar arriba 2 segundos.'},
-          {n:'Plancha lateral',                series:3, reps:'30 seg', carga:'—', nota:'Cadera alineada.'},
-          {n:'Bird dog',                       series:3, reps:'10 por lado', carga:'—', nota:'Sin mover la pelvis.'} ]
-    }
-  },
+  programas: {},
 
   /* Los circuitos armados en el pizarrón */
-  ejercicios: [
-    { id:'C1', nombre:'Circuito de reintegro — 4 postas',
-      objetivo:'Tobillo · fase 4 · reintegro a la cancha',
-      zona:'Tobillo', fase:4, cancha:'media' }
-  ]
+  ejercicios: []
 };
 
 /* ── Quién está mirando ───────────────────────────────────────────────

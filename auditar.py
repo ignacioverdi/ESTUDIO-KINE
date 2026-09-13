@@ -161,6 +161,55 @@ def archivos_huerfanos():
             AVISO.append('%s no lo usa ninguna pantalla' % barras(f))
 
 
+def bat_con_saltos_mal():
+    """Los .bat de Windows necesitan saltos de linea de Windows.
+
+    Si se editan desde otro sistema quedan con saltos sueltos y Windows
+    deja de entender las lineas: tira "no se reconoce como un comando"
+    en cada una. Paso al editar PUBLICAR.bat con Python y el resultado
+    fue que no se pudo publicar.
+
+    Es invisible mirando el archivo: los caracteres son los mismos.
+    """
+    for f in sorted(glob.glob('*.bat')):
+        d = open(f, 'rb').read()
+        sueltos = d.replace(b'\r\n', b'').count(b'\n')
+        if sueltos:
+            ROTO.append('%s tiene %d saltos de linea sueltos. Windows no lo va a '
+                        'poder ejecutar: hay que guardarlo con saltos CRLF.'
+                        % (f, sueltos))
+
+
+def onclick_sin_funcion():
+    """Un boton que llama a una funcion que no existe no hace NADA.
+
+    No da error visible: el usuario toca y no pasa nada, y uno se vuelve
+    loco buscando. Paso con el boton de borrar un paciente y volvio a
+    pasar con el de actualizar.
+    """
+    definidas = set()
+    for p in glob.glob('js/*.js') + PANTALLAS:
+        if not os.path.exists(p):
+            continue
+        for m in re.findall(r'function\s+(\w+)\s*\(', leer(p)):
+            definidas.add(m)
+        for m in re.findall(r'(?:var|window\.)\s*(\w+)\s*=\s*function', leer(p)):
+            definidas.add(m)
+
+    nativas = {'alert', 'confirm', 'print', 'close', 'open', 'history', 'location',
+               'event', 'void', 'this', 'return', 'window', 'document'}
+    faltan = set()
+    for p in PANTALLAS + glob.glob('js/*.js'):
+        if not os.path.exists(p):
+            continue
+        for m in re.findall(r'onclick=\\?["\']([a-zA-Z_]\w*)\s*\(', leer(p)):
+            if m not in definidas and m not in nativas:
+                faltan.add(m)
+    if faltan:
+        ROTO.append('estos botones llaman a funciones que NO existen: %s. '
+                    'Al tocarlos no pasa nada.' % ', '.join(sorted(faltan)))
+
+
 def ramas_sin_regla():
     """Cada rama que el portal escribe tiene que estar en las reglas.
 
@@ -274,7 +323,7 @@ def lo_que_falta_hacer():
 def main():
     for f in [enlaces_rotos, archivos_que_pide_cada_pantalla, todas_cargan_lo_comun,
               cada_pantalla_tiene_ayuda, componentes_sin_color_propio, temas_completos,
-              archivos_huerfanos, sobras, ramas_sin_regla, config_de_vercel, secretos_a_la_vista, js_balanceado,
+              archivos_huerfanos, sobras, bat_con_saltos_mal, onclick_sin_funcion, ramas_sin_regla, config_de_vercel, secretos_a_la_vista, js_balanceado,
               lo_que_falta_hacer]:
         f()
 

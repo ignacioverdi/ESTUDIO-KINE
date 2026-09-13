@@ -11,13 +11,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css">
-<link rel="stylesheet" href="css/estudio.css">
-<script src="js/firebase.js" onerror="void 0"></script>
-<script src="js/datos.js"></script><script src="js/plantillas.js"></script><script src="js/agenda.js"></script>
-<script src="js/qr.js"></script><script src="js/historia.js"></script><script src="js/estudios.js"></script>
-<script src="js/dinero.js"></script><script src="js/atender.js"></script><script src="js/mensajes.js"></script><script src="js/alertas.js"></script><script src="js/plantel.js"></script><script src="js/recordatorios.js"></script><script src="js/asistente.js"></script>
-<script src="js/ayuda.js"></script><script src="js/acceso.js"></script><script src="js/base.js"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-13-0903">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-13-0903">
+<script src="js/firebase.js?v=2026-09-13-0903" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-13-0903"></script><script src="js/plantillas.js?v=2026-09-13-0903"></script><script src="js/agenda.js?v=2026-09-13-0903"></script>
+<script src="js/qr.js?v=2026-09-13-0903"></script><script src="js/historia.js?v=2026-09-13-0903"></script><script src="js/estudios.js?v=2026-09-13-0903"></script>
+<script src="js/dinero.js?v=2026-09-13-0903"></script><script src="js/atender.js?v=2026-09-13-0903"></script><script src="js/mensajes.js?v=2026-09-13-0903"></script><script src="js/alertas.js?v=2026-09-13-0903"></script><script src="js/plantel.js?v=2026-09-13-0903"></script><script src="js/recordatorios.js?v=2026-09-13-0903"></script><script src="js/asistente.js?v=2026-09-13-0903"></script>
+<script src="js/ayuda.js?v=2026-09-13-0903"></script><script src="js/acceso.js?v=2026-09-13-0903"></script><script src="js/base.js?v=2026-09-13-0903"></script>
 <style>
   .barras{display:flex;align-items:flex-end;gap:6px;height:120px;margin:10px 0 6px}
   .barras div{flex:1;border-radius:3px 3px 0 0;min-height:2px;position:relative}
@@ -72,31 +72,9 @@
 </div>
 <script>
 var tipoMov = 'egreso';
-/* Algunos movimientos de ejemplo, para que la pantalla tenga qué mostrar. */
-if(!movimientos().length){
-  [['2026-08-02','egreso','Alquiler del local',420000,'fijos'],
-   ['2026-08-03','ingreso','Plan de 10 — Marcela Ríos',150000,'planes'],
-   ['2026-08-05','egreso','Insumos: vendas y bandas',38000,'insumos'],
-   ['2026-08-08','ingreso','Sesión suelta — Diego Sosa',18000,'sesiones'],
-   ['2026-08-12','ingreso','Plan de 10 — Camila Ferreyra',150000,'planes'],
-   ['2026-08-14','egreso','Luz y gas',56000,'fijos'],
-   ['2026-08-19','ingreso','Sesión suelta — Diego Sosa',18000,'sesiones'],
-   ['2026-08-21','ingreso','Convenio con el club — agosto',380000,'club'],
-   ['2026-08-24','egreso','Camilla nueva',290000,'equipamiento'],
-   ['2026-08-26','ingreso','Sesión suelta — Diego Sosa',18000,'sesiones']
-  ].forEach(function(m){
-    movimientos().push({id:'M'+m[0]+m[3], fecha:m[0], tipo:m[1], concepto:m[2],
-                        monto:m[3], categoria:m[4], metodo:'efectivo', pid:null});
-  });
-  /* meses anteriores, solo para el gráfico */
-  [['2026-03',980000,640000],['2026-04',1120000,690000],['2026-05',1040000,720000],
-   ['2026-06',1260000,700000],['2026-07',1180000,760000]].forEach(function(m){
-    movimientos().push({id:'H'+m[0]+'i', fecha:m[0]+'-15', tipo:'ingreso',
-                        concepto:'Cierre de mes', monto:m[1], categoria:'historico'});
-    movimientos().push({id:'H'+m[0]+'e', fecha:m[0]+'-15', tipo:'egreso',
-                        concepto:'Cierre de mes', monto:m[2], categoria:'historico'});
-  });
-}
+/* La caja arranca vacía: los ingresos se anotan solos al atender y los
+   gastos los carga el kinesiólogo. Antes había movimientos de ejemplo
+   con nombres inventados, que quedaban mezclados con la plata real. */
 document.querySelectorAll('#tipoMov .pest').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('#tipoMov .pest').forEach(function(x){ x.classList.remove('on'); });
