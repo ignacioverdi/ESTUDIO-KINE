@@ -174,6 +174,7 @@ var AYUDA = {
       ['Abrí una ficha', 'Tocá el paciente y desde ahí le abrís una lesión o le das turno.'],
       ['Los contadores de arriba', 'Uno por institución: cuántos pacientes te manda cada una. Tocá uno para ver solo esos, y tocalo de nuevo para volver a todos.'],
       ['Borrar a alguien', 'Desde su ficha, botón Borrar. Si recién lo cargaste, se borra confirmando y listo. Si ya tiene historia, lesiones o turnos, te pide escribir BORRAR: ahí sí hay algo que perder. La caja nunca se toca.'],
+      ['Cargarle la foto', 'Desde su ficha, botón Corregir sus datos: arriba de todo. Sirve para reconocerlo cuando llega. Se achica sola, no importa que la foto pese.'],
       ['Si alguien no puede entrar', 'Casi siempre es que se equivocó al cargar su documento o su fecha de nacimiento. Con "Corregir sus datos" lo arreglás y ya puede entrar.'],
       ['Abrir una lesión', 'Elegís zona, lado y gravedad. Los criterios de cada fase y la fecha estimada de alta se completan solos.']
     ],

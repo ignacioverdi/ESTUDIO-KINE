@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css?v=2026-09-13-0903">
-<link rel="stylesheet" href="css/estudio.css?v=2026-09-13-0903">
-<script src="js/firebase.js?v=2026-09-13-0903" onerror="void 0"></script>
-<script src="js/datos.js?v=2026-09-13-0903"></script><script src="js/plantillas.js?v=2026-09-13-0903"></script><script src="js/qr.js?v=2026-09-13-0903"></script><script src="js/historia.js?v=2026-09-13-0903"></script><script src="js/dinero.js?v=2026-09-13-0903"></script><script src="js/atender.js?v=2026-09-13-0903"></script><script src="js/acceso.js?v=2026-09-13-0903"></script><script src="js/ayuda.js?v=2026-09-13-0903"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-13-1824">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-13-1824">
+<script src="js/firebase.js?v=2026-09-13-1824" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-13-1824"></script><script src="js/plantillas.js?v=2026-09-13-1824"></script><script src="js/qr.js?v=2026-09-13-1824"></script><script src="js/historia.js?v=2026-09-13-1824"></script><script src="js/dinero.js?v=2026-09-13-1824"></script><script src="js/atender.js?v=2026-09-13-1824"></script><script src="js/acceso.js?v=2026-09-13-1824"></script><script src="js/ayuda.js?v=2026-09-13-1824"></script>
 </head>
 <body data-pag="alta">
 <!-- PANTALLA PUBLICA — no lleva base.js a propósito: es pública. El que entra
@@ -230,23 +230,11 @@ function leer(id){ var e = document.getElementById(id); return e ? (e.value || '
 /* La foto se achica a 300 píxeles antes de guardarse. Una foto de
    celular pesa cuatro megas; así pesa treinta kilos. */
 function subirFoto(input){
-  var f = input.files && input.files[0];
-  if(!f) return;
-  var lector = new FileReader();
-  lector.onload = function(ev){
-    var img = new Image();
-    img.onload = function(){
-      var esc = Math.min(1, 300 / Math.max(img.width, img.height));
-      var c = document.createElement('canvas');
-      c.width = Math.round(img.width * esc);
-      c.height = Math.round(img.height * esc);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      F.foto = c.toDataURL('image/jpeg', 0.8);
-      pintar();
-    };
-    img.src = ev.target.result;
-  };
-  lector.readAsDataURL(f);
+  prepararFoto(input.files && input.files[0], function(dato, motivo){
+    if(!dato) return;
+    F.foto = dato;
+    pintar();
+  });
 }
 function enviar(){
   var av = document.getElementById('aviso'), falta = [];

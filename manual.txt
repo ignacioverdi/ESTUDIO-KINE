@@ -72,6 +72,10 @@ Si recien lo cargaste y no tiene nada, se borra confirmando y listo. Si ya tiene
 Se lleva su ficha, su historia clinica, sus lesiones y libera sus turnos futuros.
 %AMBAR|La caja NO se toca. Si esa persona pago, ese ingreso queda en la contabilidad: borrar a alguien no puede hacer desaparecer plata que entro.
 Para borrar TODOS de una (por ejemplo, despues de probar el portal), esta el boton de Mi perfil, abajo de todo.
+##Cargarle la foto a alguien ya cargado
+Desde su ficha en Pacientes, boton "Corregir sus datos". La foto esta arriba de todo.
+Sirve para reconocerlo cuando llega, sobre todo si son muchos. Se achica sola: no importa que la foto del celular pese diez megas, queda en unos veinte kilos.
+Tambien se puede quitar desde ahi.
 ##Si un paciente no puede entrar
 Es el problema mas comun y tiene una sola causa: se equivoco al cargar su documento o su fecha de nacimiento, que es con lo que entra.
 %ROJO|El portal le dice "no encontramos a nadie con esos datos", sin aclarar cual de los dos esta mal. Eso es a proposito: si dijera "ese documento no esta", cualquiera podria averiguar quien es paciente del estudio probando documentos. Pero significa que el paciente no puede resolverlo solo. Lo resolves vos: en Pacientes, abris su ficha y tocas "Corregir sus datos". Ahi cambias el documento o la fecha, y ya puede entrar. La correccion queda asentada en su historia clinica.
@@ -283,6 +287,7 @@ Lo unico que hay que recordar todos los dias.
 |Cambiar las preguntas frecuentes|Mi perfil, abajo.
 |Que alguien no puede entrar|Pacientes, boton Corregir sus datos.
 |Borrar un paciente|Pacientes, abri su ficha, boton Borrar.
+|Cargarle la foto a un paciente|Pacientes, su ficha, Corregir sus datos.
 |Cargar el calendario de partidos|Plantel, solapa Los partidos.
 |Llevar la planilla del partido|Plantel, Abrir la planilla.
 |Ver los minutos de cada jugador|Plantel, solapa Minutos.

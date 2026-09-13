@@ -565,6 +565,43 @@ function tituloDelCartel(){
   return n || e || 'Centro de Kinesiología';
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   ACHICAR UNA FOTO ANTES DE GUARDARLA
+
+   Una foto de celular pesa entre 3 y 12 megas. Guardar eso en la base
+   por cada paciente la vuelve lenta y cara, y cada vez que alguien abre
+   el padron se baja todas.
+
+   Se achica a 300 pixeles, que es de sobra para reconocer una cara en
+   una lista, y queda en unos 20 kilos. Sesenta veces menos.
+
+   Estaba escrita solo adentro del alta, asi que la foto se podia cargar
+   una sola vez en la vida del paciente y despues no habia forma. Aca
+   queda disponible para todas las pantallas.
+   ══════════════════════════════════════════════════════════════════════ */
+function prepararFoto(archivo, listo){
+  if(!archivo) return listo(null, 'No se eligió ninguna foto.');
+  if(!/^image\//.test(archivo.type)){
+    return listo(null, 'Eso no es una imagen. Sacá una foto o elegí una de la galería.');
+  }
+  var lector = new FileReader();
+  lector.onload = function(ev){
+    var img = new Image();
+    img.onload = function(){
+      var esc = Math.min(1, 300 / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width * esc);
+      c.height = Math.round(img.height * esc);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      listo(c.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = function(){ listo(null, 'No se pudo leer esa imagen.'); };
+    img.src = ev.target.result;
+  };
+  lector.onerror = function(){ listo(null, 'No se pudo leer el archivo.'); };
+  lector.readAsDataURL(archivo);
+}
+
 function programaDe(L){
   if(!L) return [];
   var p = BASE.programas ? BASE.programas[L.id] : null;

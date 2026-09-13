@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css?v=2026-09-13-0903">
-<link rel="stylesheet" href="css/estudio.css?v=2026-09-13-0903">
-<script src="js/firebase.js?v=2026-09-13-0903" onerror="void 0"></script>
-<script src="js/datos.js?v=2026-09-13-0903"></script><script src="js/plantillas.js?v=2026-09-13-0903"></script><script src="js/agenda.js?v=2026-09-13-0903"></script><script src="js/qr.js?v=2026-09-13-0903"></script><script src="js/historia.js?v=2026-09-13-0903"></script><script src="js/estudios.js?v=2026-09-13-0903"></script><script src="js/dinero.js?v=2026-09-13-0903"></script><script src="js/atender.js?v=2026-09-13-0903"></script><script src="js/mensajes.js?v=2026-09-13-0903"></script><script src="js/alertas.js?v=2026-09-13-0903"></script><script src="js/plantel.js?v=2026-09-13-0903"></script><script src="js/recordatorios.js?v=2026-09-13-0903"></script><script src="js/asistente.js?v=2026-09-13-0903"></script><script src="js/ayuda.js?v=2026-09-13-0903"></script><script src="js/acceso.js?v=2026-09-13-0903"></script><script src="js/base.js?v=2026-09-13-0903"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-13-1824">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-13-1824">
+<script src="js/firebase.js?v=2026-09-13-1824" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-13-1824"></script><script src="js/plantillas.js?v=2026-09-13-1824"></script><script src="js/agenda.js?v=2026-09-13-1824"></script><script src="js/qr.js?v=2026-09-13-1824"></script><script src="js/historia.js?v=2026-09-13-1824"></script><script src="js/estudios.js?v=2026-09-13-1824"></script><script src="js/dinero.js?v=2026-09-13-1824"></script><script src="js/atender.js?v=2026-09-13-1824"></script><script src="js/mensajes.js?v=2026-09-13-1824"></script><script src="js/alertas.js?v=2026-09-13-1824"></script><script src="js/plantel.js?v=2026-09-13-1824"></script><script src="js/recordatorios.js?v=2026-09-13-1824"></script><script src="js/asistente.js?v=2026-09-13-1824"></script><script src="js/ayuda.js?v=2026-09-13-1824"></script><script src="js/acceso.js?v=2026-09-13-1824"></script><script src="js/base.js?v=2026-09-13-1824"></script>
 </head>
 <body data-pag="pacientes">
 <div class="hoja">
@@ -503,6 +503,7 @@ function confirmarBorrado(pid){
 function corregirDatos(pid){
   var p = paciente(pid);
   if(!p) return;
+  FOTO_NUEVA = null;
   var caja = document.createElement('div');
   caja.className = 'ayuda-fondo'; caja.id = 'cajaCorregir';
   caja.innerHTML = '<div class="ayuda-caja">'
@@ -512,6 +513,26 @@ function corregirDatos(pid){
     + '<div class="nota info">Con <b>el documento y la fecha de nacimiento</b> es con lo que '
     + 'el paciente entra al portal. Si se equivocó al cargarlos, no va a poder entrar y no va '
     + 'a entender por qué. Acá se arregla.</div>'
+
+    /* La foto, arriba de todo: es lo primero que se busca cuando uno
+       abre "corregir". Antes solo se podia cargar al darse de alta, y
+       despues no habia ninguna forma de agregarla. */
+    + '<div style="display:flex;gap:14px;align-items:center;margin-bottom:18px">'
+    + '<span id="cFotoVer" style="width:78px;height:78px;border-radius:50%;flex:0 0 auto;'
+    + 'background:var(--sup2);border:var(--borde) dashed var(--linea2);display:flex;'
+    + 'align-items:center;justify-content:center;overflow:hidden;font-family:var(--dat);'
+    + 'font-size:10px;color:var(--tinta3);text-align:center">'
+    + (p.foto ? '<img src="' + p.foto + '" style="width:100%;height:100%;object-fit:cover">'
+              : 'SIN<br>FOTO') + '</span>'
+    + '<span style="flex:1">'
+    + '<input type="file" id="cFoto" accept="image/*" style="display:none" '
+    + 'onchange="cambiarFoto(this)">'
+    + '<button class="bt hueco chico" onclick="document.getElementById(\'cFoto\').click()">'
+    + (p.foto ? 'Cambiar la foto' : 'Sacar o elegir una foto') + '</button>'
+    + (p.foto ? '<button class="bt neutro chico" style="margin-left:6px" '
+                + 'onclick="quitarFoto()">Quitar</button>' : '')
+    + '<small style="display:block;color:var(--tinta3);font-size:12.5px;margin-top:6px">'
+    + 'Sirve para reconocerlo cuando llega. Se achica sola.</small></span></div>'
 
     + '<label class="campo"><span class="eti">Nombre y apellido</span>'
     + '<input type="text" id="cNombre" value="' + (p.nombre || '').replace(/"/g,'&quot;') + '"></label>'
@@ -535,7 +556,32 @@ function corregirDatos(pid){
   document.body.style.overflow = 'hidden';
 }
 
+var FOTO_NUEVA = null;      /* null = no se tocó; '' = se quitó */
+
+function cambiarFoto(input){
+  var av = document.getElementById('avisoCorregir');
+  av.innerHTML = '<div class="nota info">Preparando la foto…</div>';
+  prepararFoto(input.files && input.files[0], function(dato, motivo){
+    if(!dato){
+      av.innerHTML = '<div class="nota reserva">' + motivo + '</div>';
+      return;
+    }
+    av.innerHTML = '<div class="nota bien">Foto lista. Tocá Guardar para que quede.</div>';
+    FOTO_NUEVA = dato;
+    document.getElementById('cFotoVer').innerHTML =
+      '<img src="' + dato + '" style="width:100%;height:100%;object-fit:cover">';
+  });
+}
+
+function quitarFoto(){
+  FOTO_NUEVA = '';
+  document.getElementById('cFotoVer').innerHTML = 'SIN<br>FOTO';
+  document.getElementById('avisoCorregir').innerHTML =
+    '<div class="nota aviso">Se va a quitar la foto. Tocá Guardar.</div>';
+}
+
 function cerrarCorregir(){
+  FOTO_NUEVA = null;
   var c = document.getElementById('cajaCorregir');
   if(c) c.remove();
   document.body.style.overflow = '';
@@ -570,6 +616,10 @@ function guardarCorreccion(pid){
   }
 
   var cambios = [];
+  if(FOTO_NUEVA !== null){
+    p.foto = FOTO_NUEVA || null;
+    cambios.push(FOTO_NUEVA ? 'se cargó una foto' : 'se quitó la foto');
+  }
   ['nombre','doc','nacimiento','tel','email'].forEach(function(k){
     var antes = p[k] || '';
     if(String(antes) !== String(nuevo[k])){
