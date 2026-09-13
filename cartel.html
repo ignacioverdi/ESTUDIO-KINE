@@ -76,9 +76,9 @@ var URL_ALTA = enlaceAlta();
    una sola vez al arrancar, queda con el nombre que trae de fabrica. */
 function pintar(){
 document.getElementById('cartel').innerHTML =
-  /* Del perfil, no de un texto fijo: el cartel se imprime y se pega en
-     la pared, tiene que decir el nombre real del estudio. */
-  '<h2>' + bajadaDelEstudio() + '</h2>'
+  /* El titulo del cartel dice QUIEN ATIENDE, no en que club juega el
+     paciente: se imprime y se pega en la pared del estudio. */
+  '<h2>' + tituloDelCartel() + '</h2>'
   + '<p class="lema">Si venís a tratarte, cargá tus datos una sola vez desde el celular.</p>'
   + '<div class="qr">' + qrSVG(URL_ALTA, {tinta:'#000000', fondo:'#FFFFFF'}) + '</div>'
   + '<p class="dir">' + URL_ALTA + '</p>'

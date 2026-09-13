@@ -143,8 +143,9 @@ var BASE = {
   perfil: {
     nombre: 'Guido Verdi',
     matricula: '',
-    estudio: 'GUIDO VERDI',
+    estudio: 'Centro de Kinesiología',
     club: 'Centro de Kinesiología',
+    cartel: '',
     tel: '11 5555 0000',
     email: 'guidoverdi91@gmail.com',
     clave: 'estudio',
@@ -655,12 +656,31 @@ function nombreDelEstudio(){
   return (P.estudio || '').trim() || 'ESTUDIO';
 }
 
-/* La bajada que va debajo del nombre, en el encabezado y el cartel. */
+/* La bajada del encabezado. Es el campo libre del perfil. */
 function bajadaDelEstudio(){
   var P = BASE.perfil || {};
   if((P.club || '').trim()) return P.club.trim();
   if((P.nombre || '').trim()) return P.nombre.trim() + ' — Kinesiología';
   return 'Kinesiología';
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   EL TITULO DEL CARTEL ES OTRA COSA
+
+   El cartel se imprime y se pega en la pared del estudio. Tiene que
+   decir QUIEN ATIENDE, no en que club juega el paciente.
+
+   Usaba el mismo campo que el encabezado, y como ahi decia "Boca
+   Juniors" el cartel salia con el nombre del club. Un paciente
+   particular lo lee y no entiende adonde llegó.
+   ══════════════════════════════════════════════════════════════════════ */
+function tituloDelCartel(){
+  var P = BASE.perfil || {};
+  if((P.cartel || '').trim()) return P.cartel.trim();      /* si lo escribió a mano */
+  var n = (P.nombre || '').trim();
+  var e = (P.estudio || '').trim();
+  if(n && e) return n + ' — ' + e;
+  return n || e || 'Centro de Kinesiología';
 }
 
 function programaDe(L){

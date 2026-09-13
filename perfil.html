@@ -80,8 +80,15 @@ function pintar(){
     + '<div class="rejilla c2">'
     + campo('estudio', 'Nombre del estudio') + campo('club', 'Qué dice debajo') + '</div>'
     + '<p style="font-size:13px;color:var(--tinta3);margin:-6px 0 14px">'
-    + 'Estos dos salen arriba en todas las pantallas y en el cartel del código QR. '
-    + 'Ahora dice: <b>' + nombreDelEstudio() + '</b> · ' + bajadaDelEstudio() + '</p>'
+    + 'Salen arriba, en todas las pantallas. Ahora dice: <b>' + nombreDelEstudio()
+    + '</b> · ' + bajadaDelEstudio() + '</p>'
+
+    /* El cartel es aparte: se imprime y se pega en la pared, y tiene que
+       decir quién atiende, no en qué club juega el paciente. */
+    + campo('cartel', 'Título del cartel del código QR')
+    + '<p style="font-size:13px;color:var(--tinta3);margin:-6px 0 14px">'
+    + 'Es lo que se lee grande en el cartel que se imprime. Si lo dejás vacío, '
+    + 'arma uno con tu nombre. Ahora dice: <b>' + tituloDelCartel() + '</b></p>'
     + '<div class="rejilla c2">' + campo('tel', 'Teléfono') + campo('email', 'Correo') + '</div>'
     + campo('direccion', 'Dirección')
     + '</div>'
