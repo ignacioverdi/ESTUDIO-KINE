@@ -70,8 +70,15 @@ function enlaceAlta(){
   return u.indexOf('file:') === 0 ? 'https://estudio-kine.vercel.app/alta.html' : u;
 }
 var URL_ALTA = enlaceAlta();
+
+/* Se dibuja dentro de pintar(): el nombre del estudio sale del perfil,
+   que llega de la base despues de que carga la pantalla. Si se dibuja
+   una sola vez al arrancar, queda con el nombre que trae de fabrica. */
+function pintar(){
 document.getElementById('cartel').innerHTML =
-  '<h2>' + (BASE.club || 'Estudio de kinesiología') + '</h2>'
+  /* Del perfil, no de un texto fijo: el cartel se imprime y se pega en
+     la pared, tiene que decir el nombre real del estudio. */
+  '<h2>' + bajadaDelEstudio() + '</h2>'
   + '<p class="lema">Si venís a tratarte, cargá tus datos una sola vez desde el celular.</p>'
   + '<div class="qr">' + qrSVG(URL_ALTA, {tinta:'#000000', fondo:'#FFFFFF'}) + '</div>'
   + '<p class="dir">' + URL_ALTA + '</p>'
@@ -82,6 +89,10 @@ document.getElementById('cartel').innerHTML =
   + '</div>'
   + '<p class="pie">Tus datos son información de salud. Los ve el kinesiólogo que te atiende '
   + 'y los ves vos. Nadie más.</p>';
+}
+
+pintar();
+
 function avisar(t){
   var e = document.getElementById('hecho');
   e.textContent = t; e.style.display = 'block';

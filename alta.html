@@ -22,7 +22,7 @@
      Se llega por un enlace o un código QR pegado en el estudio. -->
 <div class="top"><div class="top-in">
   <a class="marca" href="index.html"><span class="sig"></span>
-  <span><b>ESTUDIO</b><span>Kinesiología del club</span></span></a>
+  <span><b id="mEst">ESTUDIO</b><span id="mBaj">Kinesiología</span></span></a>
   <div class="quien" style="margin-left:auto">
     <button class="ayuda-bt" onclick="abrirAyuda('alta')" title="Cómo funciona">?</button>
   </div>
@@ -43,6 +43,14 @@ var F = {};
 var LOCARGA_EL_KINE = (typeof sesion === 'function')
   && !!sesion() && sesion().tipo === 'kine';
 function vos(a, b){ return LOCARGA_EL_KINE ? b : a; }
+/* El encabezado del alta se completa con los datos del perfil. Es lo
+   primero que ve un paciente nuevo: no puede decir un nombre inventado. */
+(function(){
+  var e = document.getElementById('mEst'), b = document.getElementById('mBaj');
+  if(e) e.textContent = nombreDelEstudio();
+  if(b) b.textContent = bajadaDelEstudio();
+})();
+
 function pintar(){
   document.getElementById('todo').innerHTML =
     '<h1 class="tit">' + vos('Darse de alta', 'Nuevo paciente') + '</h1>'

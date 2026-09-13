@@ -134,14 +134,17 @@ function vaciarTodo(){
 
 var BASE = {
 
-  club: 'Club Atlético — Estudio de kinesiología',
+  club: '',
 
   /* Los datos del profesional. Se editan en Mi perfil. */
+  /* Los datos del estudio. Se editan en Mi perfil y de acá los toma
+     TODO el portal: el encabezado, el cartel del QR, los mensajes al
+     paciente y la historia clínica. */
   perfil: {
-    nombre: 'Verónica Ramírez',
-    matricula: 'MP 12345 — Kinesióloga Fisiatra',
-    estudio: 'Estudio de kinesiología',
-    club: 'Club Atlético',
+    nombre: 'Guido Verdi',
+    matricula: '',
+    estudio: 'GUIDO VERDI',
+    club: 'Centro de Kinesiología',
     tel: '11 5555 0000',
     email: 'guidoverdi91@gmail.com',
     clave: 'estudio',
@@ -226,7 +229,7 @@ var BASE = {
     { id:'L1', pid:'P07', dorsal:7, zona:'Tobillo', lado:'derecho',
       diagnostico:'Esguince lateral grado II',
       mecanismo:'Caída tras disputa aérea, apoyo sobre el pie de un rival.',
-      fecha:'2026-08-11', fase:2, estado:'activa', alta:'2026-09-15', kine:'Vero',
+      fecha:'2026-08-11', fase:2, estado:'activa', alta:'2026-09-15', kine:'',
       criterios:[
         {t:'Dolor en reposo por debajo de 2 sobre 10', ok:true},
         {t:'Dorsiflexión igual a la del tobillo sano', ok:true},
@@ -243,7 +246,7 @@ var BASE = {
     { id:'L2', pid:'P12', dorsal:12, zona:'Hombro', lado:'derecho', cirugia:'2026-08-18',
       diagnostico:'Tendinopatía del supraespinoso',
       mecanismo:'Sobrecarga por volumen de lanzamiento en la pretemporada.',
-      fecha:'2026-08-20', fase:3, estado:'activa', alta:'2026-09-02', kine:'Vero',
+      fecha:'2026-08-20', fase:3, estado:'activa', alta:'2026-09-02', kine:'',
       criterios:[
         {t:'Dolor al lanzar por debajo de 3 sobre 10', ok:true},
         {t:'Rotación externa sin déficit', ok:true},
@@ -259,7 +262,7 @@ var BASE = {
     { id:'L3', pid:'P15', dorsal:15, zona:'Lumbar', lado:'—',
       diagnostico:'Contractura paravertebral',
       mecanismo:'Carga acumulada: tres partidos en ocho días.',
-      fecha:'2026-08-24', fase:4, estado:'activa', alta:'2026-09-05', kine:'Vero',
+      fecha:'2026-08-24', fase:4, estado:'activa', alta:'2026-09-05', kine:'',
       criterios:[
         {t:'Sin dolor en flexión completa', ok:true},
         {t:'Trabajo de core sin compensar', ok:true},
@@ -624,6 +627,40 @@ function lista(x){
   if(Array.isArray(x)) return x.filter(function(v){ return v !== null && v !== undefined; });
   return Object.keys(x).map(function(k){ return x[k]; })
            .filter(function(v){ return v !== null && v !== undefined; });
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   EL NOMBRE DEL ESTUDIO SALE DE UN SOLO LUGAR
+
+   Estaba escrito a mano en diecisiete lugares: "Vero", "Club Atlético",
+   "Kinesiología del club". El kinesiologo cargaba sus datos en Mi perfil
+   y la mitad del portal seguia diciendo el nombre inventado.
+
+   Ahora todo sale de estas tres funciones, que leen el perfil. Se cambia
+   una vez y cambia en todas las pantallas.
+   ══════════════════════════════════════════════════════════════════════ */
+function nombreDelKine(){
+  var P = BASE.perfil || {};
+  return (P.nombre || '').trim() || 'tu kinesiólogo';
+}
+
+/* Solo el nombre de pila: es como le habla el paciente. */
+function nombreCorto(){
+  var n = nombreDelKine();
+  return n === 'tu kinesiólogo' ? n : n.split(' ')[0];
+}
+
+function nombreDelEstudio(){
+  var P = BASE.perfil || {};
+  return (P.estudio || '').trim() || 'ESTUDIO';
+}
+
+/* La bajada que va debajo del nombre, en el encabezado y el cartel. */
+function bajadaDelEstudio(){
+  var P = BASE.perfil || {};
+  if((P.club || '').trim()) return P.club.trim();
+  if((P.nombre || '').trim()) return P.nombre.trim() + ' — Kinesiología';
+  return 'Kinesiología';
 }
 
 function programaDe(L){

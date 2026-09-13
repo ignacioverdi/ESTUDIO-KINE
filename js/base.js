@@ -91,7 +91,7 @@ function armarCabecera(){
   top.innerHTML =
     '<div class="top-in">'
     + '<a class="marca" href="index.html"><span class="sig"></span>'
-    + '<span><b>ESTUDIO</b><span>Kinesiología del club</span></span></a>'
+    + '<span><b>' + nombreDelEstudio() + '</b><span>' + bajadaDelEstudio() + '</span></span></a>'
     + '<div class="quien"><a class="version" href="estado.html" '
     + 'title="Versión ' + VERSION_PORTAL + ' — estado del portal">v'
     + VERSION_PORTAL.slice(5) + '</a>'
@@ -226,3 +226,22 @@ function llevaCabecera(){
 }
 if(!SIN_ENTRAR && llevaCabecera())
   document.addEventListener('DOMContentLoaded', armarCabecera);
+
+/* ══════════════════════════════════════════════════════════════════════
+   REDIBUJAR EL ENCABEZADO CUANDO LLEGAN LOS DATOS
+
+   El encabezado se arma apenas carga la pagina, y el perfil llega de la
+   base medio segundo despues. Resultado: el kinesiologo cargaba su
+   nombre en Mi perfil y arriba seguia apareciendo el que traia de
+   fabrica, en todas las pantallas.
+
+   Lo llama firebase.js en cuanto termina de traer todo.
+   ══════════════════════════════════════════════════════════════════════ */
+function refrescarCabecera(){
+  if(SIN_ENTRAR || !llevaCabecera()) return;
+  ['.top', '.nav', '.menu-movil'].forEach(function(sel){
+    var e = document.querySelector(sel);
+    if(e) e.remove();
+  });
+  try{ armarCabecera(); }catch(e){}
+}

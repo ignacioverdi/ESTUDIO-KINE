@@ -1069,6 +1069,9 @@ function _fbTraerRamas(ses){
         /* Antes de dibujar: lo que llego puede venir como objeto o con
            huecos, y todas las pantallas asumen listas limpias. */
         if(typeof sanearBase === 'function'){ try{ sanearBase(); }catch(e){} }
+        /* El encabezado tambien: el nombre del estudio sale del perfil,
+           que recien llega ahora. */
+        if(typeof refrescarCabecera === 'function'){ try{ refrescarCabecera(); }catch(e){} }
         if(typeof pintar === 'function'){ try{ pintar(); }catch(e){} }
         try{ window._fallaronRamas = fallaron.slice(); }catch(e){}
         if(fallaron.length) _fbAvisarLectura(fallaron);

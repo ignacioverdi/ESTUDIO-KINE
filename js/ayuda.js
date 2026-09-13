@@ -119,7 +119,7 @@ var AYUDA = {
       ['Tu turno', 'El próximo que tenés reservado. Se cambia desde la agenda.'],
       ['Tus ejercicios', 'Tildá cada uno cuando lo hacés. Si no te acordás cómo era, tocá "ver video".'],
       ['Enviá al final', 'Marcá cuánto te dolió y qué tan exigente fue, y mandá.'],
-      ['Si algo te duele, escribí', 'Al lado de cada ejercicio hay un botón de consultar. Lo que escribas queda pegado a ESE ejercicio, así Vero sabe exactamente de cuál hablás.'],
+      ['Si algo te duele, escribí', 'Al lado de cada ejercicio hay un botón de consultar. Lo que escribas queda pegado a ESE ejercicio, así tu kinesiólogo sabe exactamente de cuál hablás.'],
       ['Confirmá el turno', 'Con "Ahí voy". Y si no vas a poder, avisá con tiempo: el turno se lo damos a otro.']
     ],
     ojo: 'Contestá con la verdad, aunque te haya dolido. Si decís que estuvo todo bien y no fue así, la carga de mañana se calcula mal y volvés para atrás.'

@@ -108,7 +108,7 @@ function pintarConversacion(pid){
   document.getElementById('cuerpoMsj').innerHTML =
     '<button class="cerrar" onclick="cerrarConversacion()" aria-label="Cerrar">&times;</button>'
     + '<span class="eti">Mensajes</span>'
-    + '<h2>' + (esKine ? p.nombre : 'Consultarle a Vero') + '</h2>'
+    + '<h2>' + (esKine ? p.nombre : 'Consultarle a ' + nombreCorto()) + '</h2>'
 
     + (ctx.tipo !== 'general'
         ? '<div class="nota info">' + iconoContexto(ctx) + '</div>'
@@ -123,7 +123,7 @@ function pintarConversacion(pid){
                   ? '<span class="ancla">' + iconoContexto(m.contexto) + '</span>' : '')
               + '<p>' + m.texto + '</p>'
               + '<span class="cuando">' + fechaCorta(m.fecha) + ' · ' + (m.hora || '').slice(0,5)
-              + ' · ' + (m.de === 'kine' ? 'Vero' : p.nombre.split(' ')[0]) + '</span></div>';
+              + ' · ' + (m.de === 'kine' ? nombreCorto() : p.nombre.split(' ')[0]) + '</span></div>';
           }).join('')
         : '<div class="vacio" style="padding:24px"><b>Todavía no hay mensajes</b>'
           + (esKine ? 'Escribile si querés.' : 'Escribí lo que quieras preguntar.') + '</div>')
@@ -141,7 +141,7 @@ function pintarConversacion(pid){
        creyendo que alguien lo lee. */
     + (esKine ? ''
         : '<div class="nota aviso" style="margin-top:14px">'
-          + 'Vero responde antes de tu próximo turno. <b>Esto no es una guardia:</b> '
+          + nombreCorto() + ' responde antes de tu próximo turno. <b>Esto no es una guardia:</b> '
           + 'si te pasa algo urgente, llamá por teléfono.</div>');
 }
 

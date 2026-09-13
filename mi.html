@@ -97,7 +97,7 @@ function pintar(){
     + (prox
         ? '<div class="fila" style="cursor:default;border-color:var(--azul)">'
           + '<span class="hh">' + prox.h + '</span>'
-          + '<span class="cu"><b>' + prox.tipo + ' con Vero</b>'
+          + '<span class="cu"><b>' + prox.tipo + ' con ' + nombreCorto() + '</b>'
           + '<small>En el estudio. Te avisamos una hora antes.</small></span>'
           + '<span class="pin ' + (prox.confirmado ? 'atendido' : 'reservado') + '">'
           + (prox.confirmado ? 'confirmado' : 'reservado') + '</span></div>'
@@ -130,7 +130,7 @@ function pintar(){
               + (cuantas >= total ? 'listo' : cuantas ? cuantas + '/' + total
                   : (e.video ? 'ver' : 'abrir')) + '</span></button>';
           }).join('')
-        : '<div class="vacio"><b>Todavía no hay programa</b>Vero lo carga después de tu próximo turno.</div>')
+        : '<div class="vacio"><b>Todavía no hay programa</b>' + nombreCorto() + ' lo carga después de tu próximo turno.</div>')
     + (prog.length
         ? '<label class="campo" style="margin-top:18px"><span class="eti">Cuánto te dolió mientras los hacías</span>'
           + '<div id="esDolor"></div></label>'
@@ -138,7 +138,7 @@ function pintar(){
           + '<div id="esEsf"></div></label>'
           + '<button class="bt ancho" onclick="enviar()">Enviar al kinesiólogo</button>'
           + '<div class="nota bien" id="listo" style="display:none;margin-top:12px">'
-          + 'Enviado. Vero lo ve antes de tu próximo turno.</div>'
+          + 'Enviado. ' + nombreCorto() + ' lo ve antes de tu próximo turno.</div>'
         : '')
     + '</div>'
     /* historial */

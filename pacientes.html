@@ -324,7 +324,7 @@ function guardarLesion(){
     cirugia: NL.operado ? (document.getElementById('lCirugia') || {}).value || fec : null,
     fase: 1, estado: 'activa',
     alta: altaEstimada(NL.zona, NL.gravedad, fec),
-    kine: 'Vero',
+    kine: nombreDelKine(),
     criterios: criteriosDe(NL.zona, 1),
     sesiones: []
   };
