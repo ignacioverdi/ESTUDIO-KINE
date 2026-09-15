@@ -161,6 +161,32 @@ def archivos_huerfanos():
             AVISO.append('%s no lo usa ninguna pantalla' % barras(f))
 
 
+def fechas_escritas_a_mano():
+    """Una fecha fija en el codigo funciona hasta que pasa ese dia.
+
+    HOY estaba escrito como '2026-08-28' desde que se armaron los datos
+    de ejemplo. El portal creia que siempre era ese dia: la agenda no
+    avanzaba, los turnos de mañana nunca llegaban y los dias de
+    tratamiento no subian. Nadie lo nota hasta que alguien lo usa una
+    semana seguida.
+
+    Los datos de ejemplo pueden tener fechas; el codigo que corre, no.
+    """
+    sospechosas = []
+    patron = re.compile(r"(?:var|let|const)\s+(\w+)\s*=\s*['\"](\d{4}-\d{2}-\d{2})['\"]")
+    for p in glob.glob('js/*.js') + PANTALLAS:
+        if not os.path.exists(p):
+            continue
+        for n, linea in enumerate(leer(p).split('\n'), 1):
+            m = patron.search(linea)
+            if m and m.group(1).upper() in ('HOY', 'FECHA', 'AHORA', 'DIA', 'TODAY'):
+                sospechosas.append('%s:%d  %s = "%s"' % (p, n, m.group(1), m.group(2)))
+    if sospechosas:
+        ROTO.append('hay fechas escritas a mano en el codigo: %s. '
+                    'El portal se va a quedar congelado en ese dia.'
+                    % '; '.join(sospechosas))
+
+
 def bat_con_saltos_mal():
     """Los .bat de Windows necesitan saltos de linea de Windows.
 
@@ -323,7 +349,7 @@ def lo_que_falta_hacer():
 def main():
     for f in [enlaces_rotos, archivos_que_pide_cada_pantalla, todas_cargan_lo_comun,
               cada_pantalla_tiene_ayuda, componentes_sin_color_propio, temas_completos,
-              archivos_huerfanos, sobras, bat_con_saltos_mal, onclick_sin_funcion, ramas_sin_regla, config_de_vercel, secretos_a_la_vista, js_balanceado,
+              archivos_huerfanos, sobras, fechas_escritas_a_mano, bat_con_saltos_mal, onclick_sin_funcion, ramas_sin_regla, config_de_vercel, secretos_a_la_vista, js_balanceado,
               lo_que_falta_hacer]:
         f()
 

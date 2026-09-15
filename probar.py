@@ -490,6 +490,37 @@ def main():
         problemas += e8[:2]
         ctx.close()
 
+        print('\n  1k. QUE LA FECHA AVANCE')
+        # HOY estaba escrito a mano: el portal creia que siempre era el
+        # 28 de agosto. La agenda no avanzaba y los turnos de mañana no
+        # llegaban nunca. Se comprueba adelantando el reloj del navegador.
+        ctx = b.new_context(**pw.devices['iPhone 14 Pro'])
+        ctx.add_init_script(
+            "const F = new Date('2027-03-08T10:00:00').getTime(); const D = Date;"
+            "Date = class extends D { constructor(...a){ if(!a.length) super(F);"
+            "else super(...a);} static now(){ return F; } };")
+        pg = ctx.new_page()
+        e9 = []
+        pg.on('pageerror', lambda x: e9.append(str(x)))
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
+        pg.evaluate("localStorage.clear()")
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(400)
+        entrarComoKine(pg)
+        pg.goto(base + 'panel.html'); pg.wait_for_timeout(1200)
+        hoy = pg.evaluate("HOY")
+        titulo = pg.evaluate("(document.querySelector('h1.tit')||{}).textContent||''")
+        pg.goto(base + 'agenda.html'); pg.wait_for_timeout(1200)
+        mes = pg.evaluate("typeof mes!=='undefined' ? mes : ''")
+        print('     con el reloj en marzo de 2027         :', hoy)
+        print('     el titulo dice                        :', titulo)
+        print('     la agenda abre en                     :', mes)
+        for cond, t6 in [(hoy == '2027-03-08', 'la fecha de HOY no acompaña al reloj'),
+                         ('marzo' in titulo, 'el titulo del panel tiene la fecha escrita a mano'),
+                         (mes == '2027-03', 'la agenda no abre en el mes actual')]:
+            if not cond: problemas.append(t6)
+        problemas += e9[:2]
+        ctx.close()
+
         print('\n  2. CODIGOS QR')
         try:
             import cv2

@@ -286,6 +286,10 @@ button.dato:hover{border-color:var(--acc)}
 button.dato.elegido{border-color:var(--acc);border-width:2px;background:var(--acc-suave)}
 button.dato.elegido .v{color:var(--acc-texto)}
 
+/* Sugerencias de diagnóstico: atajos, no una lista cerrada. */
+.sug{display:flex;flex-wrap:wrap;gap:6px;margin:-8px 0 16px}
+.sug .pest{font-size:12px;padding:7px 11px;min-height:36px}
+
 /* ── PREGUNTAS FRECUENTES ────────────────────────────────────────
    Un acordeon: se ve la lista entera de un vistazo y se abre la que
    interesa. Con todas las respuestas desplegadas nadie encuentra nada. */

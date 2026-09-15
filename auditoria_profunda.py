@@ -34,7 +34,11 @@ def ok(t,c,extra=''):
     print('   %-50s %s %s' % (t,'ok' if c else 'FALLA', extra))
     if not c: f.append(t)
 
-HOY='2026-08-28'
+# La fecha de hoy, de verdad. Estaba escrita a mano y cuando el portal
+# dejo de estar congelado en agosto, los datos de prueba quedaron en otra
+# fecha y el turno que se buscaba ya no existia.
+from datetime import date, timedelta
+HOY = date.today().isoformat()
 # La base tal como Firebase la devuelve DE VERDAD: listas como objetos,
 # numeraciones desde 1 con hueco, claves fuera de orden.
 BASEFB = {
@@ -47,8 +51,8 @@ BASEFB = {
            'institucion':'Beyond','estado':'pendiente','plan':'sesion','creditos':0,
            'alta':HOY,'tipo':'particular'}},
  'kine/lesiones': [None, {'id':'L1','pid':'P07','dorsal':7,'zona':'Tobillo','lado':'derecho',
-   'diagnostico':'Esguince','mecanismo':'x','fecha':'2026-08-18','gravedad':2,'fase':2,
-   'estado':'activa','alta':'2026-09-10','criterios':[{'t':'Sin dolor','ok':False}],'sesiones':[]}],
+   'diagnostico':'Esguince','mecanismo':'x','fecha':(date.today()-timedelta(days=10)).isoformat(),'gravedad':2,'fase':2,
+   'estado':'activa','alta':(date.today()+timedelta(days=13)).isoformat(),'criterios':[{'t':'Sin dolor','ok':False}],'sesiones':[]}],
  'kine/agenda': {HOY: {'0':{'h':'09:00','pid':'P07','dorsal':7,'tipo':'Tratamiento','estado':'reservado'}}},
  'kine/historia': {'P07': {'a2':{'n':2,'tipo':'consentimiento','contenido':'C','fecha':HOY,
     'hora':'09:01','autor':'V','sello':HOY,'autor_id':'v','huella_previa':'x','huella':'y','rectifica':None},

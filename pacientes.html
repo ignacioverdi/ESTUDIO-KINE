@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css?v=2026-09-13-1824">
-<link rel="stylesheet" href="css/estudio.css?v=2026-09-13-1824">
-<script src="js/firebase.js?v=2026-09-13-1824" onerror="void 0"></script>
-<script src="js/datos.js?v=2026-09-13-1824"></script><script src="js/plantillas.js?v=2026-09-13-1824"></script><script src="js/agenda.js?v=2026-09-13-1824"></script><script src="js/qr.js?v=2026-09-13-1824"></script><script src="js/historia.js?v=2026-09-13-1824"></script><script src="js/estudios.js?v=2026-09-13-1824"></script><script src="js/dinero.js?v=2026-09-13-1824"></script><script src="js/atender.js?v=2026-09-13-1824"></script><script src="js/mensajes.js?v=2026-09-13-1824"></script><script src="js/alertas.js?v=2026-09-13-1824"></script><script src="js/plantel.js?v=2026-09-13-1824"></script><script src="js/recordatorios.js?v=2026-09-13-1824"></script><script src="js/asistente.js?v=2026-09-13-1824"></script><script src="js/ayuda.js?v=2026-09-13-1824"></script><script src="js/acceso.js?v=2026-09-13-1824"></script><script src="js/base.js?v=2026-09-13-1824"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-15-2321">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-15-2321">
+<script src="js/firebase.js?v=2026-09-15-2321" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-15-2321"></script><script src="js/plantillas.js?v=2026-09-15-2321"></script><script src="js/agenda.js?v=2026-09-15-2321"></script><script src="js/qr.js?v=2026-09-15-2321"></script><script src="js/historia.js?v=2026-09-15-2321"></script><script src="js/estudios.js?v=2026-09-15-2321"></script><script src="js/dinero.js?v=2026-09-15-2321"></script><script src="js/atender.js?v=2026-09-15-2321"></script><script src="js/mensajes.js?v=2026-09-15-2321"></script><script src="js/alertas.js?v=2026-09-15-2321"></script><script src="js/plantel.js?v=2026-09-15-2321"></script><script src="js/recordatorios.js?v=2026-09-15-2321"></script><script src="js/asistente.js?v=2026-09-15-2321"></script><script src="js/ayuda.js?v=2026-09-15-2321"></script><script src="js/acceso.js?v=2026-09-15-2321"></script><script src="js/base.js?v=2026-09-15-2321"></script>
 </head>
 <body data-pag="pacientes">
 <div class="hoja">
@@ -209,7 +209,11 @@ function abrir(id){
 var NL = {};
 function abrirLesion(pid){
   var p = paciente(pid);
-  NL = {pid: pid, zona: 'Tobillo', lado: 'derecho', gravedad: 2,
+  /* NADA elegido de antemano. Un formulario que viene con respuestas
+     puestas hace que se guarden cosas que nadie eligió: alcanza con no
+     mirar un campo para que quede "Tobillo derecho, moderada". En una
+     historia clínica eso es grave. */
+  NL = {pid: pid, zona: null, lado: null, gravedad: null,
         diagnostico: '', mecanismo: '', fecha: HOY};
   var caja = document.createElement('div');
   caja.className = 'ayuda-fondo';
@@ -222,9 +226,10 @@ function abrirLesion(pid){
 }
 function pintarLesion(){
   var p = paciente(NL.pid);
-  var pl = PLANTILLAS[NL.zona] || PLANTILLAS.Otra;
-  NL.alta = altaEstimada(NL.zona, NL.gravedad, NL.fecha);
-  var crit = criteriosDe(NL.zona, 1);
+  var pl = NL.zona ? (PLANTILLAS[NL.zona] || PLANTILLAS.Otra) : null;
+  NL.alta = (NL.zona && NL.gravedad)
+    ? altaEstimada(NL.zona, NL.gravedad, NL.fecha) : null;
+  var crit = NL.zona ? criteriosDe(NL.zona, 1) : [];
   document.getElementById('cuerpoLesion').innerHTML =
     '<button class="cerrar" onclick="cerrarLesion()" aria-label="Cerrar">&times;</button>'
     + '<span class="eti">Lesión nueva</span>'
@@ -241,18 +246,31 @@ function pintarLesion(){
     + ['derecho','izquierdo','—'].map(function(x){
         return '<button class="pest' + (x === NL.lado ? ' on' : '') + '" data-l="' + x + '">' + x + '</button>';
       }).join('') + '</div></label>'
-    + '<label class="campo"><span class="eti">Qué tiene</span>'
-    + '<select id="lDiag">'
-    + pl.diagnosticos.map(function(d){
-        return '<option' + (d === NL.diagnostico ? ' selected' : '') + '>' + d + '</option>';
-      }).join('') + '</select></label>'
+    /* Texto libre, con sugerencias segun la zona. Antes era una lista
+       cerrada: si lo que tenia el paciente no estaba, quedaba "Otro" y
+       la ficha no decia nada. Ahora se escribe con el detalle que haga
+       falta y las sugerencias estan a un toque. */
+    + (NL.zona
+        ? '<label class="campo"><span class="eti">Qué tiene — el diagnóstico</span>'
+          + '<input type="text" id="lDiag" list="sugDiag" autocomplete="off" '
+          + 'value="' + (NL.diagnostico || '').replace(/"/g, '&quot;') + '" '
+          + 'placeholder="Escribilo con el detalle que necesites">'
+          + '<datalist id="sugDiag">'
+          + pl.diagnosticos.map(function(d){ return '<option value="' + d + '">'; }).join('')
+          + '</datalist></label>'
+          + '<div class="sug">' + pl.diagnosticos.slice(0, 5).map(function(d){
+              return '<button class="pest chico" onclick="ponerDiag(\'' 
+                   + d.replace(/'/g, "") + '\')">' + d + '</button>';
+            }).join('') + '</div>'
+        : '')
     + '<label class="campo"><span class="eti">Gravedad</span>'
     + '<div class="pestanias" id="lGrav" style="margin-bottom:0">'
     + GRAVEDAD.map(function(g){
         return '<button class="pest' + (g.n === NL.gravedad ? ' on' : '') + '" data-g="' + g.n + '">' + g.t + '</button>';
       }).join('') + '</div>'
     + '<small style="color:var(--tinta3);font-size:13px">'
-    + GRAVEDAD[NL.gravedad-1].d + '</small></label>'
+    + (NL.gravedad ? GRAVEDAD[NL.gravedad-1].d : 'Elegí una: de esto sale la fecha estimada de alta.')
+    + '</small></label>'
     + '<label class="campo"><span class="eti">Cómo se lesionó</span>'
     + '<textarea id="lMec" placeholder="Caída tras disputa aérea, apoyo sobre el pie de un rival...">'
     + (NL.mecanismo || '') + '</textarea></label>'
@@ -270,13 +288,18 @@ function pintarLesion(){
         ? '<label class="campo"><span class="eti">Fecha de la cirugía</span>'
           + '<input type="date" id="lCirugia" value="' + (NL.cirugia || NL.fecha) + '"></label>'
         : '')
-    /* Lo que el sistema completa solo: se muestra para que el kine lo
-       vea antes de guardar, no para que lo escriba. */
-    + '<div class="nota info"><b>Se va a completar solo:</b><br>'
-    + 'Alta estimada el ' + fechaCorta(NL.alta) + ' (' + faltan(NL.alta) + ' días).<br>'
-    + 'Los días de rehabilitación se cuentan desde la primera sesión.<br>'
-    + 'Arranca en fase 1 con ' + crit.length + ' criterios de ' + NL.zona.toLowerCase() + '.<br>'
-    + 'El parte médico lo va a mostrar como <b>de baja</b>.</div>'
+    /* El resumen aparece solo cuando ya hay zona y gravedad: antes
+       mostraba una fecha de alta calculada sobre valores que nadie
+       habia elegido. */
+    + ((NL.zona && NL.gravedad)
+        ? '<div class="nota info"><b>Se va a completar solo:</b><br>'
+          + 'Alta estimada el ' + fechaCorta(NL.alta) + ' (' + faltan(NL.alta) + ' días).<br>'
+          + 'Los días de rehabilitación se cuentan desde la primera sesión.<br>'
+          + 'Arranca en fase 1 con ' + crit.length + ' criterios de ' + NL.zona.toLowerCase() + '.<br>'
+          + 'El parte médico lo va a mostrar como <b>de baja</b>.</div>'
+        : '<div class="nota aviso">Elegí la zona, el lado y la gravedad. '
+          + 'Con eso el portal calcula la fecha estimada de alta y los criterios de la fase 1.</div>')
+    + '<div id="avisoLesion"></div>'
     + '<button class="bt ancho" onclick="guardarLesion()">Abrir la lesión</button>';
   document.querySelectorAll('#lZona .pest').forEach(function(b){
     b.onclick = function(){ NL.zona = b.dataset.z; NL.diagnostico = ''; pintarLesion(); };
@@ -298,6 +321,7 @@ function pintarLesion(){
   if(ci) ci.onchange = function(){ NL.cirugia = ci.value; };
   ['lDiag','lMec','lFecha'].forEach(function(id){
     var e = document.getElementById(id);
+    if(!e) return;          /* lDiag no existe hasta que eligen la zona */
     e.onchange = e.oninput = function(){
       if(id === 'lDiag')  NL.diagnostico = e.value;
       if(id === 'lMec')   NL.mecanismo = e.value;
@@ -310,9 +334,33 @@ function cerrarLesion(){
   if(c) c.remove();
   document.body.style.overflow = '';
 }
+function ponerDiag(d){
+  NL.diagnostico = d;
+  var e = document.getElementById('lDiag');
+  if(e) e.value = d;
+}
+
 function guardarLesion(){
   var p = paciente(NL.pid);
-  var diag = document.getElementById('lDiag').value;
+
+  /* Nada viene elegido de antemano, así que hay que comprobar que
+     eligieron. Antes se guardaba "Tobillo derecho moderada" aunque
+     nadie hubiera tocado esos campos. */
+  var falta = [];
+  if(!NL.zona)     falta.push('la zona');
+  if(!NL.lado)     falta.push('el lado');
+  if(!NL.gravedad) falta.push('la gravedad');
+  var diagEl = document.getElementById('lDiag');
+  var diag = diagEl ? (diagEl.value || '').trim() : '';
+  if(!diag)        falta.push('el diagnóstico');
+  if(falta.length){
+    var av = document.getElementById('avisoLesion');
+    if(av){
+      av.innerHTML = '<div class="nota aviso">Falta ' + falta.join(', ') + '.</div>';
+      av.scrollIntoView({block:'center'});
+    }
+    return;
+  }
   var mec  = (document.getElementById('lMec').value || '').trim();
   var fec  = document.getElementById('lFecha').value || HOY;
   var id = 'L' + (BASE.lesiones.length + 1) + Date.now().toString().slice(-4);

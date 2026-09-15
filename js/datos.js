@@ -14,7 +14,26 @@
      kine/adherencia/<dorsal>/<fecha>
    ══════════════════════════════════════════════════════════════════════ */
 
-var HOY = '2026-08-28';
+/* ══════════════════════════════════════════════════════════════════════
+   LA FECHA DE HOY, DE VERDAD
+
+   Esto estaba escrito a mano en '2026-08-28' desde que se armaron los
+   datos de ejemplo, y nunca lo saqué. El portal creía que siempre era
+   ese día: la agenda no avanzaba, los turnos de mañana nunca llegaban,
+   los días de tratamiento no subían y la caja del mes no se movía.
+
+   Se toma del reloj del aparato. Se arma a mano y no con toISOString()
+   porque esa función devuelve la hora de Londres: a las 21 de Argentina
+   ya estaría dando el día siguiente.
+   ══════════════════════════════════════════════════════════════════════ */
+function fechaDeHoy(){
+  var d = new Date();
+  return d.getFullYear() + '-'
+       + ('0' + (d.getMonth() + 1)).slice(-2) + '-'
+       + ('0' + d.getDate()).slice(-2);
+}
+
+var HOY = fechaDeHoy();
 
 /* ══════════════════════════════════════════════════════════════════════
    MODO DEMOSTRACION

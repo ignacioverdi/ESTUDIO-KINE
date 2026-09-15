@@ -138,8 +138,10 @@ Toca un horario libre para asignarlo. En los turnos ya dados tenes "Atender" y "
 
 #Abrir una lesion
 Es lo que convierte a alguien del padron en alguien en tratamiento.
-1|Desde Pacientes, "Abrir una lesion"|Elegis zona, lado, gravedad y si hubo cirugia.
-2|Lo demas se completa solo|Los criterios de cada fase salen de la zona. La fecha estimada de alta se calcula con la zona y la gravedad. El parte medico lo marca como de baja. Todo eso lo podes corregir despues.
+1|Desde Pacientes, "Abrir una lesion"|Elegis zona, lado, gravedad y si hubo cirugia. No viene nada marcado de antemano: lo elegis vos.
+%AMBAR|Es a proposito. Un formulario que viene con respuestas puestas hace que se guarden cosas que nadie eligio: alcanzaba con no mirar un campo para que la ficha quedara con "Tobillo derecho, moderada". En una historia clinica eso no se puede permitir.
+2|El diagnostico se escribe|Es texto libre, con el detalle que necesites. Debajo hay sugerencias segun la zona, para no tipear las de siempre, pero podes escribir lo que quieras.
+3|Lo demas se completa solo|Los criterios de cada fase salen de la zona. La fecha estimada de alta se calcula con la zona y la gravedad. El parte medico lo marca como de baja. Todo eso lo podes corregir despues.
 ##Los dos relojes
 Cada ficha muestra dos numeros distintos: los dias desde la lesion o la cirugia, y los dias que lleva tratandose.
 No son lo mismo. Alguien que se opero hace 90 dias pero empezo la rehabilitacion hace 10 no esta atrasado: recien empieza. Con un solo numero eso no se ve, y es la diferencia entre apurar a un paciente o entenderlo.

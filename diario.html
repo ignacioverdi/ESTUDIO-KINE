@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css?v=2026-09-13-1824">
-<link rel="stylesheet" href="css/estudio.css?v=2026-09-13-1824">
-<script src="js/firebase.js?v=2026-09-13-1824" onerror="void 0"></script>
-<script src="js/datos.js?v=2026-09-13-1824"></script><script src="js/plantillas.js?v=2026-09-13-1824"></script><script src="js/agenda.js?v=2026-09-13-1824"></script><script src="js/qr.js?v=2026-09-13-1824"></script><script src="js/historia.js?v=2026-09-13-1824"></script><script src="js/estudios.js?v=2026-09-13-1824"></script><script src="js/dinero.js?v=2026-09-13-1824"></script><script src="js/atender.js?v=2026-09-13-1824"></script><script src="js/mensajes.js?v=2026-09-13-1824"></script><script src="js/alertas.js?v=2026-09-13-1824"></script><script src="js/plantel.js?v=2026-09-13-1824"></script><script src="js/recordatorios.js?v=2026-09-13-1824"></script><script src="js/asistente.js?v=2026-09-13-1824"></script><script src="js/ayuda.js?v=2026-09-13-1824"></script><script src="js/acceso.js?v=2026-09-13-1824"></script><script src="js/base.js?v=2026-09-13-1824"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-15-2321">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-15-2321">
+<script src="js/firebase.js?v=2026-09-15-2321" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-15-2321"></script><script src="js/plantillas.js?v=2026-09-15-2321"></script><script src="js/agenda.js?v=2026-09-15-2321"></script><script src="js/qr.js?v=2026-09-15-2321"></script><script src="js/historia.js?v=2026-09-15-2321"></script><script src="js/estudios.js?v=2026-09-15-2321"></script><script src="js/dinero.js?v=2026-09-15-2321"></script><script src="js/atender.js?v=2026-09-15-2321"></script><script src="js/mensajes.js?v=2026-09-15-2321"></script><script src="js/alertas.js?v=2026-09-15-2321"></script><script src="js/plantel.js?v=2026-09-15-2321"></script><script src="js/recordatorios.js?v=2026-09-15-2321"></script><script src="js/asistente.js?v=2026-09-15-2321"></script><script src="js/ayuda.js?v=2026-09-15-2321"></script><script src="js/acceso.js?v=2026-09-15-2321"></script><script src="js/base.js?v=2026-09-15-2321"></script>
 </head>
 <body data-pag="diario">
 <div class="hoja angosta">
@@ -43,10 +43,19 @@ var PREGUNTAS = [
   {id:'animo',  t:'Cómo andás de ánimo',   ext:['Bajón','Flojo','Normal','Bien','Muy bien']},
   {id:'estres', t:'Nivel de estrés',       ext:['Altísimo','Alto','Normal','Bajo','Nada']}
 ];
-var HISTORIAL = [
-  {f:'2026-08-27', v:3.6}, {f:'2026-08-26', v:3.2}, {f:'2026-08-25', v:2.8},
-  {f:'2026-08-24', v:3.0}, {f:'2026-08-23', v:3.8}
-];
+/* Los últimos días, de lo que el paciente cargó de verdad. Antes era una
+   lista inventada con fechas de agosto que quedaban ahí para siempre. */
+function historialReal(){
+  var w = (BASE.wellness || {})[miPid()] || {};
+  return Object.keys(w).sort().reverse().slice(0, 5).map(function(f){
+    var d = w[f], n = 0, suma = 0;
+    ['sueno','fatiga','dolor','animo','estres'].forEach(function(k){
+      if(typeof d[k] === 'number'){ suma += d[k]; n++; }
+    });
+    return {f: f, v: n ? Math.round(suma / n * 10) / 10 : 0};
+  });
+}
+var HISTORIAL = historialReal();
 var resp = {};
 document.getElementById('preguntas').innerHTML = PREGUNTAS.map(function(p){
   return '<label class="campo"><span class="eti">' + p.t + '</span>'

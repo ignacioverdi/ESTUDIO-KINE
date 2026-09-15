@@ -11,14 +11,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css?v=2026-09-13-1824">
-<link rel="stylesheet" href="css/estudio.css?v=2026-09-13-1824">
-<script src="js/firebase.js?v=2026-09-13-1824" onerror="void 0"></script>
-<script src="js/datos.js?v=2026-09-13-1824"></script><script src="js/plantillas.js?v=2026-09-13-1824"></script><script src="js/agenda.js?v=2026-09-13-1824"></script><script src="js/qr.js?v=2026-09-13-1824"></script><script src="js/historia.js?v=2026-09-13-1824"></script><script src="js/estudios.js?v=2026-09-13-1824"></script><script src="js/dinero.js?v=2026-09-13-1824"></script><script src="js/atender.js?v=2026-09-13-1824"></script><script src="js/mensajes.js?v=2026-09-13-1824"></script><script src="js/alertas.js?v=2026-09-13-1824"></script><script src="js/plantel.js?v=2026-09-13-1824"></script><script src="js/recordatorios.js?v=2026-09-13-1824"></script><script src="js/asistente.js?v=2026-09-13-1824"></script><script src="js/ayuda.js?v=2026-09-13-1824"></script><script src="js/acceso.js?v=2026-09-13-1824"></script><script src="js/base.js?v=2026-09-13-1824"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-15-2321">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-15-2321">
+<script src="js/firebase.js?v=2026-09-15-2321" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-15-2321"></script><script src="js/plantillas.js?v=2026-09-15-2321"></script><script src="js/agenda.js?v=2026-09-15-2321"></script><script src="js/qr.js?v=2026-09-15-2321"></script><script src="js/historia.js?v=2026-09-15-2321"></script><script src="js/estudios.js?v=2026-09-15-2321"></script><script src="js/dinero.js?v=2026-09-15-2321"></script><script src="js/atender.js?v=2026-09-15-2321"></script><script src="js/mensajes.js?v=2026-09-15-2321"></script><script src="js/alertas.js?v=2026-09-15-2321"></script><script src="js/plantel.js?v=2026-09-15-2321"></script><script src="js/recordatorios.js?v=2026-09-15-2321"></script><script src="js/asistente.js?v=2026-09-15-2321"></script><script src="js/ayuda.js?v=2026-09-15-2321"></script><script src="js/acceso.js?v=2026-09-15-2321"></script><script src="js/base.js?v=2026-09-15-2321"></script>
 </head>
 <body data-pag="panel">
 <div class="hoja">
-  <h1 class="tit">Viernes 28 de agosto</h1>
+  <h1 class="tit" id="tituloHoy">Hoy</h1>
   <p class="bajada">Lo que hay que resolver hoy, y cómo está el plantel.</p>
   <div class="rejilla c4" style="margin-bottom:14px">
     <div class="dato"><div class="v" id="kPac">—</div><div class="l">Pacientes</div></div>
@@ -68,6 +68,15 @@
   </div>
 </div>
 <script>
+/* El título, con la fecha de hoy. Estaba escrito a mano en el HTML:
+   decía "Viernes 28 de agosto" para siempre. */
+(function(){
+  var t = document.getElementById('tituloHoy');
+  if(!t) return;
+  var f = fechaLegible(HOY);
+  t.textContent = f.charAt(0).toUpperCase() + f.slice(1);
+})();
+
 function pintarManana(){
   var caja = document.getElementById('cajaManana');
   var f = proximoDiaConTurnos(HOY);
