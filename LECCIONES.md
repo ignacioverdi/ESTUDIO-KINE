@@ -45,10 +45,13 @@
 | `PUBLICAR.bat` dejó de funcionar | Lo edité desde Linux y perdió los saltos de línea de Windows |
 | El portal se quedó congelado el 28 de agosto | `HOY` estaba escrito a mano desde los datos de ejemplo |
 | Las lesiones se guardaban con datos que nadie eligió | El formulario venía con zona, lado y gravedad preseleccionados |
+| Una lesión mal cargada no se podía corregir ni borrar | Nunca lo previmos: se construyó el alta y no la corrección |
+| Un paciente solo podía tener una lesión a la vez | La búsqueda devolvía la primera y las demás quedaban invisibles |
+| El enlace directo a una ficha nunca funcionaba | Al no encontrarla borraba la referencia antes de que llegaran los datos |
 | El nombre del estudio no cambiaba al editarlo | Estaba escrito a mano en diecisiete lugares |
 | Las pruebas se apoyaban en los datos de ejemplo | Al sacarlos se rompieron todas; ahora se arman los suyos |
 
-**Treinta y tres errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Treinta y seis errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---

@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css?v=2026-09-15-2321">
-<link rel="stylesheet" href="css/estudio.css?v=2026-09-15-2321">
-<script src="js/firebase.js?v=2026-09-15-2321" onerror="void 0"></script>
-<script src="js/datos.js?v=2026-09-15-2321"></script><script src="js/plantillas.js?v=2026-09-15-2321"></script><script src="js/agenda.js?v=2026-09-15-2321"></script><script src="js/qr.js?v=2026-09-15-2321"></script><script src="js/historia.js?v=2026-09-15-2321"></script><script src="js/estudios.js?v=2026-09-15-2321"></script><script src="js/dinero.js?v=2026-09-15-2321"></script><script src="js/atender.js?v=2026-09-15-2321"></script><script src="js/mensajes.js?v=2026-09-15-2321"></script><script src="js/alertas.js?v=2026-09-15-2321"></script><script src="js/plantel.js?v=2026-09-15-2321"></script><script src="js/recordatorios.js?v=2026-09-15-2321"></script><script src="js/asistente.js?v=2026-09-15-2321"></script><script src="js/ayuda.js?v=2026-09-15-2321"></script><script src="js/acceso.js?v=2026-09-15-2321"></script><script src="js/base.js?v=2026-09-15-2321"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-20-0818">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-20-0818">
+<script src="js/firebase.js?v=2026-09-20-0818" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-20-0818"></script><script src="js/plantillas.js?v=2026-09-20-0818"></script><script src="js/agenda.js?v=2026-09-20-0818"></script><script src="js/qr.js?v=2026-09-20-0818"></script><script src="js/historia.js?v=2026-09-20-0818"></script><script src="js/estudios.js?v=2026-09-20-0818"></script><script src="js/dinero.js?v=2026-09-20-0818"></script><script src="js/atender.js?v=2026-09-20-0818"></script><script src="js/mensajes.js?v=2026-09-20-0818"></script><script src="js/alertas.js?v=2026-09-20-0818"></script><script src="js/plantel.js?v=2026-09-20-0818"></script><script src="js/recordatorios.js?v=2026-09-20-0818"></script><script src="js/asistente.js?v=2026-09-20-0818"></script><script src="js/ayuda.js?v=2026-09-20-0818"></script><script src="js/acceso.js?v=2026-09-20-0818"></script><script src="js/base.js?v=2026-09-20-0818"></script>
 </head>
 <body data-pag="pacientes">
 <div class="hoja">
@@ -187,9 +187,27 @@ function abrir(id){
     + '</div>'
     + (p.motivo ? '<label class="campo"><span class="eti">Por qué vino, en sus palabras</span>'
         + '<p style="color:var(--tinta2)">' + p.motivo + '</p></label>' : '')
+    /* TODAS las lesiones abiertas, no solo la primera. Una persona puede
+       estar tratándose el hombro y la rodilla al mismo tiempo. */
+    + (function(){
+        var Ls = lesionesDePid(p.id);
+        if(!Ls.length) return '';
+        return '<label class="campo" style="margin-top:14px">'
+          + '<span class="eti">' + (Ls.length === 1 ? 'Lesión abierta' : Ls.length + ' lesiones abiertas')
+          + '</span></label>'
+          + Ls.map(function(x){
+              return '<button class="fila" onclick="irA(\'lesiones.html?f=' + x.id + '\')">'
+                + '<span class="hh">F' + x.fase + '</span>'
+                + '<span class="cu"><b>' + x.zona + ' ' + (x.lado === '—' ? '' : x.lado) + '</b>'
+                + '<small>' + x.diagnostico + '</small>'
+                + '<small>día ' + diasDeLesion(x) + ' · ' + diasDeRehab(x) + ' de rehabilitación</small>'
+                + '</span><span class="pin reservado">abrir</span></button>';
+            }).join('');
+      })()
+
     + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">'
-    + (L ? '<a class="bt" href="lesiones.html?f=' + L.id + '" style="text-decoration:none">Ver su ficha</a>'
-         : '<button class="bt" onclick="abrirLesion(\'' + p.id + '\')">Abrir una lesión</button>')
+    + '<button class="bt" onclick="abrirLesion(\'' + p.id + '\')">'
+    + (lesionesDePid(p.id).length ? '+ Otra lesión' : 'Abrir una lesión') + '</button>'
     + '<button class="bt hueco" onclick="corregirDatos(\'' + p.id + '\')">Corregir sus datos</button>'
     + '<button class="bt neutro" onclick="borrarPaciente(\'' + p.id + '\')">Borrar</button>'
     + '<button class="bt hueco" onclick="abrirConversacion(\'' + p.id + '\')">Mensajes'

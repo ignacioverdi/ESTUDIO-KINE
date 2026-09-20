@@ -46,6 +46,8 @@ var AYUDA = {
     que_es: 'El corazón del portal. Cada lesión avanza por criterios cumplidos, no por días en el calendario.',
     pasos: [
       ['Abrí una ficha', 'De la lista, o tocando a alguien en el panel.'],
+      ['Corregir la lesión', 'Si cargaste mal la zona, el diagnóstico o la fecha, se arregla ahí. No borra lo anterior: agrega la corrección a la historia clínica.'],
+      ['Borrar la lesión', 'Se lleva sus sesiones y su programa. La historia clínica del paciente no se toca. Si la lesión terminó, mejor darle el alta: así queda en su historial.'],
       ['Mirá la pista de fases', 'Cinco tramos. Los verdes ya pasaron, el marcado es donde está hoy.'],
       ['Los dos relojes', 'Arriba hay dos números distintos: los días desde la lesión o la cirugía, y los días que lleva tratándose. No son lo mismo.'],
       ['Tildá los criterios', 'A medida que se cumplen. El botón de avanzar se enciende solo cuando están todos.'],
@@ -171,7 +173,7 @@ var AYUDA = {
       ['O que se cargue solo', 'Con el código QR. Es más rápido y no hay errores de dictado: no tipeás nada.'],
       ['Mirá los que dicen "sin atender"', 'Son los que se dieron de alta y todavía no viste. Pasan a activo con la primera sesión.'],
       ['Buscá por nombre o documento', 'Con el buscador de arriba de la lista.'],
-      ['Abrí una ficha', 'Tocá el paciente y desde ahí le abrís una lesión o le das turno.'],
+      ['Abrí una ficha', 'Tocá el paciente y desde ahí le abrís una lesión o le das turno. Si ya tiene alguna abierta, aparecen listadas y podés sumar otra: se puede estar tratando el hombro y la rodilla al mismo tiempo.'],
       ['Los contadores de arriba', 'Uno por institución: cuántos pacientes te manda cada una. Tocá uno para ver solo esos, y tocalo de nuevo para volver a todos.'],
       ['Borrar a alguien', 'Desde su ficha, botón Borrar. Si recién lo cargaste, se borra confirmando y listo. Si ya tiene historia, lesiones o turnos, te pide escribir BORRAR: ahí sí hay algo que perder. La caja nunca se toca.'],
       ['Cargarle la foto', 'Desde su ficha, botón Corregir sus datos: arriba de todo. Sirve para reconocerlo cuando llega. Se achica sola, no importa que la foto pese.'],

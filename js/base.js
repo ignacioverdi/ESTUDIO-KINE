@@ -21,7 +21,7 @@
    me acordaba, así que el navegador de quien ya había entrado seguía
    usando archivos viejos durante días: carteles que ya no existían,
    pacientes de ejemplo ya borrados. */
-var VERSION_PORTAL = '2026-09-15-2321';
+var VERSION_PORTAL = '2026-09-20-0818';
 
 var MENU = {
   kine: [

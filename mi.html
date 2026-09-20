@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css?v=2026-09-15-2321">
-<link rel="stylesheet" href="css/estudio.css?v=2026-09-15-2321">
-<script src="js/firebase.js?v=2026-09-15-2321" onerror="void 0"></script>
-<script src="js/datos.js?v=2026-09-15-2321"></script><script src="js/plantillas.js?v=2026-09-15-2321"></script><script src="js/agenda.js?v=2026-09-15-2321"></script><script src="js/qr.js?v=2026-09-15-2321"></script><script src="js/historia.js?v=2026-09-15-2321"></script><script src="js/estudios.js?v=2026-09-15-2321"></script><script src="js/ejercicio.js?v=2026-09-15-2321"></script><script src="js/dinero.js?v=2026-09-15-2321"></script><script src="js/atender.js?v=2026-09-15-2321"></script><script src="js/mensajes.js?v=2026-09-15-2321"></script><script src="js/alertas.js?v=2026-09-15-2321"></script><script src="js/plantel.js?v=2026-09-15-2321"></script><script src="js/recordatorios.js?v=2026-09-15-2321"></script><script src="js/asistente.js?v=2026-09-15-2321"></script><script src="js/ayuda.js?v=2026-09-15-2321"></script><script src="js/acceso.js?v=2026-09-15-2321"></script><script src="js/base.js?v=2026-09-15-2321"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-20-0818">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-20-0818">
+<script src="js/firebase.js?v=2026-09-20-0818" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-20-0818"></script><script src="js/plantillas.js?v=2026-09-20-0818"></script><script src="js/agenda.js?v=2026-09-20-0818"></script><script src="js/qr.js?v=2026-09-20-0818"></script><script src="js/historia.js?v=2026-09-20-0818"></script><script src="js/estudios.js?v=2026-09-20-0818"></script><script src="js/ejercicio.js?v=2026-09-20-0818"></script><script src="js/dinero.js?v=2026-09-20-0818"></script><script src="js/atender.js?v=2026-09-20-0818"></script><script src="js/mensajes.js?v=2026-09-20-0818"></script><script src="js/alertas.js?v=2026-09-20-0818"></script><script src="js/plantel.js?v=2026-09-20-0818"></script><script src="js/recordatorios.js?v=2026-09-20-0818"></script><script src="js/asistente.js?v=2026-09-20-0818"></script><script src="js/ayuda.js?v=2026-09-20-0818"></script><script src="js/acceso.js?v=2026-09-20-0818"></script><script src="js/base.js?v=2026-09-20-0818"></script>
 </head>
 <body data-pag="mi">
 <div class="hoja angosta" id="todo"></div>
@@ -39,6 +39,9 @@ var hechos = {}, dolor = null, esfuerzo = null;
 
 function pintar(){
   L = lesionDePid(miPid()) || lesionDe(miDorsal());
+  /* Si tiene mas de una abierta, hay que decirselo: si no, ve una sola y
+     cree que la otra no esta cargada. */
+  var otras = lesionesDePid(miPid()).filter(function(x){ return !L || x.id !== L.id; });
 
   if(!L){
     document.getElementById('todo').innerHTML =
@@ -64,6 +67,11 @@ function pintar(){
     + '<p class="bajada">' + L.diagnostico + '. Llevás ' + diasDeLesion(L) + ' días desde '
     + (L.cirugia ? 'la operación' : 'la lesión') + ' y ' + diasDeRehab(L)
     + ' de tratamiento. Faltan ' + faltan(L.alta) + ' para el alta prevista.</p>'
+    + (otras.length
+        ? '<div class="nota info">También estás tratándote '
+          + otras.map(function(x){ return x.zona.toLowerCase() + ' ' + (x.lado === '—' ? '' : x.lado); }).join(' y ')
+          + '. Los ejercicios de abajo son los de ' + L.zona.toLowerCase() + '.</div>'
+        : '')
     /* dónde estás */
     + '<div class="tarjeta">'
     + '<div class="tarjeta-cab"><h2 class="sub">Dónde estás</h2>'

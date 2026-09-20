@@ -142,6 +142,13 @@ Es lo que convierte a alguien del padron en alguien en tratamiento.
 %AMBAR|Es a proposito. Un formulario que viene con respuestas puestas hace que se guarden cosas que nadie eligio: alcanzaba con no mirar un campo para que la ficha quedara con "Tobillo derecho, moderada". En una historia clinica eso no se puede permitir.
 2|El diagnostico se escribe|Es texto libre, con el detalle que necesites. Debajo hay sugerencias segun la zona, para no tipear las de siempre, pero podes escribir lo que quieras.
 3|Lo demas se completa solo|Los criterios de cada fase salen de la zona. La fecha estimada de alta se calcula con la zona y la gravedad. El parte medico lo marca como de baja. Todo eso lo podes corregir despues.
+##Corregir o borrar una lesion
+Desde la ficha de la lesion, botones "Corregir la lesion" y "Borrar".
+Corregir NO borra lo anterior: agrega la correccion a la historia clinica, igual que en papel cuando uno tacha y firma al lado.
+%AMBAR|Si la lesion termino, mejor darle el alta que borrarla: asi queda en el historial del paciente. Borrar es para cuando se cargo por error.
+##Mas de una lesion a la vez
+Una persona puede estar tratandose el hombro y la rodilla al mismo tiempo. Desde su ficha en Pacientes, el boton dice "+ Otra lesion".
+Pasa seguido: quien se cuida un tobillo termina sobrecargando la otra pierna.
 ##Los dos relojes
 Cada ficha muestra dos numeros distintos: los dias desde la lesion o la cirugia, y los dias que lleva tratandose.
 No son lo mismo. Alguien que se opero hace 90 dias pero empezo la rehabilitacion hace 10 no esta atrasado: recien empieza. Con un solo numero eso no se ve, y es la diferencia entre apurar a un paciente o entenderlo.
@@ -289,6 +296,7 @@ Lo unico que hay que recordar todos los dias.
 |Cambiar las preguntas frecuentes|Mi perfil, abajo.
 |Que alguien no puede entrar|Pacientes, boton Corregir sus datos.
 |Borrar un paciente|Pacientes, abri su ficha, boton Borrar.
+|Corregir una lesion mal cargada|Lesiones, su ficha, Corregir la lesion.
 |Cargarle la foto a un paciente|Pacientes, su ficha, Corregir sus datos.
 |Cargar el calendario de partidos|Plantel, solapa Los partidos.
 |Llevar la planilla del partido|Plantel, Abrir la planilla.

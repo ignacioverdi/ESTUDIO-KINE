@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css?v=2026-09-15-2321">
-<link rel="stylesheet" href="css/estudio.css?v=2026-09-15-2321">
-<script src="js/firebase.js?v=2026-09-15-2321" onerror="void 0"></script>
-<script src="js/datos.js?v=2026-09-15-2321"></script><script src="js/plantillas.js?v=2026-09-15-2321"></script><script src="js/agenda.js?v=2026-09-15-2321"></script><script src="js/qr.js?v=2026-09-15-2321"></script><script src="js/historia.js?v=2026-09-15-2321"></script><script src="js/estudios.js?v=2026-09-15-2321"></script><script src="js/dinero.js?v=2026-09-15-2321"></script><script src="js/atender.js?v=2026-09-15-2321"></script><script src="js/mensajes.js?v=2026-09-15-2321"></script><script src="js/alertas.js?v=2026-09-15-2321"></script><script src="js/plantel.js?v=2026-09-15-2321"></script><script src="js/recordatorios.js?v=2026-09-15-2321"></script><script src="js/asistente.js?v=2026-09-15-2321"></script><script src="js/ayuda.js?v=2026-09-15-2321"></script><script src="js/acceso.js?v=2026-09-15-2321"></script><script src="js/base.js?v=2026-09-15-2321"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-20-0818">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-20-0818">
+<script src="js/firebase.js?v=2026-09-20-0818" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-20-0818"></script><script src="js/plantillas.js?v=2026-09-20-0818"></script><script src="js/agenda.js?v=2026-09-20-0818"></script><script src="js/qr.js?v=2026-09-20-0818"></script><script src="js/historia.js?v=2026-09-20-0818"></script><script src="js/estudios.js?v=2026-09-20-0818"></script><script src="js/dinero.js?v=2026-09-20-0818"></script><script src="js/atender.js?v=2026-09-20-0818"></script><script src="js/mensajes.js?v=2026-09-20-0818"></script><script src="js/alertas.js?v=2026-09-20-0818"></script><script src="js/plantel.js?v=2026-09-20-0818"></script><script src="js/recordatorios.js?v=2026-09-20-0818"></script><script src="js/asistente.js?v=2026-09-20-0818"></script><script src="js/ayuda.js?v=2026-09-20-0818"></script><script src="js/acceso.js?v=2026-09-20-0818"></script><script src="js/base.js?v=2026-09-20-0818"></script>
 </head>
 <body data-pag="ficha">
 <div class="hoja">
@@ -50,7 +50,15 @@ function pintar(){
     return;
   }
   var L = lesionPorId(abierta);
-  if(!L){ abierta = null; return pintar(); }
+  if(!L){
+    /* Los datos de la base llegan medio segundo despues de que carga la
+       pantalla. Antes esto ponia "abierta" en null y volvia al listado:
+       cuando los datos llegaban, ya no habia a que lesion volver y el
+       enlace directo a una ficha nunca funcionaba. Ahora espera. */
+    lista.innerHTML = '<div class="vacio"><b>Buscando la ficha…</b>'
+      + 'Si no aparece, volvé a Pacientes y entrá desde ahí.</div>';
+    return;
+  }
   lista.innerHTML = '<button class="bt neutro chico" style="margin-bottom:16px" onclick="abrir(null)">← Todas las lesiones</button>';
   document.getElementById('titulo').textContent = nombrePaciente(L) + ' · ' + L.zona.toLowerCase() + ' ' + L.lado;
   document.getElementById('bajada').textContent = L.diagnostico
@@ -103,6 +111,8 @@ function pintar(){
     + '<button class="bt hueco" onclick="abrirConversacion(\'' + L.pid + '\')">Mensajes'
     + (sinLeer(L.pid) ? ' (' + sinLeer(L.pid) + ')' : '') + '</button>'
     + '<a class="bt neutro" href="historia.html?p=' + L.pid + '" style="text-decoration:none">Historia clínica</a>'
+    + '<button class="bt hueco" onclick="editarLesion()">Corregir la lesión</button>'
+    + '<button class="bt neutro" onclick="borrarLesion()">Borrar</button>'
     + '</div></div>'
     /* mecanismo */
     + '<div class="tarjeta"><div class="tarjeta-cab"><h2 class="sub">Cómo se lesionó</h2></div>'
@@ -139,6 +149,205 @@ function pintar(){
    los dos es lo que muestra si la sesión sirvió. Por eso los dos son
    obligatorios y la nota no.                                          */
 var sesionNueva = null;
+/* ══════════════════════════════════════════════════════════════════════
+   CORREGIR UNA LESION YA CARGADA
+
+   No habia forma. Si el diagnostico se cargaba mal, o la zona, o la
+   fecha, quedaba asi para siempre: la unica salida era borrar al
+   paciente entero y cargarlo de nuevo, perdiendo su historia.
+
+   Como en la historia clinica, corregir NO borra lo anterior: se agrega
+   un asiento de rectificacion que dice que cambio. Es un documento
+   legal y se edita como en papel, tachando y firmando al lado.
+   ══════════════════════════════════════════════════════════════════════ */
+function editarLesion(){
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo'; caja.id = 'cajaEditar';
+  caja.innerHTML = '<div class="ayuda-caja"><div id="cuerpoEd"></div></div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarEditar(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+  pintarEditar();
+}
+
+function pintarEditar(){
+  var L = lesionPorId(abierta);
+  if(!L) return;
+  var pl = PLANTILLAS[L.zona] || PLANTILLAS.Otra;
+  document.getElementById('cuerpoEd').innerHTML =
+    '<button class="cerrar" onclick="cerrarEditar()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Corregir</span><h2>' + L.zona + ' ' + (L.lado === '—' ? '' : L.lado) + '</h2>'
+    + '<div class="nota info">Lo que corrijas queda asentado en la historia clínica: '
+    + 'no se borra lo anterior, se agrega la corrección.</div>'
+
+    + '<label class="campo"><span class="eti">Zona</span>'
+    + '<div class="pestanias" id="eZona" style="margin-bottom:0">'
+    + ZONAS.map(function(z){
+        return '<button class="pest' + (z === L.zona ? ' on' : '') + '" data-z="' + z + '">' + z + '</button>';
+      }).join('') + '</div></label>'
+
+    + '<label class="campo"><span class="eti">Lado</span>'
+    + '<div class="pestanias" id="eLado" style="margin-bottom:0">'
+    + ['derecho','izquierdo','—'].map(function(x){
+        return '<button class="pest' + (x === L.lado ? ' on' : '') + '" data-l="' + x + '">' + x + '</button>';
+      }).join('') + '</div></label>'
+
+    + '<label class="campo"><span class="eti">Qué tiene — el diagnóstico</span>'
+    + '<input type="text" id="eDiag" list="sugEd" autocomplete="off" value="'
+    + (L.diagnostico || '').replace(/"/g, '&quot;') + '">'
+    + '<datalist id="sugEd">'
+    + pl.diagnosticos.map(function(d){ return '<option value="' + d + '">'; }).join('')
+    + '</datalist></label>'
+
+    + '<label class="campo"><span class="eti">Gravedad</span>'
+    + '<div class="pestanias" id="eGrav" style="margin-bottom:0">'
+    + GRAVEDAD.map(function(g){
+        return '<button class="pest' + (g.n === L.gravedad ? ' on' : '') + '" data-g="' + g.n + '">'
+             + g.t + '</button>';
+      }).join('') + '</div></label>'
+
+    + '<label class="campo"><span class="eti">Cómo se lesionó</span>'
+    + '<textarea id="eMec">' + (L.mecanismo === '—' ? '' : (L.mecanismo || '')) + '</textarea></label>'
+
+    + '<div class="rejilla c2">'
+    + '<label class="campo"><span class="eti">Cuándo se lesionó</span>'
+    + '<input type="date" id="eFecha" value="' + L.fecha + '"></label>'
+    + '<label class="campo"><span class="eti">Alta estimada</span>'
+    + '<input type="date" id="eAlta" value="' + L.alta + '"></label></div>'
+
+    + '<label class="campo"><span class="eti">Fecha de cirugía (si hubo)</span>'
+    + '<input type="date" id="eCir" value="' + (L.cirugia || '') + '"></label>'
+
+    + '<div id="avisoEd"></div>'
+    + '<button class="bt ancho" onclick="guardarEdicion()">Guardar la corrección</button>';
+
+  document.querySelectorAll('#eZona .pest').forEach(function(b){
+    b.onclick = function(){
+      /* Cambiar de zona cambia los criterios de la fase: hay que avisarlo. */
+      L.zona = b.dataset.z;
+      document.getElementById('avisoEd').innerHTML =
+        '<div class="nota aviso">Al cambiar la zona, los criterios de la fase ' + L.fase
+        + ' se reemplazan por los de ' + L.zona.toLowerCase() + '. Lo ya tildado se pierde.</div>';
+      pintarEditar();
+    };
+  });
+  document.querySelectorAll('#eLado .pest').forEach(function(b){
+    b.onclick = function(){ L.lado = b.dataset.l; pintarEditar(); };
+  });
+  document.querySelectorAll('#eGrav .pest').forEach(function(b){
+    b.onclick = function(){ L.gravedad = +b.dataset.g; pintarEditar(); };
+  });
+}
+
+function guardarEdicion(){
+  var L = lesionPorId(abierta);
+  if(!L) return;
+  var antes = {zona:L.zona, lado:L.lado, diagnostico:L.diagnostico,
+               gravedad:L.gravedad, fecha:L.fecha, alta:L.alta, cirugia:L.cirugia};
+  var diag = (document.getElementById('eDiag').value || '').trim();
+  if(!diag){
+    document.getElementById('avisoEd').innerHTML =
+      '<div class="nota aviso">El diagnóstico no puede quedar vacío.</div>';
+    return;
+  }
+  L.diagnostico = diag;
+  L.mecanismo = (document.getElementById('eMec').value || '').trim() || '—';
+  L.fecha = document.getElementById('eFecha').value || L.fecha;
+  L.alta = document.getElementById('eAlta').value || L.alta;
+  L.cirugia = document.getElementById('eCir').value || null;
+
+  /* Si cambió la zona, los criterios de la fase actual ya no aplican. */
+  if(antes.zona !== L.zona){
+    L.criterios = criteriosDe(L.zona, L.fase);
+  }
+
+  var cambios = [];
+  ['zona','lado','diagnostico','gravedad','fecha','alta','cirugia'].forEach(function(k){
+    if(String(antes[k] || '') !== String(L[k] || '')){
+      cambios.push(k + ': "' + (antes[k] || 'vacío') + '" pasa a "' + (L[k] || 'vacío') + '"');
+    }
+  });
+
+  guardar('kine/lesiones/' + L.id, L);
+  if(cambios.length){
+    asentar(L.pid, 'rectificacion', 'Se corrigieron datos de la lesión. ' + cambios.join('. ') + '.');
+  }
+  cerrarEditar();
+  pintar();
+}
+
+function cerrarEditar(){
+  var c = document.getElementById('cajaEditar');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
+
+/* ── BORRAR UNA LESION ──────────────────────────────────────────────
+   Se lleva sus sesiones y su programa de ejercicios. La historia clinica
+   del paciente NO se toca: lo que paso, paso.                        */
+function borrarLesion(){
+  var L = lesionPorId(abierta);
+  if(!L) return;
+  var p = paciente(L.pid);
+  var caja = document.createElement('div');
+  caja.className = 'ayuda-fondo'; caja.id = 'cajaBorrarL';
+  caja.innerHTML = '<div class="ayuda-caja">'
+    + '<button class="cerrar" onclick="cerrarBorrarL()" aria-label="Cerrar">&times;</button>'
+    + '<span class="eti">Borrar la lesión</span>'
+    + '<h2>' + L.zona + ' ' + (L.lado === '—' ? '' : L.lado) + '</h2>'
+    + '<p>' + (p ? p.nombre : '') + ' · ' + L.diagnostico + '</p>'
+    + '<div class="nota reserva">Esto no se puede deshacer.</div>'
+    + '<div class="fila" style="cursor:default"><span class="cu">Sesiones cargadas</span>'
+    + '<span class="pin gris">' + sesionesDe(L).length + '</span></div>'
+    + '<div class="fila" style="cursor:default"><span class="cu">Ejercicios del programa</span>'
+    + '<span class="pin gris">' + programaDe(L).length + '</span></div>'
+    + '<div class="nota info">La historia clínica del paciente NO se toca: lo que pasó, pasó. '
+    + 'Si la lesión terminó, mejor darle el alta en vez de borrarla: así queda en su historial.</div>'
+    + (sesionesDe(L).length
+        ? '<label class="campo"><span class="eti">Escribí BORRAR para confirmar</span>'
+          + '<input type="text" id="cBorrarL" placeholder="BORRAR"></label>'
+        : '')
+    + '<div id="avisoBorrarL"></div>'
+    + '<button class="bt ancho" style="background:var(--rojo);border-color:var(--rojo)" '
+    + 'onclick="confirmarBorrarL()">Borrar la lesión</button>'
+    + '<button class="bt neutro ancho" style="margin-top:8px" onclick="cerrarBorrarL()">Cancelar</button>'
+    + '</div>';
+  caja.addEventListener('click', function(e){ if(e.target === caja) cerrarBorrarL(); });
+  document.body.appendChild(caja);
+  document.body.style.overflow = 'hidden';
+}
+
+function confirmarBorrarL(){
+  var L = lesionPorId(abierta);
+  if(!L) return;
+  var campo = document.getElementById('cBorrarL');
+  if(campo && (campo.value || '').trim().toUpperCase() !== 'BORRAR'){
+    document.getElementById('avisoBorrarL').innerHTML =
+      '<div class="nota aviso">Escribí BORRAR para confirmar.</div>';
+    return;
+  }
+  var pid = L.pid, desc = L.zona + ' ' + L.lado + ' — ' + L.diagnostico;
+
+  if(BASE.programas) delete BASE.programas[L.id];
+  guardar('kine/programas/' + L.id, null);
+  if(L.dorsal){
+    delete BASE.disponibilidad[L.dorsal];
+    guardar('kine/disponibilidad/' + L.dorsal, null);
+  }
+  BASE.lesiones = lista(BASE.lesiones).filter(function(x){ return x.id !== L.id; });
+  guardar('kine/lesiones/' + L.id, null);
+
+  asentar(pid, 'rectificacion', 'Se borró la ficha de lesión: ' + desc + '.');
+  location.href = 'pacientes.html';
+}
+
+function cerrarBorrarL(){
+  var c = document.getElementById('cajaBorrarL');
+  if(c) c.remove();
+  document.body.style.overflow = '';
+}
+
 function abrirSesion(){
   var L = lesionPorId(abierta);
   if(!L) return;

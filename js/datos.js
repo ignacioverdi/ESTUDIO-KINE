@@ -367,12 +367,31 @@ function lesionDe(d){
 /* La forma correcta de buscar la lesion de alguien: por su ficha, que es
    lo unico que identifica a todos. El dorsal solo lo tienen los del
    plantel, y ahi empezo el problema. */
+/* ══════════════════════════════════════════════════════════════════════
+   UNA PERSONA PUEDE TENER MAS DE UNA LESION A LA VEZ
+
+   Esto devolvia la PRIMERA lesion activa y nada mas. Si alguien venia
+   por el hombro y al mes se lesionaba la rodilla, la segunda quedaba
+   cargada en la base pero invisible en todo el portal: no aparecia en su
+   ficha, ni en su pantalla, ni en los avisos.
+
+   Y pasa seguido: quien se cuida un tobillo termina sobrecargando la
+   otra pierna.
+   ══════════════════════════════════════════════════════════════════════ */
+function lesionesDePid(pid){
+  if(!pid) return [];
+  return lista(BASE.lesiones)
+    .filter(function(L){ return L.pid === pid && L.estado === 'activa'; })
+    .map(sanearLesion);
+}
+
+/* La principal: la mas reciente. Para las pantallas que muestran una
+   sola, como la del paciente cuando entra. */
 function lesionDePid(pid){
-  if(!pid) return null;
-  for(var i=0;i<BASE.lesiones.length;i++)
-    if(BASE.lesiones[i].pid===pid && BASE.lesiones[i].estado==='activa')
-      return sanearLesion(BASE.lesiones[i]);
-  return null;
+  var L = lesionesDePid(pid);
+  if(!L.length) return null;
+  L.sort(function(a, b){ return (b.fecha || '') < (a.fecha || '') ? -1 : 1; });
+  return L[0];
 }
 function estadoDe(d){ return (BASE.disponibilidad[d] || {estado:'ok'}); }
 function dias(desde){ return Math.max(0, Math.round((new Date(HOY) - new Date(desde)) / 86400000)); }
