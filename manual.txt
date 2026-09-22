@@ -256,6 +256,10 @@ Desde el proximo partido, boton "Elegir los citados". Tocas a los que van.
 4|Una lesion: dos toques|Boton "Se lesionó", quien y donde. El minuto queda guardado sin preguntarlo.
 5|Al terminar|Boton "Terminar el partido". Los minutos de cada uno quedan asentados en su historia clinica.
 %AMBAR|Todo esto esta pensado para usarse parado, al costado de la cancha, con una mano y mirando el partido. Si cargar un cambio llevara mas de dos toques, no se cargaria, y a la semana el sistema estaria vacio.<br/><br/>Si el reloj se desfasa porque hubo demoras, el boton "Corregir minuto" lo acomoda. Y si te olvidaste de cargar un cambio, tocas al jugador en el banco y entra en el minuto actual.
+##El parte medico
+En el Panel, abajo, estan los jugadores del plantel con su estado. Es lo unico que ve el cuerpo tecnico.
+Salen del plantel de la temporada. Para sumar o sacar jugadores, andas a Plantel, solapa El plantel.
+%VERDE|El estado NO se carga a mano: se calcula solo de las lesiones abiertas. Fase 1 y 2: de baja. Fase 3 y 4: limitado. Sin lesion abierta: disponible. Cuando le das el alta a alguien, pasa solo a disponible.
 ##Los minutos no se escriben
 Se calculan solos de las entradas y salidas, que es como funciona un partido. El que arranca y termina jugo 90; el que entro a los 65 jugo 25. Nadie hace esa cuenta.
 En la solapa Minutos ves la tabla de toda la temporada: partidos jugados, cuantos de titular, minutos totales y promedio por partido, ordenado de mas a menos.

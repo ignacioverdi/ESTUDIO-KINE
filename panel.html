@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Estudio">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="css/tema.css?v=2026-09-20-0818">
-<link rel="stylesheet" href="css/estudio.css?v=2026-09-20-0818">
-<script src="js/firebase.js?v=2026-09-20-0818" onerror="void 0"></script>
-<script src="js/datos.js?v=2026-09-20-0818"></script><script src="js/plantillas.js?v=2026-09-20-0818"></script><script src="js/agenda.js?v=2026-09-20-0818"></script><script src="js/qr.js?v=2026-09-20-0818"></script><script src="js/historia.js?v=2026-09-20-0818"></script><script src="js/estudios.js?v=2026-09-20-0818"></script><script src="js/dinero.js?v=2026-09-20-0818"></script><script src="js/atender.js?v=2026-09-20-0818"></script><script src="js/mensajes.js?v=2026-09-20-0818"></script><script src="js/alertas.js?v=2026-09-20-0818"></script><script src="js/plantel.js?v=2026-09-20-0818"></script><script src="js/recordatorios.js?v=2026-09-20-0818"></script><script src="js/asistente.js?v=2026-09-20-0818"></script><script src="js/ayuda.js?v=2026-09-20-0818"></script><script src="js/acceso.js?v=2026-09-20-0818"></script><script src="js/base.js?v=2026-09-20-0818"></script>
+<link rel="stylesheet" href="css/tema.css?v=2026-09-22-0835">
+<link rel="stylesheet" href="css/estudio.css?v=2026-09-22-0835">
+<script src="js/firebase.js?v=2026-09-22-0835" onerror="void 0"></script>
+<script src="js/datos.js?v=2026-09-22-0835"></script><script src="js/plantillas.js?v=2026-09-22-0835"></script><script src="js/agenda.js?v=2026-09-22-0835"></script><script src="js/qr.js?v=2026-09-22-0835"></script><script src="js/historia.js?v=2026-09-22-0835"></script><script src="js/estudios.js?v=2026-09-22-0835"></script><script src="js/dinero.js?v=2026-09-22-0835"></script><script src="js/atender.js?v=2026-09-22-0835"></script><script src="js/mensajes.js?v=2026-09-22-0835"></script><script src="js/alertas.js?v=2026-09-22-0835"></script><script src="js/plantel.js?v=2026-09-22-0835"></script><script src="js/recordatorios.js?v=2026-09-22-0835"></script><script src="js/asistente.js?v=2026-09-22-0835"></script><script src="js/ayuda.js?v=2026-09-22-0835"></script><script src="js/acceso.js?v=2026-09-22-0835"></script><script src="js/base.js?v=2026-09-22-0835"></script>
 </head>
 <body data-pag="panel">
 <div class="hoja">
@@ -135,7 +135,8 @@ function avisar(fecha, hora){
 function pintar(){
 /* ── contadores ── */
 var c = {ok:0, limitado:0, baja:0};
-BASE.plantel.forEach(function(j){ c[estadoDe(j.d).estado]++; });
+var JUGADORES = jugadoresDelParte();
+JUGADORES.forEach(function(p){ c[estadoDelJugador(p).estado]++; });
 var turnos = agendaDe(HOY);
 document.getElementById('kTurnos').textContent = turnos.filter(function(t){ return t.dorsal || t.pid; }).length;
 /* Los indicadores del negocio, no solo los clínicos. */
@@ -193,14 +194,22 @@ document.getElementById('activas').innerHTML = sanearTodasLasLesiones().filter(f
     + ' · ' + listos + '/' + tot + ' CRITERIOS</small></span></button>';
 }).join('');
 /* ── semáforo ── */
-document.getElementById('plantel').innerHTML = BASE.plantel.map(function(j){
-  var e = estadoDe(j.d), L = lesionDe(j.d);
-  var txt = e.estado === 'ok' ? 'Disponible'
-          : e.motivo + ' · vuelve en ' + faltan(e.hasta) + ' d';
-  return '<button class="at ' + e.estado + '" onclick="' + (L ? 'irA(\'lesiones.html?f=' + L.id + '\')' : 'void 0') + '">'
-    + '<span class="d">' + j.d + '</span><div class="n">' + j.n + '</div>'
-    + '<div class="e">' + txt + '</div></button>';
-}).join('');
+document.getElementById('plantel').innerHTML = JUGADORES.length
+  ? JUGADORES.map(function(p){
+      var e = estadoDelJugador(p), L = e.L;
+      var txt = e.estado === 'ok' ? 'Disponible'
+              : e.motivo + ' · vuelve en ' + faltan(e.hasta) + ' d';
+      /* El apellido, que es como se lo nombra en un plantel. */
+      var partes = p.nombre.trim().split(' ');
+      var ape = partes.length > 1 ? partes.slice(1).join(' ') : partes[0];
+      return '<button class="at ' + e.estado + '" onclick="'
+        + (L ? 'irA(\'lesiones.html?f=' + L.id + '\')' : 'irA(\'pacientes.html\')') + '">'
+        + '<span class="d">' + (p.dorsal || '—') + '</span><div class="n">' + ape + '</div>'
+        + '<div class="e">' + txt + '</div></button>';
+    }).join('')
+  : '<div class="vacio" style="grid-column:1/-1"><b>Todavía no hay plantel</b>'
+    + 'Andá a <a href="plantel.html" style="color:var(--acc-texto)">Plantel</a> y sumá a los jugadores. '
+    + 'Aparecen acá con su estado, que se calcula solo de sus lesiones.</div>';
 }
 pintar();
 </script>

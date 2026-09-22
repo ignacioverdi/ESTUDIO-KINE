@@ -48,10 +48,11 @@
 | Una lesión mal cargada no se podía corregir ni borrar | Nunca lo previmos: se construyó el alta y no la corrección |
 | Un paciente solo podía tener una lesión a la vez | La búsqueda devolvía la primera y las demás quedaban invisibles |
 | El enlace directo a una ficha nunca funcionaba | Al no encontrarla borraba la referencia antes de que llegaran los datos |
+| El parte médico mostraba 12 jugadores inventados | Vivían en una lista aparte que el vaciado nunca tocaba |
 | El nombre del estudio no cambiaba al editarlo | Estaba escrito a mano en diecisiete lugares |
 | Las pruebas se apoyaban en los datos de ejemplo | Al sacarlos se rompieron todas; ahora se arman los suyos |
 
-**Treinta y seis errores. Cinco salieron del archivo único, cuatro de agregar cosas que
+**Treinta y siete errores. Cinco salieron del archivo único, cuatro de agregar cosas que
 nadie pidió, y dos de no probar en Windows.**
 
 ---

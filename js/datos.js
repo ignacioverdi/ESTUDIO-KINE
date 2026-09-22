@@ -187,14 +187,12 @@ var BASE = {
     foto: null, logo: null
   },
 
-  plantel: [
-    {d:1,  n:'Ferrari',  p:'Arquero'},   {d:4,  n:'Molina',  p:'Central'},
-    {d:6,  n:'Acosta',   p:'Volante'},   {d:7,  n:'Duarte',  p:'Extremo'},
-    {d:9,  n:'Suárez',   p:'Delantero'}, {d:10, n:'Peralta', p:'Enganche'},
-    {d:11, n:'Godoy',    p:'Extremo'},   {d:12, n:'Ibarra',  p:'Lateral'},
-    {d:14, n:'Ramos',    p:'Volante'},   {d:15, n:'Vera',    p:'Central'},
-    {d:17, n:'Blanco',   p:'Lateral'},   {d:18, n:'Ojeda',   p:'Delantero'}
-  ],
+  /* La lista fija de jugadores que habia aca (Ferrari, Molina, Acosta...)
+     se saco: eran inventados de los datos de ejemplo, vivian en una
+     lista aparte que el vaciado nunca tocaba, y el parte medico los
+     seguia mostrando como "disponibles" aunque no existieran.
+     El plantel ahora sale de la temporada. */
+  plantel: [],
 
   /* ── EL PADRON ──────────────────────────────────────────────────
      Hasta acá la identidad era el dorsal, pero un paciente particular
@@ -328,11 +326,54 @@ function nuevoIdPaciente(){
   return 'P' + n;
 }
 
+/* El jugador con esa camiseta, buscado en el padron real. Antes miraba
+   la lista fija de inventados, asi que un turno con el dorsal 7 decia
+   "Duarte" aunque el 7 de verdad fuera otra persona. */
 function jugador(d){
-  for(var i=0;i<BASE.plantel.length;i++) if(BASE.plantel[i].d===d) return BASE.plantel[i];
-  return {d:d, n:'#'+d, p:''};
+  var p = null;
+  lista(BASE.pacientes).forEach(function(x){ if(!p && +x.dorsal === +d) p = x; });
+  return p ? {d:d, n:p.nombre, p:''} : {d:d, n:'#' + d, p:''};
 }
 function nombre(d){ return jugador(d).n; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   EL PARTE MEDICO SALE DEL PLANTEL DE VERDAD
+
+   Antes leia una lista fija de 12 jugadores inventados. Tus pacientes
+   reales no aparecian nunca, y los inventados figuraban siempre
+   "disponibles" porque ninguno tenia lesiones.
+
+   Ahora: los jugadores del plantel de la temporada activa. Si todavia no
+   armaste la temporada, los pacientes de clubes con camiseta. Y el
+   estado de cada uno se CALCULA de sus lesiones abiertas: no hay que
+   cargarlo a mano en ningun lado.
+   ══════════════════════════════════════════════════════════════════════ */
+function jugadoresDelParte(){
+  var T = (typeof temporadaActiva === 'function') ? temporadaActiva() : null;
+  var ps;
+  if(T && lista(T.plantel).length){
+    ps = lista(T.plantel).map(function(pid){ return paciente(pid); }).filter(Boolean);
+  }else{
+    ps = lista(BASE.pacientes).filter(function(p){
+      return typeof usaDorsal === 'function' ? usaDorsal(institucionDe(p)) : p.tipo === 'plantel';
+    });
+  }
+  return ps.sort(function(a, b){
+    return (a.dorsal || 999) - (b.dorsal || 999) || (a.nombre < b.nombre ? -1 : 1);
+  });
+}
+
+/* Disponible, limitado o de baja, segun la fase de sus lesiones abiertas.
+   Fases 1 y 2: de baja. Fases 3 y 4: limitado. Sin lesion: disponible.
+   Si tiene dos, manda la peor. */
+function estadoDelJugador(p){
+  var Ls = lesionesDePid(p.id);
+  if(!Ls.length) return {estado:'ok', L:null};
+  Ls.sort(function(a, b){ return a.fase - b.fase; });
+  var L = Ls[0];
+  return {estado: L.fase <= 2 ? 'baja' : 'limitado', L: L, hasta: L.alta,
+          motivo: L.zona + ' ' + (L.lado === '—' ? '' : L.lado)};
+}
 function lesionPorId(id){
   var Ls = lista(BASE.lesiones);
   for(var i=0;i<Ls.length;i++) if(Ls[i].id===id) return sanearLesion(Ls[i]);
